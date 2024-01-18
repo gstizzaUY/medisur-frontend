@@ -530,7 +530,7 @@ const FormLayout = () => {
                                 </button> */}
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                   <Button
-                    color="secondary"
+                    color="primary"
                     onClick={handleCloseModal}
                     variant="outlined"
                   >
