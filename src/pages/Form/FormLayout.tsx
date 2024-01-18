@@ -474,7 +474,7 @@ const FormLayout = () => {
                 </div>
 
                 <div className="mb-4 w-32 mr-1">
-                  <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">Costo +20%</label>
+                  <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">+20%</label>
                   <input
                     className="text-right mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
                     type="text"
@@ -484,7 +484,7 @@ const FormLayout = () => {
                 </div>
 
                 <div className="mb-4 w-32 mr-1">
-                  <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">Costo +50%</label>
+                  <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">+50%</label>
                   <input
                     className="text-right mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
                     type="text"
