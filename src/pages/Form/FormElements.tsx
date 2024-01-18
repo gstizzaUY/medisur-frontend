@@ -7,6 +7,7 @@ import currency from "currency.js";
 import { MaterialReactTable, useMaterialReactTable } from 'material-react-table';
 import { MRT_Localization_ES } from 'material-react-table/locales/es';
 import { Box, Button, useTheme } from '@mui/material';
+import { NavLink } from 'react-router-dom';
 
 // import NewFactura from '../components/Facturas/NewFactura';
 
@@ -106,7 +107,7 @@ const FormElements = () => {
           },
         })}
       >
-        <Box>
+        <NavLink to="/forms/form-layout">
           <Button
             color="primary"
             onClick={() => { setMostrarNewFactura(true) }}
@@ -114,7 +115,7 @@ const FormElements = () => {
           >
             Nueva Factura
           </Button>
-        </Box>
+        </NavLink>
       </Box>
       <MaterialReactTable
         table={table}
