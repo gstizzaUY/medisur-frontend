@@ -24,11 +24,6 @@ const TableThree = () => {
         size: 100,
       },
       {
-        accessorKey: 'DepositoNombre',
-        header: 'Depósito',
-        size: 130,
-      },
-      {
         accessorKey: 'StockActual',
         header: 'Stock',
         size: 90,
