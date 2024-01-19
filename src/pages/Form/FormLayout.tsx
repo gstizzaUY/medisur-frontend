@@ -426,7 +426,7 @@ const FormLayout = () => {
 
         {/* Modal */}
         <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }} id="modal" className="fixed z-40 top-0 right-0 left-0 bottom-0 h-full w-full hidden">
-          <div className="p-5 max-w-xl mx-auto left-0 right-0 overflow-hidden mt-24">
+          <div className="p-4 max-w-xl mx-auto left-0 right-0 overflow-hidden mt-24">
 
             <div className="shadow absolute right-0 top-0 w-10 h-10 rounded-full bg-white text-gray-500 hover:text-gray-800 inline-flex items-center justify-center cursor-pointer"
               onClick={handleCloseModal}>
@@ -436,7 +436,7 @@ const FormLayout = () => {
               </svg>
             </div>
 
-            <div className="shadow w-full rounded-lg bg-white overflow-hidden block p-4">
+            <div className="shadow w-full rounded-lg bg-white overflow-hidden block p-3">
               <h2 className="font-bold text-2xl mb-6 text-gray-800 border-b pb-2">Agregar Artículos</h2>
 
               <div className="mb-4">
@@ -467,7 +467,7 @@ const FormLayout = () => {
                 <div className="mb-4 w-32 mr-1">
                   <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">Costo</label>
                   <input 
-                  className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+                  className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
                     type="text"
                     // eliminar los últimos 3 dígitos 
                     value={currency((Number(precioCosto)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format()}
@@ -477,7 +477,7 @@ const FormLayout = () => {
                 <div className="mb-4 w-32 mr-1">
                   <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">+20%</label>
                   <input
-                    className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+                    className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
                     type="text"
                     value={currency((Number(precioCosto * 1.2)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format()}
                     readOnly
@@ -487,7 +487,7 @@ const FormLayout = () => {
                 <div className="mb-4 w-32 mr-1">
                   <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">+50%</label>
                   <input
-                    className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+                    className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
                     type="text"
                     value={currency((Number(precioCosto * 1.5)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format()}
                     readOnly
@@ -496,7 +496,7 @@ const FormLayout = () => {
 
                 <div className="mb-4 w-32">
                   <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">Ultimo</label>
-                  <input className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${getColor(ultimoPrecio, precioCosto)}`}
+                  <input className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${getColor(ultimoPrecio, precioCosto)}`}
                     type="text"
                     value={currency((Number(ultimoPrecio)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format()}
                     readOnly />
@@ -508,13 +508,13 @@ const FormLayout = () => {
 
                   <div className="relative">
                     <label className="text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide ">Cantidad</label>
-                    <input className="text-right text-sm  mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500" type="number" defaultValue={1} onChange={(e) => setSelectedCantidad(e.target.value)} min={1} />
+                    <input className="text-right text-sm  mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500" type="number" defaultValue={1} onChange={(e) => setSelectedCantidad(e.target.value)} min={1} />
                   </div>
 
                   <div className="relative">
                     <label className="text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide ">Precio</label>
                     <input
-                      className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${color}`}
+                      className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${color}`}
                       type="text"
                       value={precio}
                       onChange={handlePrecioChange}
