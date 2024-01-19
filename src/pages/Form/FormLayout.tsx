@@ -508,14 +508,18 @@ const FormLayout = () => {
 
                   <div className="relative">
                     <label className="text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide ">Cantidad</label>
-                    <input className="text-right text-sm  mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500" type="number" defaultValue={1} onChange={(e) => setSelectedCantidad(e.target.value)} min={1} />
+                    <input 
+                    className="text-right text-sm  mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500" 
+                    type="number" 
+                    defaultValue={1} 
+                    onChange={(e) => setSelectedCantidad(e.target.value)} min={1} />
                   </div>
 
                   <div className="relative">
                     <label className="text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide ">Precio</label>
                     <input
                       className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${color}`}
-                      type="text"
+                      type="number"
                       value={precio}
                       onChange={handlePrecioChange}
                     />
