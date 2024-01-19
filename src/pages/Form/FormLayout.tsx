@@ -467,7 +467,7 @@ const FormLayout = () => {
                 <div className="mb-4 w-32 mr-1">
                   <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">Costo</label>
                   <input 
-                  className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-5 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+                  className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
                     type="text"
                     // eliminar los últimos 3 dígitos 
                     value={currency((Number(precioCosto)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format()}
@@ -477,7 +477,7 @@ const FormLayout = () => {
                 <div className="mb-4 w-32 mr-1">
                   <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">+20%</label>
                   <input
-                    className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-5 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+                    className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
                     type="text"
                     value={currency((Number(precioCosto * 1.2)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format()}
                     readOnly
@@ -487,7 +487,7 @@ const FormLayout = () => {
                 <div className="mb-4 w-32 mr-1">
                   <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">+50%</label>
                   <input
-                    className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-5 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+                    className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
                     type="text"
                     value={currency((Number(precioCosto * 1.5)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format()}
                     readOnly
@@ -496,7 +496,7 @@ const FormLayout = () => {
 
                 <div className="mb-4 w-32">
                   <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">Ultimo</label>
-                  <input className={`text-right mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-5 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${getColor(ultimoPrecio, precioCosto)}`}
+                  <input className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${getColor(ultimoPrecio, precioCosto)}`}
                     type="text"
                     value={currency((Number(ultimoPrecio)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format()}
                     readOnly />
@@ -508,13 +508,13 @@ const FormLayout = () => {
 
                   <div className="relative">
                     <label className="text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide ">Cantidad</label>
-                    <input className="text-right text-sm  mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-5 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500" type="number" defaultValue={1} onChange={(e) => setSelectedCantidad(e.target.value)} min={1} />
+                    <input className="text-right text-sm  mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500" type="number" defaultValue={1} onChange={(e) => setSelectedCantidad(e.target.value)} min={1} />
                   </div>
 
                   <div className="relative">
                     <label className="text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide ">Precio</label>
                     <input
-                      className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-5 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${color}`}
+                      className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${color}`}
                       type="text"
                       value={precio}
                       onChange={handlePrecioChange}
