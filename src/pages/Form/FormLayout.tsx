@@ -10,7 +10,7 @@ import currency from 'currency.js';
 
 const FormLayout = () => {
   const {
-    clientes,
+    clientes, 
     setClientes,
     selectedCliente,
     setSelectedCliente,
