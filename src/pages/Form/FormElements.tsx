@@ -130,30 +130,6 @@ const FormElements = () => {
   return  (
     <>
     <Breadcrumb pageName="Facturas" />
-      <Box
-        sx={(theme) => ({
-          display: 'flex',
-          backgroundColor: 'inherit',
-          borderRadius: '4px',
-          flexDirection: 'row',
-          gap: '16px',
-          justifyContent: 'space-between',
-          padding: '18px 4px',
-          '@media max-width: 768px': {
-            flexDirection: 'column',
-          },
-        })}
-      >
-        <NavLink to="/forms/form-layout">
-          <Button
-            color="primary"
-            onClick={() => { setMostrarNewFactura(true) }}
-            variant="contained"
-          >
-            Nueva Factura
-          </Button>
-        </NavLink>
-      </Box>
       <MaterialReactTable
         table={table}
       />
