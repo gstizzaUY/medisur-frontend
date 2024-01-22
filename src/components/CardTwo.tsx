@@ -1,21 +1,15 @@
-import { useContext } from 'react';
+import React from 'react';
+import { useContext, useEffect } from 'react';
 import { dataContext } from '../hooks/DataContext';
 import currency from 'currency.js';
 
 const CardTwo = () => {
-  const { facturasClientesMesAnterior, setFacturasClientesMesAnterior } = useContext(dataContext);
   const { mesActual, setMesActual } = useContext(dataContext);
   const { anioActual, setAnioActual } = useContext(dataContext);
+  const { totalFacturadoMesAnterior, setTotalFacturadoMesAnterior } = useContext(dataContext);
+
   
-  const TotalFacturadoMesAnterior = () => {
-    let total = 0;
-    facturasClientesMesAnterior?.forEach(factura => {
-        const subtotal = factura.Subtotal?.toString().slice(0, -3);
-        total += subtotal ? parseFloat(subtotal) : 0;
-    });
-    total *= 1.22;
-    return total;
-  }
+
 
   return (
     <div className="rounded-sm border border-stroke bg-white py-6 px-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
@@ -46,12 +40,10 @@ const CardTwo = () => {
       <div className="mt-4 flex items-end justify-between">
         <div>
           <h4 className="text-title-md font-bold text-black dark:text-white">
-          {currency(TotalFacturadoMesAnterior(), { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
+          {currency(totalFacturadoMesAnterior,  { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
           </h4>
           <span className="text-sm font-medium">
-            {/* Escribir el mes anterior en formato texto, tomando como dato el estado de mesActual */}
-            { mesActual === 1 ? "Diciembre" : mesActual === 2 ? "Enero" : mesActual === 3 ? "Febrero" : mesActual === 4 ? "Marzo" : mesActual === 5 ? "Abril" : mesActual === 6 ? "Mayo" : mesActual === 7 ? "Junio" : mesActual === 8 ? "Julio" : mesActual === 9 ? "Agosto" : mesActual === 10 ? "Septiembre" : mesActual === 11 ? "Octubre" : "Noviembre" }{' '}
-            { mesActual === 1 ? anioActual - 1 : anioActual }
+            Facturación: { mesActual === 1 ? "Diciembre" : mesActual === 2 ? "Enero" : mesActual === 3 ? "Febrero" : mesActual === 4 ? "Marzo" : mesActual === 5 ? "Abril" : mesActual === 6 ? "Mayo" : mesActual === 7 ? "Junio" : mesActual === 8 ? "Julio" : mesActual === 9 ? "Agosto" : mesActual === 10 ? "Septiembre" : mesActual === 11 ? "Octubre" : "Noviembre" }{' '}{ mesActual === 1 ? anioActual - 1 : anioActual }
           </span>
         </div>
 

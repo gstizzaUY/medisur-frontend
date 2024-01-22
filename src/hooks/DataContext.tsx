@@ -1,6 +1,7 @@
 import React, { ReactNode } from "react";
 import { useState, useEffect } from "react";
 import clienteAxios from '../functions/clienteAxios';
+import currency from 'currency.js';
 
 export const dataContext = React.createContext({});
 
@@ -105,8 +106,9 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     const [selectedFechaFactura, setSelectedFechaFactura] = useState('');
     const [movimiento, setMovimiento] = useState({});
     const [facturasClientes, setFacturasClientes] = useState([]);
-    const [facturasClientesMesAnterior, setFacturasClientesMesAnterior] = useState([]);
-    const [factura, setFactura] = useState({});
+    const [totalFacturadoMesActual, setTotalFacturadoMesActual] = useState(0);
+    const [totalFacturadoMesAnterior, setTotalFacturadoMesAnterior] = useState(0);
+
 
 
     //* Obtener clientes
@@ -148,7 +150,7 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
         obtenerComprobantes();
     }, []);
 
-    //* Obtener las facturas de los clientes del último mes
+    //* Obtener las facturas de los clientes de los últimos 3 meses
     useEffect(() => {
         const obtenerFacturas = async () => {
             try {
@@ -158,28 +160,20 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
                     "Anio": anioActual,
                 });
                 setFacturasClientes(data);
+
+                const facturasClientesMesActual = data.filter(factura => factura.Fecha.substring(5, 7) == mesActual && factura.Fecha.substring(0, 4) == anioActual);
+                const totalMes = facturasClientesMesActual.reduce((total, factura) => total + Number(factura.Total), 0);
+                setTotalFacturadoMesActual(totalMes);
+
+                const facturasClientesMesAnterior = data.filter(factura => factura.Fecha.substring(5, 7) == (mesActual === 1 ? 12 : mesActual - 1) && factura.Fecha.substring(0, 4) == (mesActual === 1 ? anioActual - 1 : anioActual));
+                const totalMesAnterior = facturasClientesMesAnterior.reduce((total, factura) => total + Number(factura.Total), 0);
+                setTotalFacturadoMesAnterior(totalMesAnterior);
+
             } catch (error) {
                 console.log(error);
             }
         }
         obtenerFacturas();
-    }, []);
-
-    //* Obtener las facturas de los clientes del mes anterior
-    useEffect(() => {
-        const obtenerFacturasMesAnterior = async () => {
-            try {
-                const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/facturasClientes`, {
-                    // mes anterior
-                    "Mes": mesActual === 1 ? 12 : mesActual - 1,
-                    "Anio": mesActual === 1 ? anioActual - 1 : anioActual,
-                });
-                setFacturasClientesMesAnterior(data);
-            } catch (error) {
-                console.log(error);
-            }
-        }
-        obtenerFacturasMesAnterior();
     }, []);
 
 
@@ -217,8 +211,10 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
             setMovimiento,
             facturasClientes,
             setFacturasClientes,
-            facturasClientesMesAnterior,
-            setFacturasClientesMesAnterior,
+            totalFacturadoMesActual,
+            setTotalFacturadoMesActual,
+            totalFacturadoMesAnterior,
+            setTotalFacturadoMesAnterior,
         }}>
             {children}
         </dataContext.Provider>

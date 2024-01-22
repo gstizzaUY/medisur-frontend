@@ -3,30 +3,9 @@ import { dataContext } from '../hooks/DataContext';
 import currency from 'currency.js';
 
 const CardThree = () => {
-  const { facturasClientes, setFacturasClientes } = useContext(dataContext);
-  const { facturasClientesMesAnterior, setFacturasClientesMesAnterior } = useContext(dataContext);
-  const { mesActual, setMesActual } = useContext(dataContext);
-  const { anioActual, setAnioActual } = useContext(dataContext);
+  const { totalFacturadoMesActual, setTotalFacturadoMesActual } = useContext(dataContext);
+  const { totalFacturadoMesAnterior, setTotalFacturadoMesAnterior } = useContext(dataContext);
 
-  const TotalFacturadoMes = () => {
-    let total = 0;
-    facturasClientes?.forEach(factura => {
-        const subtotal = factura.Subtotal?.toString().slice(0, -3);
-        total += subtotal ? parseFloat(subtotal) : 0;
-    });
-    total *= 1.22;
-    return total;
-  }
-
-  const TotalFacturadoMesAnterior = () => {
-    let total = 0;
-    facturasClientesMesAnterior?.forEach(factura => {
-        const subtotal = factura.Subtotal?.toString().slice(0, -3);
-        total += subtotal ? parseFloat(subtotal) : 0;
-    });
-    total *= 1.22;
-    return total;
-  }
 
   return (
     <div className="rounded-sm border border-stroke bg-white py-6 px-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
@@ -53,7 +32,7 @@ const CardThree = () => {
       <div className="mt-4 flex items-end justify-between">
         <div>
           <h4 className="text-title-md font-bold text-black dark:text-white">
-          {currency((TotalFacturadoMes() - TotalFacturadoMesAnterior()) / TotalFacturadoMesAnterior() * 100, { symbol: "", precision: 2, separator: ".", decimal: "," }).format()}{' '}%
+          {currency( ((totalFacturadoMesActual / totalFacturadoMesAnterior) -1) * 100, { symbol: "", precision: 2, separator: ".", decimal: "," }).format()}{' '}%
           </h4>
           <span className="text-sm font-medium">Variación</span>
         </div>
