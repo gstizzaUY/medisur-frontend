@@ -9,8 +9,14 @@ const Settings = lazy(() => import('../pages/Settings'));
 const Tables = lazy(() => import('../pages/Tables'));
 const Alerts = lazy(() => import('../pages/UiElements/Alerts'));
 const Buttons = lazy(() => import('../pages/UiElements/Buttons'));
+const ComprobantesPendientes = lazy(() => import('../pages/Comprobantes/ComprobantesPendientes'));
 
 const coreRoutes = [
+  {
+    path: '/comprobantes/comprobantes-pendientes',
+    title: 'Comprobantes Pendientes',
+    component: ComprobantesPendientes,
+  },
   {
     path: '/calendar',
     title: 'Calender',

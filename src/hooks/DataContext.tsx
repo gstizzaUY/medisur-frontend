@@ -87,7 +87,6 @@ type Comprobantes = {
     "TomarParaActualizarCostos": String,
 }
 
-
 const DataContextProvider = ({ children }: DataContextProviderProps) => {
     const mesActual = new Date().getMonth() + 1;
     const anioActual = new Date().getFullYear();
@@ -108,6 +107,8 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     const [facturasClientes, setFacturasClientes] = useState([]);
     const [totalFacturadoMesActual, setTotalFacturadoMesActual] = useState(0);
     const [totalFacturadoMesAnterior, setTotalFacturadoMesAnterior] = useState(0);
+    const [comprobantesPendientes, setComprobantesPendientes] = useState([]);
+    const [listaArticulos, setListaArticulos] = useState([]);
 
 
 
@@ -124,18 +125,41 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
         obtenerClientes();
     }, []);
 
-    //* Obtener items
+    //* Obtener lista de artículos
     useEffect(() => {
-        const obtenerItems = async () => {
+        const obtenerArticulos = async () => {
             try {
-                const items = await clienteAxios.get(`${import.meta.env.VITE_API_URL}/facturas/items`);
-                setItems([...items.data as Item[]]);
+                const { data } = await clienteAxios.get(`${import.meta.env.VITE_API_URL}/facturas/listaArticulos`);
+                console.log(data);
+                setListaArticulos(data);
             } catch (error) {
                 console.log(error);
             }
         }
-        obtenerItems();
+        obtenerArticulos();
     }, []);
+
+    useEffect(() => {
+        const obtenerItems = async () => {
+            try {
+                const { data } = await clienteAxios.get(`${import.meta.env.VITE_API_URL}/facturas/items`);
+                const itemsConCosto = data.map(item => {
+                    const articulo = listaArticulos.find(articulo => articulo.Codigo === item.ArticuloCodigo);
+                    // Crear una nueva copia de item y modificar PrecioCosto
+                    return articulo ? { ...item, PrecioCosto: articulo.Costo } : { ...item, PrecioCosto: "0.00000" };
+                });
+                setItems(itemsConCosto);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        if (listaArticulos.length > 0) {
+            obtenerItems();
+        }
+    }, [listaArticulos]);
+
+
+
 
     //* Obtener comprobantes
     useEffect(() => {
@@ -174,6 +198,19 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
             }
         }
         obtenerFacturas();
+    }, []);
+
+    //* Obtener los comprobantes pendientes
+    useEffect(() => {
+        const obtenerComprobantesPendientes = async () => {
+            try {
+                const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/comprobantesPendientes`);
+                setComprobantesPendientes(data);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        obtenerComprobantesPendientes();
     }, []);
 
 
@@ -215,6 +252,10 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
             setTotalFacturadoMesActual,
             totalFacturadoMesAnterior,
             setTotalFacturadoMesAnterior,
+            comprobantesPendientes,
+            setComprobantesPendientes,
+            listaArticulos,
+            setListaArticulos,
         }}>
             {children}
         </dataContext.Provider>

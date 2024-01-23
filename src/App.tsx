@@ -16,7 +16,7 @@ function App() {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    setTimeout(() => setLoading(false), 1000);
+    setTimeout(() => setLoading(false), 2000);
   }, []);
 
   return loading ? (
@@ -32,6 +32,7 @@ function App() {
         <Routes>
           <Route path="/auth/signin" element={<SignIn />} />
           <Route path="/auth/signup" element={<SignUp />} />
+
           <Route element={<DefaultLayout />}>
             <Route index element={<ECommerce />} />
             {routes.map((routes, index) => {
