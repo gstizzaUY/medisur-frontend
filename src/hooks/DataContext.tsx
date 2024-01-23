@@ -139,6 +139,7 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
         obtenerArticulos();
     }, []);
 
+    //* Obtener items y agregar PrecioCosto de cada item con el costo del artículo
     useEffect(() => {
         const obtenerItems = async () => {
             try {
@@ -159,8 +160,6 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     }, [listaArticulos]);
 
 
-
-
     //* Obtener comprobantes
     useEffect(() => {
         const obtenerComprobantes = async () => {
@@ -174,12 +173,13 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
         obtenerComprobantes();
     }, []);
 
-    //* Obtener las facturas de los clientes de los últimos 3 meses
+
+
+    //* Obtener las facturas de los clientes de los últimos 6 meses
     useEffect(() => {
         const obtenerFacturas = async () => {
             try {
                 const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/facturasClientes`, {
-                    // mes actual
                     "Mes": mesActual,
                     "Anio": anioActual,
                 });
@@ -192,7 +192,6 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
                 const facturasClientesMesAnterior = data.filter(factura => factura.Fecha.substring(5, 7) == (mesActual === 1 ? 12 : mesActual - 1) && factura.Fecha.substring(0, 4) == (mesActual === 1 ? anioActual - 1 : anioActual));
                 const totalMesAnterior = facturasClientesMesAnterior.reduce((total, factura) => total + Number(factura.Total), 0);
                 setTotalFacturadoMesAnterior(totalMesAnterior);
-
             } catch (error) {
                 console.log(error);
             }
@@ -200,18 +199,27 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
         obtenerFacturas();
     }, []);
 
+
     //* Obtener los comprobantes pendientes
     useEffect(() => {
         const obtenerComprobantesPendientes = async () => {
-            try {
-                const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/comprobantesPendientes`);
-                setComprobantesPendientes(data);
-            } catch (error) {
-                console.log(error);
-            }
+                try {
+                    const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/comprobantesPendientes`);
+                    // setComprobantesPendientes(data);
+                    // Agregar a cada comprobante la zona del cliente, tomada del estado facturasClientes. Comparar por CodigoCliente y agregar la propiedad ClienteZona a cada comprobante7
+                    const comprobantesPendientes = data.map(comprobante => {
+                        const facturaCliente = facturasClientes.find(factura => factura.ClienteCodigo === comprobante.ClienteCodigo);
+                        return facturaCliente ? { ...comprobante, ClienteZona: facturaCliente.ClienteZonaCodigo } : { ...comprobante, ClienteZona: '' };
+                    });
+                    setComprobantesPendientes(comprobantesPendientes);
+                } catch (error) {
+                    console.log(error);
+                }
         }
         obtenerComprobantesPendientes();
-    }, []);
+    }, [facturasClientes]);
+
+
 
 
     return (

@@ -58,6 +58,11 @@ const ComprobantesPendientes = () => {
                 size: 150,
             },
             {
+                accessorKey: 'ClienteZona',
+                header: 'Zona',
+                size: 90,
+            },
+            {
                 accessorKey: 'Total',
                 header: 'Total',
                 size: 90,

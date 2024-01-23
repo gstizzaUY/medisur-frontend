@@ -51,7 +51,6 @@ const TableThree = () => {
                 {
                   (() => {
                     const numberValue = parseFloat(cellValue);
-                    let formattedValue = cellValue;
 
                     if (numberValue <= 0.99) {
                       return currency(numberValue, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format();
