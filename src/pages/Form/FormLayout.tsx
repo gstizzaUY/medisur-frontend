@@ -73,7 +73,11 @@ const FormLayout = () => {
   // Opciones de clientes para el select
   const clienteOptions = clientes.map(cliente => ({ value: cliente.Nombre, label: cliente.Nombre }));
   const handleChangeCliente = selectedOption => {
-    setSelectedCliente(clientes.find(cliente => cliente.Nombre === selectedOption.value));
+    if (selectedOption) {
+      setSelectedCliente(clientes.find(cliente => cliente.Nombre === selectedOption.value));
+    } else {
+      setSelectedCliente(null);
+    }
   };
   // Opciones de items para el select
   const itemOptions = items.map(item => ({ value: item.ArticuloNombre, label: item.ArticuloNombre }));
@@ -141,23 +145,20 @@ const FormLayout = () => {
       return 'text-danger';
     }
   }
-
   const handlePrecioChange = (event) => {
     let inputValue = event.target.value;
     // Remover el símbolo $ si existe
     inputValue = inputValue.replace('$', '');
     // Permitir solo números y dos decimales, y permitir la entrada de una parte decimal sin un número entero antes de ella
-    if (/^\d*\.?\d{0,2}$/.test(inputValue.replace(',', '.'))) {
-      // Reemplazar el punto por una coma
-      inputValue = inputValue.replace('.', ',');
+    if (/^\d*\.?\d{0,2}$/.test(inputValue)) {
       // Agregar el símbolo $
       inputValue = inputValue;
       setPrecio(inputValue);
-      // Eliminar el signo $  de inputValue y reemplazar la coma por un punto
-      inputValue = inputValue.replace(',', '.').replace('$', '');
+      // Eliminar el signo $  de inputValue
+      inputValue = inputValue.replace('$', '');
       setPrecioVenta(inputValue);
       // Cambiar el color del texto en función del valor del precio
-      const precioNumerico = parseFloat(inputValue.replace(',', '.').replace('$', ''));
+      const precioNumerico = parseFloat(inputValue.replace('$', ''));
       if (precioNumerico >= precioCosto * 1.5) {
         setColor('text-meta-3');
       } else if (precioNumerico >= precioCosto * 1.2) {

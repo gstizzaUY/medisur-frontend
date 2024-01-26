@@ -98,7 +98,7 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     const [ultimoPrecio, setUltimoPrecio] = useState(0);
     const [articulos, setArticulos] = useState([]);
     const [notas, setNotas] = useState('');
-    const [selectedItem, setSelectedItem] = useState({});
+    const [selectedItem, setSelectedItem] = useState(null);
     const [selectedCliente, setSelectedCliente] = useState('');
     const [selectedCantidad, setSelectedCantidad] = useState(1);
     const [selectedComprobante, setSelectedComprobante] = useState('');

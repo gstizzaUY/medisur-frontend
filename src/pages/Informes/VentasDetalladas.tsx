@@ -13,27 +13,30 @@ const VentasDetalladas = () => {
     const { anioActual, setAnioActual } = React.useContext(dataContext);
     const { clientes, setClientes } = React.useContext(dataContext);
     const { ventasDetalladas, setVentasDetalladas } = React.useContext(dataContext);
-
     const [clienteSeleccionado, setClienteSeleccionado] = React.useState(undefined);
     const [ventasFiltradas, setVentasFiltradas] = React.useState({});
     const [ventasFiltradasAgrupadas, setVentasFiltradasAgrupadas] = React.useState({});
     const [data, setData] = React.useState([]);
 
+
     const clienteOptions = clientes.map(cliente => ({ value: cliente.Nombre, label: cliente.Nombre }));
+
     const handleChangeCliente = selectedOption => {
         setClienteSeleccionado(clientes.find(cliente => cliente.Nombre === selectedOption.value));
-        console.log('Cliente seleccionado:', clienteSeleccionado);
     };
+
     const handleConsultar = () => {
+
         // Verificar si clienteSeleccionado es undefined
         if (!clienteSeleccionado) {
             console.error('No se ha seleccionado ningún cliente');
             return;
         }
+
         // filtrar de ventasDetalladas por clienteSeleccionado
         const ventasFiltradas = ventasDetalladas.filter(venta => venta.ClienteCodigo === clienteSeleccionado.Codigo);
         setVentasFiltradas(ventasFiltradas);
-        console.log('Ventas filtradas:', ventasFiltradas);
+
         // Usando la propiedad "FacturaRegistroFecha" de cada venta, por cada producto las ventas de ese producto por cada mes
         const ventasFiltradasAgrupadas = ventasFiltradas.reduce((acumulador, venta) => {
             const fecha = new Date(venta.FacturaRegistroFecha);
@@ -73,15 +76,15 @@ const VentasDetalladas = () => {
                 }
             }
         }
-
         setVentasFiltradasAgrupadas(Object.values(ventasFiltradasAgrupadas));
-        console.log('Ventas filtradas agrupadas:', ventasFiltradasAgrupadas);
     }
+
 
     React.useEffect(() => {
         const data = Object.values(ventasFiltradasAgrupadas).map(producto => {
             const { codigo, nombre, Cantidad, Precio } = producto;
             const row = { codigo, nombre };
+
             for (let mesAni in Cantidad) {
                 let [mes, anio] = mesAni.split('-');
                 mes = mes.padStart(2, '0');
@@ -99,7 +102,7 @@ const VentasDetalladas = () => {
             { accessorKey: 'codigo', header: 'Código', size: 50 },
             { accessorKey: 'nombre', header: 'Nombre del Artículo', sortDescFirst: true, size: 200 },
         ];
-        for (let i = 0; i < 12; i++) {
+        for (let i = 0; i < 5; i++) {
             let mes = mesActual - i;
             let anio = anioActual;
             if (mes < 1) {
@@ -118,7 +121,6 @@ const VentasDetalladas = () => {
         localization: MRT_Localization_ES,
         data,
         enableTopToolbar: false,
-
         positionActionsColumn: "last",
         globalFilterFn: 'contains', //turn off fuzzy matching and use simple contains filter function
         enableGlobalFilterRankedResults: true,
@@ -129,7 +131,10 @@ const VentasDetalladas = () => {
             },
             sorting: [
                 { id: 'nombre', desc: false },
-              ],
+            ],
+            columnVisibility: {
+                'codigo': false,
+            },
         },
     });
 
