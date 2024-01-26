@@ -1,6 +1,5 @@
 import { lazy } from 'react';
 
-const Calendar = lazy(() => import('../pages/Calendar'));
 const Chart = lazy(() => import('../pages/Chart'));
 const FormElements = lazy(() => import('../pages/Form/FormElements'));
 const FormLayout = lazy(() => import('../pages/Form/FormLayout'));
@@ -10,6 +9,7 @@ const Tables = lazy(() => import('../pages/Tables'));
 const Alerts = lazy(() => import('../pages/UiElements/Alerts'));
 const Buttons = lazy(() => import('../pages/UiElements/Buttons'));
 const ComprobantesPendientes = lazy(() => import('../pages/Comprobantes/ComprobantesPendientes'));
+const VentasDetalladas = lazy(() => import('../pages/Informes/VentasDetalladas'));
 
 const coreRoutes = [
   {
@@ -18,9 +18,9 @@ const coreRoutes = [
     component: ComprobantesPendientes,
   },
   {
-    path: '/calendar',
-    title: 'Calender',
-    component: Calendar,
+    path: '/informes/ventas-detalladas',
+    title: 'Ventas Detalladas',
+    component: VentasDetalladas,
   },
   {
     path: '/profile',

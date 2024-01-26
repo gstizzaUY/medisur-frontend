@@ -78,6 +78,8 @@ const TableThree = () => {
     localization: MRT_Localization_ES,
     data, //data must be memoized or stable (useState, useMemo, defined outside of this component, etc.)
     enableTopToolbar: true,
+    globalFilterFn: 'contains', //turn off fuzzy matching and use simple contains filter function
+    enableGlobalFilterRankedResults: true,
     initialState: {
       density: 'compact',
       sorting: [

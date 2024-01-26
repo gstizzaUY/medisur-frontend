@@ -109,6 +109,7 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     const [totalFacturadoMesAnterior, setTotalFacturadoMesAnterior] = useState(0);
     const [comprobantesPendientes, setComprobantesPendientes] = useState([]);
     const [listaArticulos, setListaArticulos] = useState([]);
+    const [ventasDetalladas, setVentasDetalladas] = useState([]);
 
 
 
@@ -130,7 +131,6 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
         const obtenerArticulos = async () => {
             try {
                 const { data } = await clienteAxios.get(`${import.meta.env.VITE_API_URL}/facturas/listaArticulos`);
-                console.log(data);
                 setListaArticulos(data);
             } catch (error) {
                 console.log(error);
@@ -179,7 +179,7 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     useEffect(() => {
         const obtenerFacturas = async () => {
             try {
-                const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/facturasClientes`, {
+                const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/facturas-clientes`, {
                     "Mes": mesActual,
                     "Anio": anioActual,
                 });
@@ -204,7 +204,7 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     useEffect(() => {
         const obtenerComprobantesPendientes = async () => {
                 try {
-                    const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/comprobantesPendientes`);
+                    const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/comprobantes-pendientes`);
                     // setComprobantesPendientes(data);
                     // Agregar a cada comprobante la zona del cliente, tomada del estado facturasClientes. Comparar por CodigoCliente y agregar la propiedad ClienteZona a cada comprobante7
                     const comprobantesPendientes = data.map(comprobante => {
@@ -218,6 +218,25 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
         }
         obtenerComprobantesPendientes();
     }, [facturasClientes]);
+
+
+    //* Obtener ventas detalladas
+    useEffect(() => {
+        const obtenerVentasDetalladas = async () => {
+            try {
+                const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/informes/ventas-detalladas`, {
+                    "Mes": mesActual,
+                    "Anio": anioActual,
+                });
+                console.log(data);
+                setVentasDetalladas(data);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        obtenerVentasDetalladas();
+    }, []);
+
 
 
 
@@ -264,6 +283,8 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
             setComprobantesPendientes,
             listaArticulos,
             setListaArticulos,
+            ventasDetalladas,
+            setVentasDetalladas,
         }}>
             {children}
         </dataContext.Provider>

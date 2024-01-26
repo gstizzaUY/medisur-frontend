@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useMemo } from 'react';
 import { dataContext } from '../../hooks/DataContext';
@@ -18,7 +17,7 @@ const ComprobantesPendientes = () => {
 
     const obtenerFacturaPDF = async (row) => {
         try {
-            const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/facturaPDF`, {
+            const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/factura-pdf`, {
                 "RegistroId": row.original.RegistroId
             });
             console.log(data);
@@ -83,6 +82,8 @@ const ComprobantesPendientes = () => {
         enableTopToolbar: true,
         positionActionsColumn: "last",
         enableRowActions: true,
+        globalFilterFn: 'contains', //turn off fuzzy matching and use simple contains filter function
+        enableGlobalFilterRankedResults: true,
         renderRowActions: ({ row }) => (
             <Box>
                 <IconButton onClick={() => { obtenerFacturaPDF(row) }}>

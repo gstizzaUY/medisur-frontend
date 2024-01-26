@@ -251,8 +251,6 @@ const FormLayout = () => {
     <>
       <Breadcrumb pageName="Nueva Factura" />
       <div className=''>
-
-
         <div className="grid grid-cols-12 gap-4 mb-15">
           {/* Columna 1 */}
           <div className="col-span-12 md:col-span-6">
