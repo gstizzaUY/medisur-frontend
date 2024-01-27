@@ -90,6 +90,9 @@ const TableThree = () => {
           Clear All Sorting
         </Button>
       ),
+      columnVisibility: {
+        'ArticuloCodigo': false,
+    },
     },
   });
 

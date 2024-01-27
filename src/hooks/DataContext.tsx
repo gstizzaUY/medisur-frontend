@@ -1,7 +1,6 @@
 import React, { ReactNode } from "react";
 import { useState, useEffect } from "react";
 import clienteAxios from '../functions/clienteAxios';
-import currency from 'currency.js';
 
 export const dataContext = React.createContext({});
 

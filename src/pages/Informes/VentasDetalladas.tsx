@@ -5,7 +5,7 @@ import Breadcrumb from '../../components/Breadcrumb';
 import Select from 'react-select';
 import { MaterialReactTable, useMaterialReactTable } from 'material-react-table';
 import { MRT_Localization_ES } from 'material-react-table/locales/es';
-import { Box, Button } from '@mui/material';
+import { Button } from '@mui/material';
 import currency from "currency.js";
 
 const VentasDetalladas = () => {
@@ -20,13 +20,11 @@ const VentasDetalladas = () => {
 
 
     const clienteOptions = clientes.map(cliente => ({ value: cliente.Nombre, label: cliente.Nombre }));
-
     const handleChangeCliente = selectedOption => {
         setClienteSeleccionado(clientes.find(cliente => cliente.Nombre === selectedOption.value));
     };
 
     const handleConsultar = () => {
-
         // Verificar si clienteSeleccionado es undefined
         if (!clienteSeleccionado) {
             console.error('No se ha seleccionado ningún cliente');

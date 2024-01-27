@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useMemo } from 'react';
 import { dataContext } from '../../hooks/DataContext';
 import clienteAxios from '../../functions/clienteAxios';
@@ -33,7 +33,7 @@ const ComprobantesPendientes = () => {
             {
                 accessorKey: 'Numero',
                 header: 'Número',
-                size: 50,
+                size: 30,
             },
             {
                 accessorKey: 'Emitido',
@@ -44,7 +44,7 @@ const ComprobantesPendientes = () => {
                 accessorKey: 'Fecha',
                 header: 'Fecha',
                 sortDescFirst: true,
-                size: 100,
+                size: 80,
             },
             {
                 accessorKey: 'ComprobanteNombre',
@@ -64,7 +64,7 @@ const ComprobantesPendientes = () => {
             {
                 accessorKey: 'Total',
                 header: 'Total',
-                size: 90,
+                size: 100,
                 Cell: ({ cell }) => (
                     <div className="text-right">
                         {currency(cell.getValue().slice(0, -3), { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
@@ -101,6 +101,10 @@ const ComprobantesPendientes = () => {
                     Clear All Sorting
                 </Button>
             ),
+            columnVisibility: {
+                'Emitido': false,
+                'ComprobanteNombre': false,
+            },
         },
     });
 

@@ -1,11 +1,10 @@
-import Breadcrumb from '../../components/Breadcrumb';
-
 import React from 'react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { dataContext } from '../../hooks/DataContext';
 import Select from 'react-select';
 import { Box, Button } from '@mui/material';
+import Breadcrumb from '../../components/Breadcrumb';
 import currency from 'currency.js';
 
 const FormLayout = () => {
@@ -106,7 +105,6 @@ const FormLayout = () => {
       if (selectedItem?.ArticuloCodigo) {
         try {
           const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/facturas/item/costo`, { ArticuloCodigo: selectedItem.ArticuloCodigo });
-          //const { data } = clienteAxios.post(`/facturas/item/costo`, { ArticuloCodigo: selectedItem.ArticuloCodigo });
           setPrecioCosto(data);
         } catch (error) {
           console.log(error);
@@ -123,8 +121,6 @@ const FormLayout = () => {
       if (selectedItem?.ArticuloCodigo && selectedCliente?.Codigo) {
         try {
           const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/facturas/item/ultimoPrecio`, { ArticuloCodigo: selectedItem.ArticuloCodigo, Codigo: selectedCliente.Codigo });
-          console.log('ultimo precio', data);
-          // const { data } = clienteAxios.post(`/facturas/item/ultimoPrecio`, { ArticuloCodigo: selectedItem.ArticuloCodigo, Codigo: selectedCliente.Codigo });
           setUltimoPrecio(data);
         } catch (error) {
           console.log(error);
@@ -233,7 +229,6 @@ const FormLayout = () => {
       setSelectedCliente({});
       setSelectedComprobante('');
       setSelectedFechaFactura('');
-      setSelectedVendedor('');
       setArticulos([]);
       setNotas('');
       // Limpiar los campos del modal
@@ -341,14 +336,12 @@ const FormLayout = () => {
             </div>
 
             <div className="w-32 text-right">
-              {/* <p className="text-gray-800">{articulo.PrecioUnitario}</p> */}
               <p className="text-gray-800">
                 {currency(articulo.PrecioUnitario, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
               </p>
             </div>
 
             <div className="w-32 text-right">
-              {/* <p className="text-gray-800">{articulo.total}</p> */}
               <p className="text-gray-800">
                 {currency(articulo.total, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
               </p>
@@ -377,7 +370,6 @@ const FormLayout = () => {
         </Button>
 
 
-        {/* Manteniendo la resonsividad agregar un textarea para las notas de la factura sobre la izquierda y un apartado para el total y calculo de impuestos */}
         <div className="flex mt-6 pr-9  py-2">
           <div className="flex-1 px-1">
           </div>
@@ -442,7 +434,6 @@ const FormLayout = () => {
                 <label className="text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide">Artículo</label>
                 <Select
                   className="mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full  text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
-                  // classNamePrefix="select"
                   styles={{
                     control: (baseStyles, state) => ({
                       ...baseStyles,
@@ -528,10 +519,6 @@ const FormLayout = () => {
               </div>
 
               <div className="mt-4 text-right">
-
-                {/* <button type="button" className="bg-white hover:bg-gray-100 text-gray-700 font-semibold py-2 px-4 border border-gray-300 rounded shadow-sm mr-2" onClick={handleCloseModal}>
-                                    Cancelar
-                                </button> */}
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                   <Button
                     color="primary"

@@ -69,10 +69,10 @@ const FormElements = () => {
 
       {
         accessorKey: 'Total',
-        header: '$ c/iva',
+        header: 'Total c/iva',
         size: 90,
         Cell: ({ cell }) => (
-          <div className="text-right">
+          <div className="text-center">
             {currency(cell.getValue().slice(0, -3), { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
           </div>
         ),
@@ -107,6 +107,9 @@ const FormElements = () => {
           Clear All Sorting
         </Button>
       ),
+      columnVisibility: {
+        'Subtotal': false,
+    },
     },
   });
 
