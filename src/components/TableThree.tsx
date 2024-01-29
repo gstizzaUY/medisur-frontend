@@ -5,6 +5,7 @@ import { MaterialReactTable, useMaterialReactTable } from 'material-react-table'
 import { MRT_Localization_ES } from 'material-react-table/locales/es';
 import { Box, Button, useTheme } from '@mui/material';
 import currency from "currency.js";
+import { alignProperty } from '@mui/material/styles/cssUtils';
 
 // import NewFactura from '../components/Facturas/NewFactura';
 
@@ -31,7 +32,7 @@ const TableThree = () => {
       {
         accessorKey: 'StockActual',
         header: 'Stock',
-        size: 90,
+        size: 50,
         // Eliminar los últimos 6 digitos
         Cell: ({ cell }) => (
           <Box>
@@ -47,7 +48,7 @@ const TableThree = () => {
           const cellValue = cell.getValue();
           if (cellValue) {
             return (
-              <div>
+              <div className='pr-4 text-center'>
                 {
                   (() => {
                     const numberValue = parseFloat(cellValue);
@@ -62,7 +63,7 @@ const TableThree = () => {
             );
           } else {
             return (
-              <div>
+              <div className='pr-4 text-center'>
                 {currency(0, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
               </div>
             );

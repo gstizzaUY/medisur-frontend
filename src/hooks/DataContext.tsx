@@ -112,7 +112,7 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
 
 
 
-    //* Obtener clientes
+    //* OBTENER CLIENTES //
     useEffect(() => {
         const obtenerClientes = async () => {
             try {
@@ -125,7 +125,7 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
         obtenerClientes();
     }, []);
 
-    //* Obtener lista de artículos
+    //* OBTENER LISTA DE ARTÍCULOS //
     useEffect(() => {
         const obtenerArticulos = async () => {
             try {
@@ -227,7 +227,6 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
                     "Mes": mesActual,
                     "Anio": anioActual,
                 });
-                console.log(data);
                 setVentasDetalladas(data);
             } catch (error) {
                 console.log(error);
