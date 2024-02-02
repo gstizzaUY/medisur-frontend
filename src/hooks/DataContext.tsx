@@ -87,6 +87,8 @@ type Comprobantes = {
 }
 
 const DataContextProvider = ({ children }: DataContextProviderProps) => {
+    const [diaActual, setDiaActual] = React.useState(new Date());
+    const [diaVencimiento, setDiaVencimiento] = React.useState(new Date());
     const mesActual = new Date().getMonth() + 1;
     const anioActual = new Date().getFullYear();
     const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -109,8 +111,17 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     const [comprobantesPendientes, setComprobantesPendientes] = useState([]);
     const [listaArticulos, setListaArticulos] = useState([]);
     const [ventasDetalladas, setVentasDetalladas] = useState([]);
+    const [facturasVencidas, setFacturasVencidas] = useState([]);
+    const [isLoading, setIsLoading] = React.useState(true);
 
 
+    //* ESTABLECER EL DÍA ACTUAL Y DÍA VENCIMIENTO EN FORMATO YYYY-MM-DD
+    useEffect(() => {
+        setDiaActual(new Date().toISOString().split('T')[0]);
+        // Establecer fecha de vencimiento en formato YYYY-MM-DD como la fecha actual menos 30 días
+        setDiaVencimiento(new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+
+    }, []);
 
     //* OBTENER CLIENTES //
     useEffect(() => {
@@ -184,13 +195,37 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
                 });
                 setFacturasClientes(data);
 
+                //* FACTURAS MES ACTUAL
                 const facturasClientesMesActual = data.filter(factura => factura.Fecha.substring(5, 7) == mesActual && factura.Fecha.substring(0, 4) == anioActual);
-                const totalMes = facturasClientesMesActual.reduce((total, factura) => total + Number(factura.Total), 0);
-                setTotalFacturadoMesActual(totalMes);
 
+                // Filtrar las facturas del mes actual donde ComprobanteCodigo = 701, (Venta Crédito) y ComprobanteCodigo = 702, (Venta Contado)
+                const ventasMesActual = facturasClientesMesActual.filter(factura => factura.ComprobanteCodigo === 701 || factura.ComprobanteCodigo === 702);
+                const totalVentasMesActual = ventasMesActual.reduce((total, factura) => total + Number(factura.Total), 0);
+
+                // Filtrar las facturas del mes actual donde ComprobanteCodigo = 702, (Nota de Crédito) y ComprobanteCodigo = 704, (Devolución Contado)
+                const devolucionesMesActual = facturasClientesMesActual.filter(factura => factura.ComprobanteCodigo === 702 || factura.ComprobanteCodigo === 704);
+                const totalDevolucionesMesActual = devolucionesMesActual.reduce((total, factura) => total + Number(factura.Total), 0);
+
+                // Restar las devoluciones de las ventas para obtener el total facturado del mes actual
+                const totalMesActual = totalVentasMesActual - totalDevolucionesMesActual;
+                setTotalFacturadoMesActual(totalMesActual);
+
+
+                //* FACTURAS MES ANTERIOR
                 const facturasClientesMesAnterior = data.filter(factura => factura.Fecha.substring(5, 7) == (mesActual === 1 ? 12 : mesActual - 1) && factura.Fecha.substring(0, 4) == (mesActual === 1 ? anioActual - 1 : anioActual));
-                const totalMesAnterior = facturasClientesMesAnterior.reduce((total, factura) => total + Number(factura.Total), 0);
+
+                // Filtrar las facturas del mes anterior donde ComprobanteCodigo = 701, (Venta Crédito) y ComprobanteCodigo = 702, (Venta Contado)
+                const ventasMesAnterior = facturasClientesMesAnterior.filter(factura => factura.ComprobanteCodigo === 701 || factura.ComprobanteCodigo === 702);
+                const totalVentasMesAnterior = ventasMesAnterior.reduce((total, factura) => total + Number(factura.Total), 0);
+
+                // Filtrar las facturas del mes anterior donde ComprobanteCodigo = 702, (Nota de Crédito) y ComprobanteCodigo = 704, (Devolución Contado)
+                const devolucionesMesAnterior = facturasClientesMesAnterior.filter(factura => factura.ComprobanteCodigo === 702 || factura.ComprobanteCodigo === 704);
+                const totalDevolucionesMesAnterior = devolucionesMesAnterior.reduce((total, factura) => total + Number(factura.Total), 0);
+
+                // Restar las devoluciones de las ventas para obtener el total facturado del mes anterior
+                const totalMesAnterior = totalVentasMesAnterior - totalDevolucionesMesAnterior;
                 setTotalFacturadoMesAnterior(totalMesAnterior);
+
             } catch (error) {
                 console.log(error);
             }
@@ -202,24 +237,36 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     //* Obtener los comprobantes pendientes
     useEffect(() => {
         const obtenerComprobantesPendientes = async () => {
-                try {
-                    const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/comprobantes-pendientes`);
-                    // setComprobantesPendientes(data);
-                    // Agregar a cada comprobante la zona del cliente, tomada del estado facturasClientes. Comparar por CodigoCliente y agregar la propiedad ClienteZona a cada comprobante7
-                    const comprobantesPendientes = data.map(comprobante => {
-                        const facturaCliente = facturasClientes.find(factura => factura.ClienteCodigo === comprobante.ClienteCodigo);
-                        return facturaCliente ? { ...comprobante, ClienteZona: facturaCliente.ClienteZonaCodigo } : { ...comprobante, ClienteZona: '' };
-                    });
-                    setComprobantesPendientes(comprobantesPendientes);
-                } catch (error) {
-                    console.log(error);
-                }
+            try {
+                const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/comprobantes-pendientes`);
+                setComprobantesPendientes(data);
+                // Agregar a cada comprobante la zona del cliente, tomada del estado facturasClientes. Comparar por CodigoCliente y agregar la propiedad ClienteZona a cada comprobante7
+                const comprobantesPendientes = data.map(comprobante => {
+                    const facturaCliente = facturasClientes.find(factura => factura.ClienteCodigo === comprobante.ClienteCodigo);
+                    return facturaCliente ? { ...comprobante, ClienteZona: facturaCliente.ClienteZonaCodigo } : { ...comprobante, ClienteZona: '' };
+                });
+                setComprobantesPendientes(comprobantesPendientes);
+
+                // Filtrar los comprobantes vencidos, donde un comprobante vencido es aquel que comprobante.Fecha < diaVencimiento
+                const comprobantesVencidos = comprobantesPendientes.filter(comprobante => new Date(comprobante.Fecha) < new Date(diaVencimiento));
+                // Agregar a cada comprobante vencido la zona del cliente, tomada del estado facturasClientes. Comparar por CodigoCliente y agregar la propiedad ClienteZona a cada comprobante7
+                const comprobantesVencidosConZona = comprobantesVencidos.map(comprobante => {
+                    const facturaCliente = facturasClientes.find(factura => factura.ClienteCodigo === comprobante.ClienteCodigo);
+                    return facturaCliente ? { ...comprobante, ClienteZona: facturaCliente.ClienteZonaCodigo } : { ...comprobante, ClienteZona: '' };
+                });
+                setFacturasVencidas(comprobantesVencidosConZona);
+
+                setIsLoading(false);
+
+            } catch (error) {
+                console.log(error);
+            }
         }
         obtenerComprobantesPendientes();
     }, [facturasClientes]);
 
 
-    //* Obtener ventas detalladas
+    // * Obtener ventas detalladas
     useEffect(() => {
         const obtenerVentasDetalladas = async () => {
             try {
@@ -283,6 +330,14 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
             setListaArticulos,
             ventasDetalladas,
             setVentasDetalladas,
+            diaActual,
+            setDiaActual,
+            diaVencimiento,
+            setDiaVencimiento,
+            facturasVencidas,
+            setFacturasVencidas,
+            isLoading,
+            setIsLoading,
         }}>
             {children}
         </dataContext.Provider>

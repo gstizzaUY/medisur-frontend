@@ -100,7 +100,7 @@ const FormElements = () => {
     initialState: {
       density: 'compact',
       sorting: [
-        { id: 'Fecha', desc: true },
+        { id: 'Numero', desc: true },
       ],
       renderTopToolbarCustomActions: ({ table }) => (
         <Button >
