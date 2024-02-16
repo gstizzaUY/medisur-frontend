@@ -11,6 +11,8 @@ const SignIn = () => {
   const [snakBarOpen, setSnakBarOpen] = useState(false);
   const [snackBarMessage, setSnackBarMessage] = useState('');
 
+  localStorage.removeItem('token');
+
 //* ENVIAR FORMULARIO
   const handleSubmit = async (e) => {
     e.preventDefault();
