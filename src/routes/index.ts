@@ -13,52 +13,52 @@ const VentasDetalladas = lazy(() => import('../pages/Informes/VentasDetalladas')
 
 const coreRoutes = [
   {
-    path: '/comprobantes/comprobantes-pendientes',
+    path: '/app/comprobantes/comprobantes-pendientes',
     title: 'Comprobantes Pendientes',
     component: ComprobantesPendientes,
   },
   {
-    path: '/informes/ventas-detalladas',
+    path: '/app/informes/ventas-detalladas',
     title: 'Ventas Detalladas',
     component: VentasDetalladas,
   },
   {
-    path: '/profile',
+    path: '/app/profile',
     title: 'Profile',
     component: Profile,
   },
   {
-    path: '/forms/form-elements',
+    path: '/app/forms/form-elements',
     title: 'Forms Elements',
     component: FormElements,
   },
   {
-    path: '/forms/form-layout',
+    path: '/app/forms/form-layout',
     title: 'Form Layouts',
     component: FormLayout,
   },
   {
-    path: '/tables',
+    path: '/app/tables',
     title: 'Tables',
     component: Tables,
   },
   {
-    path: '/settings',
+    path: '/app/settings',
     title: 'Settings',
     component: Settings,
   },
   {
-    path: '/chart',
+    path: '/app/chart',
     title: 'Chart',
     component: Chart,
   },
   {
-    path: '/ui/alerts',
+    path: '/app/ui/alerts',
     title: 'Alerts',
     component: Alerts,
   },
   {
-    path: '/ui/buttons',
+    path: '/app/ui/buttons',
     title: 'Buttons',
     component: Buttons,
   },

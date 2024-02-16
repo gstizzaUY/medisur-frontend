@@ -30,10 +30,10 @@ function App() {
           containerClassName="overflow-auto"
         />
         <Routes>
-          <Route path="/auth/signin" element={<SignIn />} />
-          <Route path="/auth/signup" element={<SignUp />} />
+          <Route path="/" element={<SignIn />} />
+          {/* <Route path="/auth/signup" element={<SignUp />} /> */}
 
-          <Route element={<DefaultLayout />}>
+          <Route path="/app" element={<DefaultLayout />}>
             <Route index element={<ECommerce />} />
             {routes.map((routes, index) => {
               const { path, component: Component } = routes;

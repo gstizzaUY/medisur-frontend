@@ -7,6 +7,7 @@ import { MaterialReactTable, useMaterialReactTable } from 'material-react-table'
 import { MRT_Localization_ES } from 'material-react-table/locales/es';
 import { Button } from '@mui/material';
 import currency from "currency.js";
+import { lightGreen } from '@mui/material/colors';
 
 const VentasDetalladas = () => {
     const { mesActual, setMesActual } = React.useContext(dataContext);
@@ -34,13 +35,19 @@ const VentasDetalladas = () => {
         // filtrar de ventasDetalladas por clienteSeleccionado
         const ventasFiltradas = ventasDetalladas.filter(venta => venta.ClienteCodigo === clienteSeleccionado.Codigo);
         setVentasFiltradas(ventasFiltradas);
+        console.log('ventasFiltradas', ventasFiltradas);
 
         // Usando la propiedad "FacturaRegistroFecha" de cada venta, por cada producto las ventas de ese producto por cada mes
         const ventasFiltradasAgrupadas = ventasFiltradas.reduce((acumulador, venta) => {
+            // venta.FacturaRegistroFecha es un string con formato "YYYY-MM-DD"
+            // const fecha = new Date();
+            //* REVISAR FECHA, ESTÁ MAL. REVISAR TODA ESTA FUNCIÓN
             const fecha = new Date(venta.FacturaRegistroFecha);
+            console.log('fecha', fecha);
             const mes = fecha.getMonth() + 1; // Ajuste para obtener el mes correcto
             const anio = fecha.getFullYear();
             const mesAni = `${mes}-${anio}`;
+            console.log('mesAni', mesAni);
 
             let productoExistente = acumulador[venta.ArticuloCodigo];
             if (!productoExistente) {
@@ -61,7 +68,7 @@ const VentasDetalladas = () => {
             productoExistente.Cantidad[mesAni] += Number(venta.LineaCantidad);
             productoExistente.Precio[mesAni].total += Number(venta.LineaPrecio) * Number(venta.LineaCantidad); // Multiplicar el precio por la cantidad
             productoExistente.Precio[mesAni].count += Number(venta.LineaCantidad); // Sumar la cantidad a count
-
+            console.log('acumulador', acumulador);
             return acumulador;
         }, {});
 
@@ -101,7 +108,7 @@ const VentasDetalladas = () => {
             { accessorKey: 'nombre', header: 'Nombre del Artículo', sortDescFirst: true, size: 200 },
         ];
         for (let i = 0; i < 5; i++) {
-            let mes = mesActual - i;
+            let mes = mesActual - i ;
             let anio = anioActual;
             if (mes < 1) {
                 mes += 12;

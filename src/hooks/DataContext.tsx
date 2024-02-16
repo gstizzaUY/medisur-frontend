@@ -87,6 +87,7 @@ type Comprobantes = {
 }
 
 const DataContextProvider = ({ children }: DataContextProviderProps) => {
+    const [usuario, setUsuario] = useState({} as any);
     const [diaActual, setDiaActual] = React.useState(new Date());
     const [diaVencimiento, setDiaVencimiento] = React.useState(new Date());
     const mesActual = new Date().getMonth() + 1;
@@ -114,6 +115,28 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     const [facturasVencidas, setFacturasVencidas] = useState([]);
     const [isLoading, setIsLoading] = React.useState(true);
 
+    // Autenticar usuario
+
+    useEffect(() => {
+        const autenticarUsuario = async () => {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+            try {
+                const { data } = await clienteAxios.get(`${import.meta.env.VITE_API_URL}/auth/perfil`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                setUsuario(data.usuario);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+            autenticarUsuario();
+    }, []);
+
+
+
 
     //* ESTABLECER EL DÍA ACTUAL Y DÍA VENCIMIENTO EN FORMATO YYYY-MM-DD
     useEffect(() => {
@@ -123,11 +146,16 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
 
     }, []);
 
+
     //* OBTENER CLIENTES //
     useEffect(() => {
         const obtenerClientes = async () => {
             try {
-                const clientes = await clienteAxios.get(`${import.meta.env.VITE_API_URL}/facturas/clientes`);
+                const clientes = await clienteAxios.get(`${import.meta.env.VITE_API_URL}/facturas/clientes`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
                 setClientes([...clientes.data as Cliente[]]);
             } catch (error) {
                 console.log(error);
@@ -140,7 +168,11 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     useEffect(() => {
         const obtenerArticulos = async () => {
             try {
-                const { data } = await clienteAxios.get(`${import.meta.env.VITE_API_URL}/facturas/listaArticulos`);
+                const { data } = await clienteAxios.get(`${import.meta.env.VITE_API_URL}/facturas/listaArticulos`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
                 setListaArticulos(data);
             } catch (error) {
                 console.log(error);
@@ -153,7 +185,11 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     useEffect(() => {
         const obtenerItems = async () => {
             try {
-                const { data } = await clienteAxios.get(`${import.meta.env.VITE_API_URL}/facturas/items`);
+                const { data } = await clienteAxios.get(`${import.meta.env.VITE_API_URL}/facturas/items`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
                 const itemsConCosto = data.map(item => {
                     const articulo = listaArticulos.find(articulo => articulo.Codigo === item.ArticuloCodigo);
                     // Crear una nueva copia de item y modificar PrecioCosto
@@ -174,7 +210,11 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     useEffect(() => {
         const obtenerComprobantes = async () => {
             try {
-                const listaComprobantes = await clienteAxios.get(`${import.meta.env.VITE_API_URL}/facturas/comprobantes`);
+                const listaComprobantes = await clienteAxios.get(`${import.meta.env.VITE_API_URL}/facturas/comprobantes`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
                 setComprobantes([...listaComprobantes.data as Comprobantes[]]);
             } catch (error) {
                 console.log(error);
@@ -189,10 +229,14 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     useEffect(() => {
         const obtenerFacturas = async () => {
             try {
-                const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/facturas-clientes`, {
-                    "Mes": mesActual,
-                    "Anio": anioActual,
-                });
+                const datos = {Mes: mesActual, Anio: anioActual};
+                const config = {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                };
+                const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/facturas-clientes`, datos, config);
+
                 setFacturasClientes(data);
 
                 //* FACTURAS MES ACTUAL
@@ -211,7 +255,7 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
                 setTotalFacturadoMesActual(totalMesActual);
 
 
-                //* FACTURAS MES ANTERIOR
+                 //* FACTURAS MES ANTERIOR
                 const facturasClientesMesAnterior = data.filter(factura => factura.Fecha.substring(5, 7) == (mesActual === 1 ? 12 : mesActual - 1) && factura.Fecha.substring(0, 4) == (mesActual === 1 ? anioActual - 1 : anioActual));
 
                 // Filtrar las facturas del mes anterior donde ComprobanteCodigo = 701, (Venta Crédito) y ComprobanteCodigo = 702, (Venta Contado)
@@ -238,7 +282,11 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     useEffect(() => {
         const obtenerComprobantesPendientes = async () => {
             try {
-                const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/comprobantes-pendientes`);
+                const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/comprobantes-pendientes`, null, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
                 setComprobantesPendientes(data);
                 // Agregar a cada comprobante la zona del cliente, tomada del estado facturasClientes. Comparar por CodigoCliente y agregar la propiedad ClienteZona a cada comprobante7
                 const comprobantesPendientes = data.map(comprobante => {
@@ -255,9 +303,7 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
                     return facturaCliente ? { ...comprobante, ClienteZona: facturaCliente.ClienteZonaCodigo } : { ...comprobante, ClienteZona: '' };
                 });
                 setFacturasVencidas(comprobantesVencidosConZona);
-
                 setIsLoading(false);
-
             } catch (error) {
                 console.log(error);
             }
@@ -270,10 +316,13 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     useEffect(() => {
         const obtenerVentasDetalladas = async () => {
             try {
-                const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/informes/ventas-detalladas`, {
-                    "Mes": mesActual,
-                    "Anio": anioActual,
-                });
+                const datos = {Mes: mesActual, Anio: anioActual};
+                const config = {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                };
+                const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/informes/ventas-detalladas`, datos, config);
                 setVentasDetalladas(data);
             } catch (error) {
                 console.log(error);
@@ -338,6 +387,8 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
             setFacturasVencidas,
             isLoading,
             setIsLoading,
+            usuario,
+            setUsuario,
         }}>
             {children}
         </dataContext.Provider>
