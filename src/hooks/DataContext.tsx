@@ -115,8 +115,7 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     const [facturasVencidas, setFacturasVencidas] = useState([]);
     const [isLoading, setIsLoading] = React.useState(true);
 
-    // Autenticar usuario
-
+    //* AUTENTICAR USUARIO
     useEffect(() => {
         const autenticarUsuario = async () => {
             const token = localStorage.getItem('token');
@@ -136,8 +135,6 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     }, []);
 
 
-
-
     //* ESTABLECER EL DÍA ACTUAL Y DÍA VENCIMIENTO EN FORMATO YYYY-MM-DD
     useEffect(() => {
         setDiaActual(new Date().toISOString().split('T')[0]);
@@ -145,7 +142,6 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
         setDiaVencimiento(new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
 
     }, []);
-
 
     //* OBTENER CLIENTES //
     useEffect(() => {
@@ -205,7 +201,6 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
         }
     }, [listaArticulos]);
 
-
     //* Obtener comprobantes
     useEffect(() => {
         const obtenerComprobantes = async () => {
@@ -222,7 +217,6 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
         }
         obtenerComprobantes();
     }, []);
-
 
 
     //* Obtener las facturas de los clientes de los últimos 6 meses

@@ -38,9 +38,9 @@ const ComprobantesPendientes = () => {
         let totalPorCliente = {};
         facturasVencidas.forEach((comprobante) => {
             if (totalPorCliente[comprobante.ClienteCodigo]) {
-                totalPorCliente[comprobante.ClienteCodigo] += parseFloat(comprobante.Total.slice(0, -3));
+                totalPorCliente[comprobante.ClienteCodigo] += parseFloat(comprobante.SaldoSigno.slice(0, -3));
             } else {
-                totalPorCliente[comprobante.ClienteCodigo] = parseFloat(comprobante.Total.slice(0, -3));
+                totalPorCliente[comprobante.ClienteCodigo] = parseFloat(comprobante.SaldoSigno.slice(0, -3));
             }
         });
         return currency(totalPorCliente[id], { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format();
@@ -95,6 +95,17 @@ const ComprobantesPendientes = () => {
                 ),
             },
             {
+                accessorKey: 'SaldoSigno',
+                header: 'Saldo',
+                size: 50,
+                Cell: ({ cell }) => (
+                    <div >
+                        {currency(cell.getValue().slice(0, -3), { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
+                    </div>
+                ),
+            },
+
+            {
                 accessorKey: 'FechaVencimiento',
                 header: 'V.',
                 size: 30,
@@ -114,11 +125,11 @@ const ComprobantesPendientes = () => {
                 //required to render an aggregated cell, show the average salary in the group
                 AggregatedCell: ({ cell }) => (
                     <>
-                        Total: {' '}
+                        Total Facturado: {' '}
                         <Box sx={{ color: 'success.main', fontWeight: 'bold' }}>
                             {totalDeFacturasPorCliente(cell.row.original.ClienteCodigo)}
                         </Box>
-                        Vencidas: {' '}
+                        Saldo Vencido: {' '}
                         <Box sx={{ color: 'error.main', fontWeight: 'bold' }}>
                             {totalFacturasVencidasPorCliente(cell.row.original.ClienteCodigo)}
                         </Box>

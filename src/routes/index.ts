@@ -1,4 +1,5 @@
 import { lazy } from 'react';
+import NuevaCotizacion from '../pages/Cotizador/NuevaCotizacion';
 
 const Chart = lazy(() => import('../pages/Chart'));
 const FormElements = lazy(() => import('../pages/Form/FormElements'));
@@ -21,6 +22,11 @@ const coreRoutes = [
     path: '/app/informes/ventas-detalladas',
     title: 'Ventas Detalladas',
     component: VentasDetalladas,
+  },
+  {
+    path: '/app/cotizador/nueva-cotizacion',
+    title: 'Nueva Cotizacion',
+    component: NuevaCotizacion,
   },
   {
     path: '/app/profile',

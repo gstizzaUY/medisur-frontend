@@ -8,39 +8,18 @@ import Snackbar from '@mui/material/Snackbar';
 import { Box, Button } from '@mui/material';
 import Breadcrumb from '../../components/Breadcrumb';
 
-
-const FormLayout = () => {
-  const { 
-    clientes, 
-    setClientes, 
-    selectedCliente, 
-    setSelectedCliente, 
-    comprobantes, 
-    setComprobantes, 
-    selectedComprobante, 
-    setSelectedComprobante,
-    selectedFechaFactura, 
-    setSelectedFechaFactura, 
-    items, 
-    setItems, 
-    selectedItem, 
-    setSelectedItem, 
-    precioCosto, 
+const NuevaCotizacion = () => {
+  const {
+    clientes,
+    items,
+    precioCosto,
     setPrecioCosto,
-    ultimoPrecio, 
-    setUltimoPrecio, 
-    selectedCantidad, 
-    setSelectedCantidad, 
-    precioVenta, 
-    setPrecioVenta, 
-    articulos, 
-    setArticulos, 
-    notas, 
-    setNotas,
-    listaArticulos, 
-    setListaArticulos, 
-    movimiento, 
-    setMovimiento } = React.useContext(dataContext);
+    ultimoPrecio,
+    setUltimoPrecio,
+    precioVenta,
+    setPrecioVenta,
+    articulos,
+    listaArticulos } = React.useContext(dataContext);
 
   const [openModal, setOpenModal] = React.useState(false);
   const [precio, setPrecio] = useState('');
@@ -49,20 +28,24 @@ const FormLayout = () => {
   const [totalIVA, setTotalIVA] = useState(0);
   const [snakBarOpen, setSnakBarOpen] = useState(false);
 
-  
+  const [cotizacion, setCotizacion] = useState({});
+  const [selectedLead, setSelectedLead] = useState({});
+  const [selectedFechaCotizacion, setSelectedFechaCotizacion] = useState(new Date().toISOString().slice(0, 10));
+  const [productos, setProductos] = useState([]);
+  const [selectedProducto, setSelectedProducto] = useState();
+  const [selectedCantidadProducto, setSelectedCantidadProducto] = useState(1);
+  const [ultimoPrecioProducto, setUltimoPrecioProducto] = useState(0);
+
   //* OPCIONES SELECTS //
   const clienteOptions = clientes.map(cliente => ({ value: cliente.Nombre, label: cliente.Nombre }));
   const itemOptions = items.map(item => ({ value: item.ArticuloNombre, label: item.ArticuloNombre }));
-  const comprobanteOptions = comprobantes
-    .filter(comprobante => comprobante.Nombre.includes('(CFE)'))
-    .map(comprobante => ({ value: comprobante.Nombre, label: comprobante.Nombre }));
 
   //* CONTROL SELECT CLIENTE //
   const handleChangeCliente = selectedOption => {
     if (selectedOption) {
-      setSelectedCliente(clientes.find(cliente => cliente.Nombre === selectedOption.value));
+      setSelectedLead(clientes.find(cliente => cliente.Nombre === selectedOption.value));
     } else {
-      setSelectedCliente(null);
+      setSelectedLead({});
     }
   };
 
@@ -70,36 +53,33 @@ const FormLayout = () => {
   const handleChangeFecha = (e) => {
     // tranformar la fecha en un string con formato yyyymmdd
     const fecha = e.target.value;
-    const fechaFactura = fecha.split('-');
-    const fechaFacturaString = fechaFactura[0] + fechaFactura[1] + fechaFactura[2];
-    setSelectedFechaFactura(fechaFacturaString);
+    const fechaCotizacion = fecha.split('-');
+    const fechaCotizacionString = fechaCotizacion[0] + fechaCotizacion[1] + fechaCotizacion[2];
+    setSelectedFechaCotizacion(fechaCotizacionString);
   }
 
-  //* CONTROL SELECT COMPROBANTES
-  const handleChangeComprobante = selectedOption => {
-    setSelectedComprobante(comprobantes.find(comprobante => comprobante.Nombre === selectedOption.value));
-  };
+
 
   //* CONTROL SELECT ITEMS //
   const handleChangeItem = selectedOption => {
-    setSelectedItem(items.find(item => item.ArticuloNombre === selectedOption.value));
+    setSelectedProducto(items.find(item => item.ArticuloNombre === selectedOption.value));
   };
 
   //* CONTROL ELIMINAR ARTÍCULOS
-  const handleEliminarArticulo = (index) => {
-    // Encontrar el articulo a eliminar en la lista de articulos
-    const articuloAEliminar = articulos.find((articulo, articuloIndex) => articuloIndex === index);
+  const handleEliminarProducto = (index) => {
+    // Encontrar el articulo a eliminar en la lista de productos
+    const productoAEliminar = productos.find((producto, productoIndex) => productoIndex === index);
     // Calcular el total del IVA y restarlo al estado totalIVA, teniendo en cuenta el IVACodigo de articulo: 1 = 10%, 2 = 22%, 3 = 0%
-    if (articuloAEliminar.IVACodigo === 1) {
-      setTotalIVA(totalIVA - (articuloAEliminar.total * 0.1));
-    } else if (articuloAEliminar.IVACodigo === 2) {
-      setTotalIVA(totalIVA - (articuloAEliminar.total * 0.22));
-    } else if (articuloAEliminar.IVACodigo === 3) {
+    if (productoAEliminar.IVACodigo === 1) {
+      setTotalIVA(totalIVA - (productoAEliminar.total * 0.1));
+    } else if (productoAEliminar.IVACodigo === 2) {
+      setTotalIVA(totalIVA - (productoAEliminar.total * 0.22));
+    } else if (productoAEliminar.IVACodigo === 3) {
       setTotalIVA(totalIVA - 0);
     }
     // Eliminar el artículo del estado articulos
-    const articulosFiltrados = articulos.filter((articulo, articuloIndex) => articuloIndex !== index);
-    setArticulos(articulosFiltrados);
+    const productoFiltrados = productos.filter((producto, productoIndex) => productoIndex !== index);
+    setProductos(productoFiltrados);
   };
 
   //* CONTROL CAMBIO DE PRECIO
@@ -130,9 +110,9 @@ const FormLayout = () => {
   //* OBTENER PRECIO DE COSTO //
   useEffect(() => {
     const obtenerPrecioCosto = async () => {
-      if (selectedItem?.ArticuloCodigo) {
+      if (selectedProducto?.ArticuloCodigo) {
         try {
-          const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/facturas/item/costo`, { ArticuloCodigo: selectedItem.ArticuloCodigo });
+          const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/facturas/item/costo`, { ArticuloCodigo: selectedProducto.ArticuloCodigo });
           setPrecioCosto(data);
         } catch (error) {
           console.log(error);
@@ -142,24 +122,24 @@ const FormLayout = () => {
       }
     }
     obtenerPrecioCosto();
-  }, [selectedItem]);
+  }, [selectedProducto]);
 
   //* OBTENER ÚLTIMO PRECIO
   useEffect(() => {
     const obtenerUltimoPrecio = async () => {
-      if (selectedItem?.ArticuloCodigo && selectedCliente?.Codigo) {
+      if (selectedProducto?.ArticuloCodigo && selectedLead?.Codigo) {
         try {
-          const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/facturas/item/ultimoPrecio`, { ArticuloCodigo: selectedItem.ArticuloCodigo, Codigo: selectedCliente.Codigo });
-          setUltimoPrecio(data);
+          const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/facturas/item/ultimoPrecio`, { ArticuloCodigo: selectedProducto.ArticuloCodigo, Codigo: selectedLead.Codigo });
+          setUltimoPrecioProducto(data);
         } catch (error) {
           console.log(error);
         }
       } else {
-        setUltimoPrecio(0);
+        setUltimoPrecioProducto(0);
       }
     }
     obtenerUltimoPrecio();
-  }, [selectedCliente, selectedItem]);
+  }, [selectedLead, selectedProducto]);
 
   function getColor(ultimoPrecio, precioCosto) {
     if (ultimoPrecio >= precioCosto * 1.5) {
@@ -171,64 +151,68 @@ const FormLayout = () => {
     }
   }
 
-  //* AGREGAR LINEAS DE LA FACTURA
-  const handleAgregarArticulo = () => {
-    // Buscar el selectedItem en listaArticulos y obtener el iVACodigo
-    const ivaSelectedItem = listaArticulos.find(articulo => articulo.Codigo === selectedItem.ArticuloCodigo);
+  //* AGREGAR LINEAS A LA COTIZACIÓN
+  const handleAgregarProducto = () => {
+
+    // Buscar el selectedProducto en listaArticulos y obtener el iVACodigo
+    const ivaSelectedProducto = listaArticulos.find(producto => producto.Codigo === selectedProducto.ArticuloCodigo);
+
     // Agregar el nuevo artículo al estado de los artículos
-    setArticulos(prevArticulos => [...prevArticulos, {
-      CodigoArticulo: selectedItem.ArticuloCodigo,
-      NombreArticulo: selectedItem.ArticuloNombre,
-      Cantidad: selectedCantidad,
+    setProductos(prevProductos => [...prevProductos, {
+      CodigoArticulo: selectedProducto.ArticuloCodigo,
+      NombreArticulo: selectedProducto.ArticuloNombre,
+      Cantidad: selectedCantidadProducto,
       // Convertir el precio a número y formatearlo con dos decimales
       PrecioUnitario: Number(precioVenta.replace('$', '')).toLocaleString('es-UY', { minimumFractionDigits: 2 }),
       costo: precioCosto,
-      IVACodigo: ivaSelectedItem.IVACodigo,
-      total: precioVenta * selectedCantidad,
+      IVACodigo: ivaSelectedProducto.IVACodigo,
+      total: precioVenta * selectedCantidadProducto,
       Notas: ""
     }]);
     // Calcular el total del IVA y agregarlo al estado totalIVA, teniendo en cuenta el IVACodigo de articulo: 1 = 10%, 2 = 22%, 3 = 0%
-    if (ivaSelectedItem.IVACodigo === 1) {
-      setTotalIVA(totalIVA + (precioVenta * selectedCantidad * 0.1));
-    } else if (ivaSelectedItem.IVACodigo === 2) {
-      setTotalIVA(totalIVA + (precioVenta * selectedCantidad * 0.22));
-    } else if (ivaSelectedItem.IVACodigo === 3) {
+    if (ivaSelectedProducto.IVACodigo === 1) {
+      setTotalIVA(totalIVA + (precioVenta * selectedCantidadProducto * 0.1));
+    } else if (ivaSelectedProducto.IVACodigo === 2) {
+      setTotalIVA(totalIVA + (precioVenta * selectedCantidadProducto * 0.22));
+    } else if (ivaSelectedProducto.IVACodigo === 3) {
       setTotalIVA(totalIVA + 0);
     }
     handleCloseModal();
-    limpiarFormularioAgregarArticulo();
+    limpiarFormularioAgregarProducto();
   }
 
-  //* CONTRSTUIR LA FACTURA
+  //* CONTRSTUIR LA COTIZACIÓN
   useEffect(() => {
     // Eliminar el campo articuloNombre,costo y total del array articulos y eliminar el signo $ del precio
     const articulosSinNombre = articulos.map(({ NombreArticulo, costo, total, IVACodigo, ...rest }) => ({ ...rest, PrecioUnitario: precioVenta.replace('$', '') }));
     // convertir el campo precio a número de la forma 1234.56 del array articulos
     articulosSinNombre.forEach(articulo => articulo.PrecioUnitario = parseFloat(articulo.PrecioUnitario.replace(',', '.')));
     // Construir el objeto factura
-    setMovimiento({
-      CodigoComprobante: selectedComprobante.Codigo,
-      Serie: "",
-      Numero: 0,
-      Fecha: selectedFechaFactura || fechaActual.replace(/-/g, ''),
-      CodigoMoneda: 1,
-      CodigoCliente: selectedCliente.Codigo,
-      CodigoVendedor: selectedCliente.VendedorCodigo,
-      CodigoPrecio: selectedCliente.PrecioVentaCodigo,
-      CodigoCondicionPago: "30",
-      CodigoDepositoOrigen: 1,
-      CodigoDepositoDestino: 1,
-      Notas: notas,
-      CodigoLocal: 1,
-      CodigoUsuario: 3,
-      CodigoCaja: 1,
-      Lineas: articulosSinNombre,
-      FormasPago: [{
-        CodigoFormaPago: 1,
-        CodigoMonedaPago: 1
-      }]
+    setCotizacion({
+      numero_cotizacion: 0,
+      fecha_cotizacion: selectedFechaCotizacion,
+      lead: {
+        codigo_lead: selectedLead.Codigo,
+        nombre_lead: selectedLead.Nombre,
+        email_lead: selectedLead.EmailAdministracion,
+      },
+      productos: [
+        ...articulosSinNombre.map(articulo => ({
+          codigo_producto: articulo.CodigoArticulo,
+          cantidad: articulo.Cantidad,
+          precio_unitario: articulo.PrecioUnitario,
+          iva_codigo: articulo.IVACodigo,
+          notas: articulo.Notas,
+        })),
+      ],
+      total: Math.round((articulosSinNombre.reduce((acc, articulo) => acc + (articulo.total * 100), 0) / 100) + totalIVA),
+      notas: "",
+      usuario: "",
+      forma_pago: "",
+      plazo: "",
+      fecha_entrega: "",
     });
-  }, [selectedCliente, selectedComprobante, selectedFechaFactura, articulos, notas, precioVenta]);
+  }, [articulos, precioVenta]);
 
 
   //* ENVIAR FACTURA A ZSOFTWARE
@@ -268,22 +252,21 @@ const FormLayout = () => {
   }
 
   //* LIMPIAR FORMULARIO AGREGAR ARTÍCULO
-  const limpiarFormularioAgregarArticulo = () => {
-    setSelectedItem(null);
-    setSelectedCantidad(1);
+  const limpiarFormularioAgregarProducto = () => {
+    setSelectedProducto(null);
+    setSelectedCantidadProducto(1);
     setPrecio('');
     setColor('text-gray-700');
   };
 
   //* LIMPIAR FORMULARIO ENVIAR FACTURA
   const limpiarFormularioEnviarFactura = () => {
-    setSelectedCliente({});
-    setSelectedComprobante('');
+    setLead({});
     setSelectedFechaFactura('');
-    setArticulos([]);
+    setProductos([]);
     setNotas('');
-    setSelectedItem(null);
-    setSelectedCantidad(1);
+    setSelectedProducto(null);
+    setSelectedCantidadProducto(1);
     setPrecio('');
     setColor('text-gray-700');
   };
@@ -297,11 +280,11 @@ const FormLayout = () => {
         message="Factura Enviada Correctamente a ZSoftware"
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       />
-      <Breadcrumb pageName="Nueva Factura" />
+      <Breadcrumb pageName="Nueva Cotización" />
       <div className=''>
         <div className="grid grid-cols-12 gap-4 mb-15">
           {/* Columna 1 */}
-          <div className="col-span-12 md:col-span-6">
+          <div className="col-span-8 md:col-span-6">
             <Select
               className="mb-3 bg-gray-200 appearance-none rounded w-full py-0 px-0 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
               styles={{
@@ -313,32 +296,19 @@ const FormLayout = () => {
                 }),
               }}
               placeholder="Seleccione un cliente"
-              defaultValue={selectedCliente}
+              defaultValue={selectedLead}
               isClearable={true}
               isSearchable={true}
               name="cliente"
               options={clienteOptions}
               onChange={handleChangeCliente}
             />
-            <Select
-              className="mb-3 bg-gray-200 appearance-none rounded w-full py-0 px-0 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-black"
-              styles={{
-                control: (baseStyles, state) => ({
-                  ...baseStyles,
-                  backgroundColor: '#FFFFFF',
-                  border: '1px',
-                  borderColor: '#000000',
-                  '&:hover': { backgroundColor: '#FFFFFF' },
-                }),
-              }}
-              placeholder="Seleccione un comprobante"
-              defaultValue={selectedComprobante}
-              isClearable={true}
-              isSearchable={true}
-              name="comprobante"
-              options={comprobanteOptions}
-              onChange={handleChangeComprobante}
-            />
+          </div>
+
+          <div className="col-span-4 md:col-span-6">
+            <Button >
+              Cliente
+            </Button>
           </div>
 
           {/* Columna 2 */}
@@ -377,25 +347,25 @@ const FormLayout = () => {
           <div className="px-1 w-20 text-center">
           </div>
         </div>
-        {articulos.map((articulo, index) => (
+        {productos.map((producto, index) => (
           <div key={index} className="flex pt-3 pb-3 border-b">
             <div className="flex-1 ">
-              <p className="text-gray-800">{articulo.NombreArticulo}</p>
+              <p className="text-gray-800">{producto.NombreArticulo}</p>
             </div>
 
             <div className="px-1 w-20 text-right">
-              <p className="text-gray-800">{articulo.Cantidad}</p>
+              <p className="text-gray-800">{producto.Cantidad}</p>
             </div>
 
             <div className="w-32 text-right">
               <p className="text-gray-800">
-                {currency(articulo.PrecioUnitario, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
+                {currency(producto.PrecioUnitario, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
               </p>
             </div>
 
             <div className="w-32 text-right">
               <p className="text-gray-800">
-                {currency(articulo.total, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
+                {currency(producto.total, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
               </p>
 
             </div>
@@ -403,7 +373,7 @@ const FormLayout = () => {
             <div className="px-5 w-30" style={{ textAlign: 'right' }}>
               <Button
                 color="error"
-                onClick={() => handleEliminarArticulo(index)}
+                onClick={() => handleEliminarProducto(index)}
                 variant="contained"
                 size="small"
               >
@@ -433,13 +403,13 @@ const FormLayout = () => {
 
           <div className="px-1 w-32 text-right">
             <p className="text-gray-800">
-              {currency(Math.round((articulos.reduce((acc, articulo) => acc + (articulo.total * 100), 0) / 100)), { symbol: "$ ", separator: ".", decimal: "," }).format()}
+              {currency(Math.round((productos.reduce((acc, producto) => acc + (producto.total * 100), 0) / 100)), { symbol: "$ ", separator: ".", decimal: "," }).format()}
             </p>
             <p className="text-gray-800">
               {currency(Math.round(totalIVA), { symbol: "$ ", separator: ".", decimal: "," }).format()}
             </p>
             <p className="text-gray-800">
-              {currency(Math.round((articulos.reduce((acc, articulo) => acc + (articulo.total * 100), 0) / 100) + totalIVA), { symbol: "$ ", separator: ".", decimal: "," }).format()}
+              {currency(Math.round((productos.reduce((acc, producto) => acc + (producto.total * 100), 0) / 100) + totalIVA), { symbol: "$ ", separator: ".", decimal: "," }).format()}
             </p>
           </div>
 
@@ -493,8 +463,8 @@ const FormLayout = () => {
                     }),
                   }}
                   placeholder="Seleccione un artículo"
-                  defaultValue={selectedItem}
-                  // value={selectedItem}
+                  defaultValue={selectedProducto}
+                  // value={selectedProducto}
                   isClearable={true}
                   isSearchable={true}
                   name="item"
@@ -553,8 +523,8 @@ const FormLayout = () => {
                       className="text-right text-sm  mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
                       type="number"
                       // defaultValue={1}
-                      value={selectedCantidad}
-                      onChange={(e) => setSelectedCantidad(e.target.value)} min={1} />
+                      value={selectedCantidadProducto}
+                      onChange={(e) => setSelectedCantidadProducto(e.target.value)} min={1} />
                   </div>
 
                   <div className="relative">
@@ -582,7 +552,7 @@ const FormLayout = () => {
 
                   <Button
                     color="primary"
-                    onClick={handleAgregarArticulo}
+                    onClick={handleAgregarProducto}
                     variant="contained"
                   >
                     Agregar
@@ -599,4 +569,4 @@ const FormLayout = () => {
   )
 }
 
-export default FormLayout;
+export default NuevaCotizacion;
