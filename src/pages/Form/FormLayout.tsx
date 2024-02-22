@@ -8,7 +8,6 @@ import Snackbar from '@mui/material/Snackbar';
 import { Box, Button } from '@mui/material';
 import Breadcrumb from '../../components/Breadcrumb';
 
-
 const FormLayout = () => {
   const { 
     clientes, 
@@ -279,13 +278,13 @@ const FormLayout = () => {
   const limpiarFormularioEnviarFactura = () => {
     setSelectedCliente({});
     setSelectedComprobante('');
-    setSelectedFechaFactura('');
     setArticulos([]);
     setNotas('');
     setSelectedItem(null);
     setSelectedCantidad(1);
     setPrecio('');
     setColor('text-gray-700');
+    window.location.reload();
   };
 
   return (

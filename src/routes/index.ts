@@ -1,5 +1,4 @@
 import { lazy } from 'react';
-import NuevaCotizacion from '../pages/Cotizador/NuevaCotizacion';
 
 const Chart = lazy(() => import('../pages/Chart'));
 const FormElements = lazy(() => import('../pages/Form/FormElements'));
@@ -11,6 +10,8 @@ const Alerts = lazy(() => import('../pages/UiElements/Alerts'));
 const Buttons = lazy(() => import('../pages/UiElements/Buttons'));
 const ComprobantesPendientes = lazy(() => import('../pages/Comprobantes/ComprobantesPendientes'));
 const VentasDetalladas = lazy(() => import('../pages/Informes/VentasDetalladas'));
+const NuevaCotizacion = lazy(() => import('../pages/Cotizador/NuevaCotizacion'));
+const Cotizaciones = lazy(() => import('../pages/Cotizador/Cotizaciones'));
 
 const coreRoutes = [
   {
@@ -27,6 +28,11 @@ const coreRoutes = [
     path: '/app/cotizador/nueva-cotizacion',
     title: 'Nueva Cotizacion',
     component: NuevaCotizacion,
+  },
+  {
+    path: '/app/cotizador/cotizaciones',
+    title: 'Cotizaciones',
+    component: Cotizaciones,
   },
   {
     path: '/app/profile',

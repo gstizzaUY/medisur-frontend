@@ -608,17 +608,17 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                               Nueva Cotización
                             </NavLink>
                           </li>
-                          {/* <li>
+                          <li>
                             <NavLink
-                              to="/forms/form-layout"
+                              to="/app/cotizador/cotizaciones"
                               className={({ isActive }) =>
                                 'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
                                 (isActive && '!text-white')
                               }
                             >
-                              Form Layout
+                              Cotizaciones
                             </NavLink>
-                          </li> */}
+                          </li>
                         </ul>
                       </div>
                       {/* <!-- Dropdown Menu End --> */}

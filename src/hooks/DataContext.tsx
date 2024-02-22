@@ -114,6 +114,8 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     const [ventasDetalladas, setVentasDetalladas] = useState([]);
     const [facturasVencidas, setFacturasVencidas] = useState([]);
     const [isLoading, setIsLoading] = React.useState(true);
+    const [contadorCotizaciones, setContadorCotizaciones] = React.useState('');
+    const [cotizaciones, setCotizaciones] = React.useState([]);
 
     //* AUTENTICAR USUARIO
     useEffect(() => {
@@ -327,6 +329,37 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
 
 
 
+    //* Obtener contador de Cotizaciones
+    useEffect(() => {
+        const obtenerContadorCotizaciones = async () => {
+            try {
+                const { data } = await clienteAxios.get(`${import.meta.env.VITE_API_URL}/cotizador/obtener-contador`);
+                const ultimoNumero = data.contador;
+                const nuevoNumero = String(parseInt(ultimoNumero, 10)).padStart(7, '0');
+                setContadorCotizaciones(nuevoNumero);
+                console.log('Nuevo número: ', nuevoNumero);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        obtenerContadorCotizaciones();
+    }, []);
+
+    //* Obterner Cotizaciones
+    useEffect(() => {
+        const obtenerCotizaciones = async () => {
+            try {
+                const { data } = await clienteAxios.get(`${import.meta.env.VITE_API_URL}/cotizador/cotizaciones`);
+                setCotizaciones(data);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        obtenerCotizaciones();
+    }, []);
+
+
+
 
 
     return (
@@ -383,6 +416,10 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
             setIsLoading,
             usuario,
             setUsuario,
+            contadorCotizaciones,
+            setContadorCotizaciones,
+            cotizaciones,
+            setCotizaciones
         }}>
             {children}
         </dataContext.Provider>
