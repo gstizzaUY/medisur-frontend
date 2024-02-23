@@ -1,6 +1,7 @@
 import React, { ReactNode } from "react";
 import { useState, useEffect } from "react";
 import clienteAxios from '../functions/clienteAxios';
+import dayjs from 'dayjs';
 
 export const dataContext = React.createContext({});
 
@@ -112,7 +113,6 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     const [comprobantesPendientes, setComprobantesPendientes] = useState([]);
     const [listaArticulos, setListaArticulos] = useState([]);
     const [ventasDetalladas, setVentasDetalladas] = useState([]);
-    const [facturasVencidas, setFacturasVencidas] = useState([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [contadorCotizaciones, setContadorCotizaciones] = React.useState('');
     const [cotizaciones, setCotizaciones] = React.useState([]);
@@ -133,7 +133,7 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
                 console.log(error);
             }
         }
-            autenticarUsuario();
+        autenticarUsuario();
     }, []);
 
 
@@ -225,7 +225,7 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     useEffect(() => {
         const obtenerFacturas = async () => {
             try {
-                const datos = {Mes: mesActual, Anio: anioActual};
+                const datos = { Mes: mesActual, Anio: anioActual };
                 const config = {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -251,7 +251,7 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
                 setTotalFacturadoMesActual(totalMesActual);
 
 
-                 //* FACTURAS MES ANTERIOR
+                //* FACTURAS MES ANTERIOR
                 const facturasClientesMesAnterior = data.filter(factura => factura.Fecha.substring(5, 7) == (mesActual === 1 ? 12 : mesActual - 1) && factura.Fecha.substring(0, 4) == (mesActual === 1 ? anioActual - 1 : anioActual));
 
                 // Filtrar las facturas del mes anterior donde ComprobanteCodigo = 701, (Venta Crédito) y ComprobanteCodigo = 702, (Venta Contado)
@@ -289,17 +289,26 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
                     const facturaCliente = facturasClientes.find(factura => factura.ClienteCodigo === comprobante.ClienteCodigo);
                     return facturaCliente ? { ...comprobante, ClienteZona: facturaCliente.ClienteZonaCodigo } : { ...comprobante, ClienteZona: '' };
                 });
+
                 setComprobantesPendientes(comprobantesPendientes);
 
-                // Filtrar los comprobantes vencidos, donde un comprobante vencido es aquel que comprobante.Fecha < diaVencimiento
-                const comprobantesVencidos = comprobantesPendientes.filter(comprobante => new Date(comprobante.Fecha) < new Date(diaVencimiento));
-                // Agregar a cada comprobante vencido la zona del cliente, tomada del estado facturasClientes. Comparar por CodigoCliente y agregar la propiedad ClienteZona a cada comprobante7
-                const comprobantesVencidosConZona = comprobantesVencidos.map(comprobante => {
-                    const facturaCliente = facturasClientes.find(factura => factura.ClienteCodigo === comprobante.ClienteCodigo);
-                    return facturaCliente ? { ...comprobante, ClienteZona: facturaCliente.ClienteZonaCodigo } : { ...comprobante, ClienteZona: '' };
-                });
-                setFacturasVencidas(comprobantesVencidosConZona);
+                // Por cada comprobantePendiente verificar extraer la Fecha del comprobante y el número de días de crédito del cliente obtenido de CondicionCodigo (string)
+                // Si la Fecha + días de crédito < hoy, agregar la propiedad Vencido: true, sino agregar la propiedad Vencido: false
+                const hoy = dayjs().format('YYYY-MM-DD');
+                const comprobantesPendientesConVencimiento = comprobantesPendientes.map(comprobante => {
+                    const fechaVencimiento = dayjs(comprobante.Fecha).add(comprobante.CondicionCodigo, 'day').format('YYYY-MM-DD');
+                    const vencido = fechaVencimiento < hoy;
+                    if (vencido) {
+                        return { ...comprobante, Vencido: true };
+                    } else {
+                        return { ...comprobante, Vencido: false };
+                    }
+                }
+                );
+                setComprobantesPendientes(comprobantesPendientesConVencimiento);
+                console.log('Comprobantes pendientes con vencimiento', comprobantesPendientesConVencimiento);
                 setIsLoading(false);
+
             } catch (error) {
                 console.log(error);
             }
@@ -312,7 +321,7 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     useEffect(() => {
         const obtenerVentasDetalladas = async () => {
             try {
-                const datos = {Mes: mesActual, Anio: anioActual};
+                const datos = { Mes: mesActual, Anio: anioActual };
                 const config = {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -337,7 +346,6 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
                 const ultimoNumero = data.contador;
                 const nuevoNumero = String(parseInt(ultimoNumero, 10)).padStart(7, '0');
                 setContadorCotizaciones(nuevoNumero);
-                console.log('Nuevo número: ', nuevoNumero);
             } catch (error) {
                 console.log(error);
             }
@@ -410,8 +418,6 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
             setDiaActual,
             diaVencimiento,
             setDiaVencimiento,
-            facturasVencidas,
-            setFacturasVencidas,
             isLoading,
             setIsLoading,
             usuario,

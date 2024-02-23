@@ -60,19 +60,24 @@ const FormElements = () => {
         accessorKey: 'Subtotal',
         header: '$ s/iva',
         size: 90,
+        muiTableBodyCellProps: {
+          align: 'right',
+      },
         Cell: ({ cell }) => (
-          <div className="text-right">
+          <div>
             {currency(cell.getValue().slice(0, -3), { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
           </div>
         ),
       },
-
       {
         accessorKey: 'Total',
         header: 'Total c/iva',
         size: 90,
+        muiTableBodyCellProps: {
+          align: 'right',
+      },
         Cell: ({ cell }) => (
-          <div className="text-center">
+          <div>
             {currency(cell.getValue().slice(0, -3), { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
           </div>
         ),

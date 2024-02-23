@@ -21,6 +21,7 @@
     "apexcharts": "^3.41.0",
     "axios": "^1.6.5",
     "currency.js": "^2.0.4",
+    "dayjs": "^1.11.10",
     "dotenv": "^16.3.1",
     "headlessui": "^0.0.0",
     "jsvectormap": "^1.5.3",

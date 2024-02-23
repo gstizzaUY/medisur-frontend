@@ -20,11 +20,10 @@ const columnHelper = createMRTColumnHelper();
 
 const ComprobantesPendientes = () => {
     const { comprobantesPendientes, setComprobantesPendientes } = React.useContext(dataContext);
-    const { diaActual, setDiaActual } = React.useContext(dataContext);
-    const { diaVencimiento, setDiaVencimiento } = React.useContext(dataContext);
-    const { facturasVencidas, setFacturasVencidas } = React.useContext(dataContext);
     const data = comprobantesPendientes;
 
+
+    //* ENVIAR LOS DATOS AL SERVIDOR PARA OBTENER EL PDF
     const handleExportRows = async (rows) => {
         console.log(rows);
         // Enviar los datos al servidor para obtener la url del PDF
@@ -37,28 +36,10 @@ const ComprobantesPendientes = () => {
         }
     };
 
-
-
-
-
     //* OBTENER TOTAL DE FACTURAS POR CLIENTE
-    const totalDeFacturasPorCliente = (id) => {
+    const totalPendiente = (id) => {
         let totalPorCliente = {};
         data.forEach((comprobante) => {
-            if (totalPorCliente[comprobante.ClienteCodigo]) {
-                totalPorCliente[comprobante.ClienteCodigo] += parseFloat(comprobante.Total.slice(0, -3));
-            } else {
-                totalPorCliente[comprobante.ClienteCodigo] = parseFloat(comprobante.Total.slice(0, -3));
-            }
-        });
-        return currency(totalPorCliente[id], { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format();
-    }
-
-
-    //* OBTENER EL TOTAL DEL MONTO DE LAS FACTURAS VENCIDAS POR CLIENTE
-    const totalFacturasVencidasPorCliente = (id) => {
-        let totalPorCliente = {};
-        facturasVencidas.forEach((comprobante) => {
             if (totalPorCliente[comprobante.ClienteCodigo]) {
                 totalPorCliente[comprobante.ClienteCodigo] += parseFloat(comprobante.SaldoSigno.slice(0, -3));
             } else {
@@ -66,6 +47,23 @@ const ComprobantesPendientes = () => {
             }
         });
         return currency(totalPorCliente[id], { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format();
+    }
+
+
+    //* OBTENER EL TOTAL DEL MONTO DE LAS FACTURAS VENCIDAS POR CLIENTE
+    const totalVencido = (id) => {
+        let vencidos = {};
+        data.forEach((comprobante) => {
+            if ( comprobante.Vencido ) {
+                if (vencidos[comprobante.ClienteCodigo]) {
+                    vencidos[comprobante.ClienteCodigo] += parseFloat(comprobante.SaldoSigno.slice(0, -3));
+                } else {
+                    vencidos[comprobante.ClienteCodigo] = parseFloat(comprobante.SaldoSigno.slice(0, -3));
+                }
+            }
+
+        });
+        return currency(vencidos[id], { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format();
     }
 
 
@@ -85,6 +83,25 @@ const ComprobantesPendientes = () => {
 
     const columns = useMemo(
         () => [
+            {
+                header: 'Resumen',
+                accessorKey: 'Resumen',
+                aggregationFn: ['count'],
+                size: 30,
+                //required to render an aggregated cell, show the average salary in the group
+                AggregatedCell: ({ cell }) => (
+                    <>
+                        Pendiente: {' '}
+                        <Box sx={{ color: 'success.main', fontWeight: 'bold' }}>
+                            {totalPendiente(cell.row.original.ClienteCodigo)}
+                        </Box>
+                        Vencido: {' '}
+                        <Box sx={{ color: 'error.main', fontWeight: 'bold' }}>
+                            {totalVencido(cell.row.original.ClienteCodigo)}
+                        </Box>
+                    </>
+                ),
+            },
             {
                 header: 'Número',
                 accessorKey: 'Numero',
@@ -111,6 +128,9 @@ const ComprobantesPendientes = () => {
                 accessorKey: 'Total',
                 header: 'Total',
                 size: 50,
+                muiTableBodyCellProps: {
+                    align: 'right',
+                },
                 Cell: ({ cell }) => (
                     <div >
                         {currency(cell.getValue().slice(0, -3), { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
@@ -121,6 +141,9 @@ const ComprobantesPendientes = () => {
                 accessorKey: 'SaldoSigno',
                 header: 'Saldo',
                 size: 50,
+                muiTableBodyCellProps: {
+                    align: 'right',
+                },
                 Cell: ({ cell }) => (
                     <div >
                         {currency(cell.getValue().slice(0, -3), { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
@@ -129,35 +152,21 @@ const ComprobantesPendientes = () => {
             },
 
             {
-                accessorKey: 'FechaVencimiento',
-                header: 'V.',
+                accessorKey: 'Vencimiento',
+                header: 'Vencido',
                 size: 30,
                 // Comparar propiedad Fecha (en formato string) con fechaVencimiento (en formato Date)
                 Cell: ({ cell }) => (
-                    <div>
-                        {new Date(cell.row.original.Fecha) < new Date(diaVencimiento) ? 'S' : 'N'}
-                    </div>
+                    <Box
+                        sx={{
+                            color: cell.row.original.Vencido ? 'error.main' : 'text.primary',
+                            fontWeight: cell.row.original.Vencido ? 'bold' : 'normal',
+                        }}
+                    >
+                        {cell.row.original.Vencido ? 'S' : 'N'}
+                    </Box>
                 ),
 
-            },
-            {
-                header: 'R.',
-                accessorKey: 'Resumen',
-                aggregationFn: ['count'],
-                size: 30,
-                //required to render an aggregated cell, show the average salary in the group
-                AggregatedCell: ({ cell }) => (
-                    <>
-                        Total Facturado: {' '}
-                        <Box sx={{ color: 'success.main', fontWeight: 'bold' }}>
-                            {totalDeFacturasPorCliente(cell.row.original.ClienteCodigo)}
-                        </Box>
-                        Saldo Vencido: {' '}
-                        <Box sx={{ color: 'error.main', fontWeight: 'bold' }}>
-                            {totalFacturasVencidasPorCliente(cell.row.original.ClienteCodigo)}
-                        </Box>
-                    </>
-                ),
             },
         ],
         [],
@@ -177,7 +186,7 @@ const ComprobantesPendientes = () => {
             density: 'compact',
             expanded: false, //expand all groups by default
             grouping: ['ClienteNombre'], //an array of columns to group by by default (can be multiple)
-            pagination: { pageIndex: 0, pageSize: 20 },
+            pagination: { pageIndex: 0, pageSize: 15 },
             sorting: [{ id: 'ClienteNombre', desc: false }], //sort by state by default
             columnVisibility: {
                 'ClienteZona': false,

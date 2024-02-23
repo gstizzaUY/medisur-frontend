@@ -594,6 +594,7 @@ const NuevaCotizacion = () => {
               <div className="flex justify-end">
                 <div className="mb-4 w-28 text-right">
 
+
                   {/* <div className="relative">
                     <label className="text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide ">Cantidad</label>
                     <input

@@ -5,9 +5,7 @@ import { MaterialReactTable, useMaterialReactTable } from 'material-react-table'
 import { MRT_Localization_ES } from 'material-react-table/locales/es';
 import { Box, Button, useTheme } from '@mui/material';
 import currency from "currency.js";
-import { alignProperty } from '@mui/material/styles/cssUtils';
 
-// import NewFactura from '../components/Facturas/NewFactura';
 
 const TableThree = () => {
   const { items, setItems } = React.useContext(dataContext);
@@ -22,17 +20,32 @@ const TableThree = () => {
         accessorKey: 'ArticuloCodigo', //access nested data with dot notation
         header: 'Código',
         size: 50,
+        muiTableHeadCellProps: {
+          align: 'right',
+        },
       },
       {
         accessorKey: 'ArticuloNombre',
         header: 'Nombre',
         sortDescFirst: true,
         size: 100,
+        muiTableHeadCellProps: {
+          align: 'center',
+        },
+        muiTableBodyCellProps: {
+          align: 'center',
+      },
       },
       {
         accessorKey: 'StockActual',
         header: 'Stock',
-        size: 50,
+        size: 100,
+        muiTableHeadCellProps: {
+          align: 'center',
+        },
+        muiTableBodyCellProps: {
+          align: 'center',
+      },
         // Eliminar los últimos 6 digitos
         Cell: ({ cell }) => (
           <Box>
@@ -44,28 +57,33 @@ const TableThree = () => {
         accessorKey: 'PrecioCosto',
         header: 'Costo',
         size: 90,
+        muiTableHeadCellProps: {
+          align: 'center',
+        },
+        muiTableBodyCellProps: {
+          align: 'center',
+      },
         Cell: ({ cell }) => {
           const cellValue = cell.getValue();
           if (cellValue) {
             return (
-              <div className='pr-4 text-center'>
+              <Box >
                 {
                   (() => {
                     const numberValue = parseFloat(cellValue);
-
                     if (numberValue <= 0.99) {
                       return currency(numberValue, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format();
                     }
                     return currency(numberValue, { symbol: "$ ", separator: ".", decimal: "," }).format();
                   })()
                 }
-              </div>
+              </Box>
             );
           } else {
             return (
-              <div className='pr-4 text-center'>
+              <Box>
                 {currency(0, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
-              </div>
+              </Box>
             );
           }
         },
