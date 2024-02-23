@@ -78,7 +78,7 @@ const FormElements = () => {
             </Box>
         ),
         initialState: {
-            pagination: { pageIndex: 0, pageSize: 200 },
+            pagination: { pageIndex: 0, pageSize: 100 },
             density: 'compact',
             sorting: [
                 // ordenar por numero_cotizacion de forma descendente si los números son de la forma 0000014, 0000015, 0000016, etc.

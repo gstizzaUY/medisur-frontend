@@ -103,7 +103,7 @@ const TableThree = () => {
     enableStickyFooter: true,
     muiTableContainerProps: { sx: { maxHeight: 430 } },
     initialState: {
-      pagination: { pageIndex: 0, pageSize: 200 },
+      pagination: { pageIndex: 0, pageSize: 100 },
       density: 'compact',
       sorting: [
         { id: 'ArticuloNombre', desc: false },

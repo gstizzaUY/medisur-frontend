@@ -6,7 +6,7 @@ import TableTwo from '../components/TableTwo';
 const Tables = () => {
   return (
     <>
-      <Breadcrumb pageName="Artículos" />
+      <Breadcrumb pageName="Artículos - Stock" />
 
       <div className="flex flex-col gap-10">
         {/* <TableOne />
