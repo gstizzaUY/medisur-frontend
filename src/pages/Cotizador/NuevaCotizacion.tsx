@@ -207,7 +207,6 @@ const NuevaCotizacion = () => {
   const handleEnviarCotizacion = async () => {
     try {
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/cotizador/nueva-cotizacion`, { cotizacion });
-      console.log(response.data.data.url);
       window.open(response.data.data.url);
       if (response.status === 200) {
         setSnakBarOpen(true);

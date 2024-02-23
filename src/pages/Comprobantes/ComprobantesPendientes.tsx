@@ -1,14 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useMemo } from 'react';
-import { Box } from '@mui/material';
-import { MaterialReactTable, useMaterialReactTable } from 'material-react-table';
-import { dataContext } from '../../hooks/DataContext';
+
 import Breadcrumb from '../../components/Breadcrumb';
 import currency from "currency.js";
+import clienteAxios from '../../functions/clienteAxios';
+
+import { MaterialReactTable, useMaterialReactTable, createMRTColumnHelper } from 'material-react-table';
+import { MRT_Localization_ES } from 'material-react-table/locales/es';
+
+import { Box, Button } from '@mui/material';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import IconButton from '@mui/material/IconButton';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
-import clienteAxios from '../../functions/clienteAxios';
-import { MRT_Localization_ES } from 'material-react-table/locales/es';
+
+import { dataContext } from '../../hooks/DataContext';
+
+const columnHelper = createMRTColumnHelper();
 
 
 const ComprobantesPendientes = () => {
@@ -17,6 +24,21 @@ const ComprobantesPendientes = () => {
     const { diaVencimiento, setDiaVencimiento } = React.useContext(dataContext);
     const { facturasVencidas, setFacturasVencidas } = React.useContext(dataContext);
     const data = comprobantesPendientes;
+
+    const handleExportRows = async (rows) => {
+        console.log(rows);
+        // Enviar los datos al servidor para obtener la url del PDF
+        try {
+            const response = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/informes/comprobantes-pendientes`, { rows });
+            console.log(response);
+            window.open(response.data.data.url);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+
+
 
 
     //* OBTENER TOTAL DE FACTURAS POR CLIENTE
@@ -71,7 +93,8 @@ const ComprobantesPendientes = () => {
             {
                 header: 'Cliente',
                 accessorKey: 'ClienteNombre',
-                size: 20,
+                size: 50,
+                grow: false,
             },
             {
                 header: 'Fecha',
@@ -142,11 +165,14 @@ const ComprobantesPendientes = () => {
 
 
     const table = useMaterialReactTable({
+        localization: MRT_Localization_ES,
         columns,
         data,
-        localization: MRT_Localization_ES,
+        enableRowSelection: true,
         enableGrouping: true,
         enableStickyHeader: true,
+        // enableGlobalFilterRankedResults: true,
+        enableRowActions: true,
         initialState: {
             density: 'compact',
             expanded: false, //expand all groups by default
@@ -155,14 +181,35 @@ const ComprobantesPendientes = () => {
             sorting: [{ id: 'ClienteNombre', desc: false }], //sort by state by default
             columnVisibility: {
                 'Numero': false,
+                'ClienteZona': false,
             },
         },
         muiToolbarAlertBannerChipProps: { color: 'primary' },
         muiTableContainerProps: { sx: { maxHeight: 700 } },
         globalFilterFn: 'contains', //turn off fuzzy matching and use simple contains filter function
-        enableGlobalFilterRankedResults: true,
-        enableRowActions: true,
         positionActionsColumn: "last",
+        positionToolbarAlertBanner: 'bottom',
+        renderTopToolbarCustomActions: ({ table }) => (
+            <Box
+                sx={{
+                    display: 'flex',
+                    gap: '16px',
+                    padding: '8px',
+                    flexWrap: 'wrap',
+                }}
+            >
+                <Button
+                    disabled={
+                        !table.getIsSomeRowsSelected() && !table.getIsAllRowsSelected()
+                    }
+                    //only export selected rows
+                    onClick={() => handleExportRows(table.getSelectedRowModel().rows)}
+                    startIcon={<FileDownloadIcon />}
+                >
+                    EXPORTAR SELECCIONADOS
+                </Button>
+            </Box>
+        ),
         renderRowActions: ({ row }) => (
             <Box>
                 <IconButton onClick={() => { obtenerFacturaPDF(row) }}>
