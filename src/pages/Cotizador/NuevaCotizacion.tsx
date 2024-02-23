@@ -594,7 +594,7 @@ const NuevaCotizacion = () => {
               <div className="flex justify-end">
                 <div className="mb-4 w-28 text-right">
 
-                  <div className="relative">
+                  {/* <div className="relative">
                     <label className="text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide ">Cantidad</label>
                     <input
                       className="text-right text-sm  mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
@@ -602,7 +602,7 @@ const NuevaCotizacion = () => {
                       // defaultValue={1}
                       value={selectedCantidadProducto}
                       onChange={(e) => setSelectedCantidadProducto(e.target.value)} min={1} />
-                  </div>
+                  </div> */}
 
                   <div className="relative">
                     <label className="text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide ">Precio</label>
