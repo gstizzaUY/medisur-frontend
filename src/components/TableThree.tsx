@@ -99,7 +99,11 @@ const TableThree = () => {
     enableTopToolbar: true,
     globalFilterFn: 'contains', //turn off fuzzy matching and use simple contains filter function
     enableGlobalFilterRankedResults: true,
+    enableStickyHeader : true,
+    enableStickyFooter: true,
+    muiTableContainerProps: { sx: { maxHeight: 430 } },
     initialState: {
+      pagination: { pageIndex: 0, pageSize: 200 },
       density: 'compact',
       sorting: [
         { id: 'ArticuloNombre', desc: false },

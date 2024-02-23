@@ -170,23 +170,25 @@ const ComprobantesPendientes = () => {
         localization: MRT_Localization_ES,
         columns,
         data,
+        enableStickyHeader : true,
+        enableStickyFooter: true,
+        muiTableContainerProps: { sx: { maxHeight: 420 } },
         enableRowSelection: true,
         enableGrouping: true,
-        enableStickyHeader: true,
         // enableGlobalFilterRankedResults: true,
         enableRowActions: true,
         initialState: {
             density: 'compact',
             expanded: false, //expand all groups by default
             grouping: ['ClienteNombre'], //an array of columns to group by by default (can be multiple)
-            pagination: { pageIndex: 0, pageSize: 7 },
+            pagination: { pageIndex: 0, pageSize: 200 },
             sorting: [{ id: 'ClienteNombre', desc: false }], //sort by state by default
             columnVisibility: {
                 'ClienteZona': false,
             },
         },
         muiToolbarAlertBannerChipProps: { color: 'primary' },
-        muiTableContainerProps: { sx: { maxHeight: 700 } },
+        
         globalFilterFn: 'contains', //turn off fuzzy matching and use simple contains filter function
         positionActionsColumn: "last",
         positionToolbarAlertBanner: 'bottom',

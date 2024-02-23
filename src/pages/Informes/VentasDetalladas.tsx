@@ -129,11 +129,12 @@ const VentasDetalladas = () => {
         positionActionsColumn: "last",
         globalFilterFn: 'contains', //turn off fuzzy matching and use simple contains filter function
         enableGlobalFilterRankedResults: true,
+        enableStickyHeader : true,
+        enableStickyFooter: true,
+        muiTableContainerProps: { sx: { maxHeight: 430 } },
         initialState: {
+            pagination: { pageIndex: 0, pageSize: 200 },
             density: 'compact',
-            pagination: {
-                pageSize: 10,
-            },
             sorting: [
                 { id: 'nombre', desc: false },
             ],

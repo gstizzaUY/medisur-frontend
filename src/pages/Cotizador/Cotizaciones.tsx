@@ -67,6 +67,9 @@ const FormElements = () => {
         enableRowActions: true,
         globalFilterFn: 'contains', //turn off fuzzy matching and use simple contains filter function
         enableGlobalFilterRankedResults: true,
+        enableStickyHeader : true,
+        enableStickyFooter: true,
+        muiTableContainerProps: { sx: { maxHeight: 430 } },
         renderRowActions: ({ row }) => (
             <Box>
                 <IconButton onClick={() => window.open(`${row.original.url_pdf}`, '_blank')} >
@@ -75,6 +78,7 @@ const FormElements = () => {
             </Box>
         ),
         initialState: {
+            pagination: { pageIndex: 0, pageSize: 200 },
             density: 'compact',
             sorting: [
                 // ordenar por numero_cotizacion de forma descendente si los números son de la forma 0000014, 0000015, 0000016, etc.

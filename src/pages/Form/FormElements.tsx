@@ -90,6 +90,9 @@ const FormElements = () => {
     columns,
     localization: MRT_Localization_ES,
     data,
+    enableStickyHeader : true,
+    enableStickyFooter: true,
+    muiTableContainerProps: { sx: { maxHeight: 430 } },
     enableTopToolbar: true,
     positionActionsColumn: "last",
     enableRowActions: true,
@@ -103,6 +106,7 @@ const FormElements = () => {
       </Box>
     ),
     initialState: {
+      pagination: { pageIndex: 0, pageSize: 100 },
       density: 'compact',
       sorting: [
         { id: 'Numero', desc: true },
