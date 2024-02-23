@@ -14,7 +14,6 @@ import currency from "currency.js";
 const FormElements = () => {
     const { cotizaciones, setCotizaciones } = React.useContext(dataContext);
     const data = cotizaciones;
-    console.log(cotizaciones);
 
     const columns = useMemo(
         () => [

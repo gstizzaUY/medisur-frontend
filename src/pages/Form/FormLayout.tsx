@@ -214,9 +214,9 @@ const FormLayout = () => {
       CodigoCliente: selectedCliente.Codigo,
       CodigoVendedor: selectedCliente.VendedorCodigo,
       CodigoPrecio: selectedCliente.PrecioVentaCodigo,
-      CodigoCondicionPago: "30",
-      CodigoDepositoOrigen: 1,
-      CodigoDepositoDestino: 1,
+      CodigoCondicionPago: selectedCliente.CondicionCodigo,
+      CodigoDepositoOrigen: 1, //& ACTUALIZAR EN PRODUCCIÓN SEGÚN CODIGO DEL COMPROBANTE
+      CodigoDepositoDestino: 1, //& ACTUALIZAR EN PRODUCCIÓN SEGÚN CODIGO DEL COMPROBANTE
       Notas: notas,
       CodigoLocal: 1,
       CodigoUsuario: 3,
