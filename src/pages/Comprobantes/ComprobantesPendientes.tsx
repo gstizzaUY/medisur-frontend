@@ -25,11 +25,9 @@ const ComprobantesPendientes = () => {
 
     //* ENVIAR LOS DATOS AL SERVIDOR PARA OBTENER EL PDF
     const handleExportRows = async (rows) => {
-        console.log(rows);
         // Enviar los datos al servidor para obtener la url del PDF
         try {
             const response = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/informes/comprobantes-pendientes`, { rows });
-            console.log(response);
             window.open(response.data.data.url);
         } catch (error) {
             console.log(error);
@@ -87,18 +85,13 @@ const ComprobantesPendientes = () => {
                 header: 'Resumen',
                 accessorKey: 'Resumen',
                 aggregationFn: ['count'],
-                size: 30,
+                size: 230,
                 //required to render an aggregated cell, show the average salary in the group
                 AggregatedCell: ({ cell }) => (
-                    <>
-                        Pendiente: {' '}
-                        <Box sx={{ color: 'success.main', fontWeight: 'bold' }}>
-                            {totalPendiente(cell.row.original.ClienteCodigo)}
-                        </Box>
-                        Vencido: {' '}
-                        <Box sx={{ color: 'error.main', fontWeight: 'bold' }}>
-                            {totalVencido(cell.row.original.ClienteCodigo)}
-                        </Box>
+                    <>  
+                        Saldo Total: {' '} <span style={{fontWeight: 'bold'}}> {totalPendiente(cell.row.original.ClienteCodigo)}</span>
+                        <br />                 
+                        Saldo Total Vencido: {' '} <span style={{fontWeight: 'bold', color: 'red'}}> {totalVencido(cell.row.original.ClienteCodigo)}</span>                    
                     </>
                 ),
             },
@@ -186,7 +179,7 @@ const ComprobantesPendientes = () => {
             density: 'compact',
             expanded: false, //expand all groups by default
             grouping: ['ClienteNombre'], //an array of columns to group by by default (can be multiple)
-            pagination: { pageIndex: 0, pageSize: 15 },
+            pagination: { pageIndex: 0, pageSize: 7 },
             sorting: [{ id: 'ClienteNombre', desc: false }], //sort by state by default
             columnVisibility: {
                 'ClienteZona': false,

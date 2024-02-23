@@ -306,7 +306,6 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
                 }
                 );
                 setComprobantesPendientes(comprobantesPendientesConVencimiento);
-                console.log('Comprobantes pendientes con vencimiento', comprobantesPendientesConVencimiento);
                 setIsLoading(false);
 
             } catch (error) {
