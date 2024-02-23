@@ -180,7 +180,6 @@ const ComprobantesPendientes = () => {
             pagination: { pageIndex: 0, pageSize: 20 },
             sorting: [{ id: 'ClienteNombre', desc: false }], //sort by state by default
             columnVisibility: {
-                'Numero': false,
                 'ClienteZona': false,
             },
         },
