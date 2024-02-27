@@ -142,7 +142,6 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
         setDiaActual(new Date().toISOString().split('T')[0]);
         // Establecer fecha de vencimiento en formato YYYY-MM-DD como la fecha actual menos 30 días
         setDiaVencimiento(new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
-
     }, []);
 
     //* OBTENER CLIENTES //
@@ -232,40 +231,29 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
                     }
                 };
                 const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/facturas-clientes`, datos, config);
-
                 setFacturasClientes(data);
-
                 //* FACTURAS MES ACTUAL
                 const facturasClientesMesActual = data.filter(factura => factura.Fecha.substring(5, 7) == mesActual && factura.Fecha.substring(0, 4) == anioActual);
-
-                // Filtrar las facturas del mes actual donde ComprobanteCodigo = 701, (Venta Crédito) y ComprobanteCodigo = 702, (Venta Contado)
-                const ventasMesActual = facturasClientesMesActual.filter(factura => factura.ComprobanteCodigo === 701 || factura.ComprobanteCodigo === 702);
+                // Filtrar las facturas del mes actual donde ComprobanteCodigo = 701, (Venta Crédito) y ComprobanteCodigo = 703, (Venta Contado)
+                const ventasMesActual = facturasClientesMesActual.filter(factura => factura.ComprobanteCodigo === 701 || factura.ComprobanteCodigo === 703);
                 const totalVentasMesActual = ventasMesActual.reduce((total, factura) => total + Number(factura.Total), 0);
-
                 // Filtrar las facturas del mes actual donde ComprobanteCodigo = 702, (Nota de Crédito) y ComprobanteCodigo = 704, (Devolución Contado)
                 const devolucionesMesActual = facturasClientesMesActual.filter(factura => factura.ComprobanteCodigo === 702 || factura.ComprobanteCodigo === 704);
                 const totalDevolucionesMesActual = devolucionesMesActual.reduce((total, factura) => total + Number(factura.Total), 0);
-
                 // Restar las devoluciones de las ventas para obtener el total facturado del mes actual
                 const totalMesActual = totalVentasMesActual - totalDevolucionesMesActual;
                 setTotalFacturadoMesActual(totalMesActual);
-
-
                 //* FACTURAS MES ANTERIOR
                 const facturasClientesMesAnterior = data.filter(factura => factura.Fecha.substring(5, 7) == (mesActual === 1 ? 12 : mesActual - 1) && factura.Fecha.substring(0, 4) == (mesActual === 1 ? anioActual - 1 : anioActual));
-
-                // Filtrar las facturas del mes anterior donde ComprobanteCodigo = 701, (Venta Crédito) y ComprobanteCodigo = 702, (Venta Contado)
-                const ventasMesAnterior = facturasClientesMesAnterior.filter(factura => factura.ComprobanteCodigo === 701 || factura.ComprobanteCodigo === 702);
+                // Filtrar las facturas del mes anterior donde ComprobanteCodigo = 701, (Venta Crédito) y ComprobanteCodigo = 703, (Venta Contado)
+                const ventasMesAnterior = facturasClientesMesAnterior.filter(factura => factura.ComprobanteCodigo === 701 || factura.ComprobanteCodigo === 703);
                 const totalVentasMesAnterior = ventasMesAnterior.reduce((total, factura) => total + Number(factura.Total), 0);
-
                 // Filtrar las facturas del mes anterior donde ComprobanteCodigo = 702, (Nota de Crédito) y ComprobanteCodigo = 704, (Devolución Contado)
                 const devolucionesMesAnterior = facturasClientesMesAnterior.filter(factura => factura.ComprobanteCodigo === 702 || factura.ComprobanteCodigo === 704);
                 const totalDevolucionesMesAnterior = devolucionesMesAnterior.reduce((total, factura) => total + Number(factura.Total), 0);
-
                 // Restar las devoluciones de las ventas para obtener el total facturado del mes anterior
                 const totalMesAnterior = totalVentasMesAnterior - totalDevolucionesMesAnterior;
                 setTotalFacturadoMesAnterior(totalMesAnterior);
-
             } catch (error) {
                 console.log(error);
             }
@@ -289,9 +277,7 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
                     const facturaCliente = facturasClientes.find(factura => factura.ClienteCodigo === comprobante.ClienteCodigo);
                     return facturaCliente ? { ...comprobante, ClienteZona: facturaCliente.ClienteZonaCodigo } : { ...comprobante, ClienteZona: '' };
                 });
-
                 setComprobantesPendientes(comprobantesPendientes);
-
                 // Por cada comprobantePendiente verificar extraer la Fecha del comprobante y el número de días de crédito del cliente obtenido de CondicionCodigo (string)
                 // Si la Fecha + días de crédito < hoy, agregar la propiedad Vencido: true, sino agregar la propiedad Vencido: false
                 const hoy = dayjs().format('YYYY-MM-DD');

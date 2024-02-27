@@ -39,7 +39,9 @@ const FormLayout = () => {
     listaArticulos, 
     setListaArticulos, 
     movimiento, 
-    setMovimiento } = React.useContext(dataContext);
+    setMovimiento,
+    usuario,
+    setUsuario } = React.useContext(dataContext);
 
   const [openModal, setOpenModal] = React.useState(false);
   const [precio, setPrecio] = useState('');
@@ -53,7 +55,7 @@ const FormLayout = () => {
   const clienteOptions = clientes.map(cliente => ({ value: cliente.Nombre, label: cliente.Nombre }));
   const itemOptions = items.map(item => ({ value: item.ArticuloNombre, label: item.ArticuloNombre }));
   const comprobanteOptions = comprobantes
-    .filter(comprobante => comprobante.Nombre.includes('(CFE)'))
+    .filter(comprobante => comprobante.Nombre.includes('(CFE)') && !comprobante.Nombre.includes('Débito'))
     .map(comprobante => ({ value: comprobante.Nombre, label: comprobante.Nombre }));
 
   //* CONTROL SELECT CLIENTE //
@@ -215,11 +217,11 @@ const FormLayout = () => {
       CodigoVendedor: selectedCliente.VendedorCodigo,
       CodigoPrecio: selectedCliente.PrecioVentaCodigo,
       CodigoCondicionPago: selectedCliente.CondicionCodigo,
-      CodigoDepositoOrigen: 1, //& ACTUALIZAR EN PRODUCCIÓN SEGÚN CODIGO DEL COMPROBANTE
-      CodigoDepositoDestino: 1, //& ACTUALIZAR EN PRODUCCIÓN SEGÚN CODIGO DEL COMPROBANTE
+      CodigoDepositoOrigen: (selectedComprobante.Codigo === 701 || selectedComprobante.Codigo === 703) ? 1 : 0,
+      CodigoDepositoDestino: (selectedComprobante.Codigo === 702 || selectedComprobante.Codigo === 704) ? 1 : 0,
       Notas: notas,
       CodigoLocal: 1,
-      CodigoUsuario: 3,
+      CodigoUsuario: usuario.codigoZ,
       CodigoCaja: 1,
       Lineas: articulosSinNombre,
       FormasPago: [{
@@ -380,6 +382,7 @@ const FormLayout = () => {
           <div key={index} className="flex pt-3 pb-3 border-b">
             <div className="flex-1 ">
               <p className="text-gray-800">{articulo.NombreArticulo}</p>
+              <p className="text-gray-600">{articulo.Notas}</p>
             </div>
 
             <div className="px-1 w-20 text-right">
