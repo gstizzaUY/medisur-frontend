@@ -184,7 +184,7 @@ const FormLayout = () => {
       // Convertir el precio a número y formatearlo con dos decimales
       PrecioUnitario: Number(precioVenta.replace('$', '')).toLocaleString('es-UY', { minimumFractionDigits: 2 }),
       costo: precioCosto,
-      IVACodigo: ivaSelectedItem.IVACodigo,
+      CodigoIVA: ivaSelectedItem.IVACodigo,
       total: precioVenta * selectedCantidad,
       Notas: ""
     }]);
@@ -203,7 +203,7 @@ const FormLayout = () => {
   //* CONTRSTUIR LA FACTURA
   useEffect(() => {
     // Eliminar el campo articuloNombre,costo y total del array articulos y eliminar el signo $ del precio
-    const articulosSinNombre = articulos.map(({ NombreArticulo, costo, total, IVACodigo, ...rest }) => ({ ...rest, PrecioUnitario: precioVenta.replace('$', '') }));
+    const articulosSinNombre = articulos.map(({ NombreArticulo, costo, total, ...rest }) => ({ ...rest, PrecioUnitario: precioVenta.replace('$', '') }));
     // convertir el campo precio a número de la forma 1234.56 del array articulos
     articulosSinNombre.forEach(articulo => articulo.PrecioUnitario = parseFloat(articulo.PrecioUnitario.replace(',', '.')));
     // Construir el objeto factura
