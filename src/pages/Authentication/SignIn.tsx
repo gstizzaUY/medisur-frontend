@@ -212,6 +212,7 @@ const SignIn = () => {
                       autoComplete="email"
                       autoFocus
                       value={email} onChange={e => setEmail(e.target.value)}
+                      InputLabelProps={{ style: { color: '#00aaad' } }}
                       sx={{
                         "& .MuiOutlinedInput-notchedOutline": {
                           border: "2px solid 00aaad"
@@ -237,6 +238,7 @@ const SignIn = () => {
                       id="password"
                       autoComplete="current-password"
                       value={password} onChange={e => setPassword(e.target.value)}
+                      InputLabelProps={{ style: { color: '#00aaad' } }}
                       sx={{
                         "& .MuiOutlinedInput-notchedOutline": {
                           border: "2px solid 00aaad"
