@@ -9,36 +9,32 @@ import { Box, Button } from '@mui/material';
 import Breadcrumb from '../../components/Breadcrumb';
 
 const FormLayout = () => {
-  const { 
-    clientes, 
-    setClientes, 
-    selectedCliente, 
-    setSelectedCliente, 
-    comprobantes, 
-    setComprobantes, 
-    selectedComprobante, 
+  const {
+    clientes,
+    setClientes,
+    selectedCliente,
+    setSelectedCliente,
+    comprobantes,
+    setComprobantes,
+    selectedComprobante,
     setSelectedComprobante,
-    selectedFechaFactura, 
-    setSelectedFechaFactura, 
-    items, 
-    setItems, 
-    selectedItem, 
-    setSelectedItem, 
-    precioCosto, 
-    setPrecioCosto,
-    ultimoPrecio, 
-    setUltimoPrecio, 
-    selectedCantidad, 
-    setSelectedCantidad, 
-    precioVenta, 
-    setPrecioVenta, 
-    articulos, 
-    setArticulos, 
-    notas, 
+    selectedFechaFactura,
+    setSelectedFechaFactura,
+    selectedItem,
+    setSelectedItem,
+    ultimoPrecio,
+    setUltimoPrecio,
+    selectedCantidad,
+    setSelectedCantidad,
+    precioVenta,
+    setPrecioVenta,
+    articulos,
+    setArticulos,
+    notas,
     setNotas,
-    listaArticulos, 
-    setListaArticulos, 
-    movimiento, 
+    listaArticulos,
+    setListaArticulos,
+    movimiento,
     setMovimiento,
     usuario,
     setUsuario } = React.useContext(dataContext);
@@ -50,10 +46,12 @@ const FormLayout = () => {
   const [totalIVA, setTotalIVA] = useState(0);
   const [snakBarOpen, setSnakBarOpen] = useState(false);
 
-  
+
   //* OPCIONES SELECTS //
   const clienteOptions = clientes.map(cliente => ({ value: cliente.Nombre, label: cliente.Nombre }));
-  const itemOptions = items.map(item => ({ value: item.ArticuloNombre, label: item.ArticuloNombre }));
+  const itemOptions = listaArticulos
+    .filter(item => item !== null && item !== undefined)
+    .map(item => ({ value: item.Nombre, label: item.Nombre }));
   const comprobanteOptions = comprobantes
     .filter(comprobante => comprobante.Nombre.includes('(CFE)') && !comprobante.Nombre.includes('Débito'))
     .map(comprobante => ({ value: comprobante.Nombre, label: comprobante.Nombre }));
@@ -83,7 +81,7 @@ const FormLayout = () => {
 
   //* CONTROL SELECT ITEMS //
   const handleChangeItem = selectedOption => {
-    setSelectedItem(items.find(item => item.ArticuloNombre === selectedOption.value));
+    setSelectedItem(listaArticulos.find(item => item.Nombre === selectedOption.value));
   };
 
   //* CONTROL ELIMINAR ARTÍCULOS
@@ -118,39 +116,23 @@ const FormLayout = () => {
       setPrecioVenta(inputValue);
       // Cambiar el color del texto en función del valor del precio
       const precioNumerico = parseFloat(inputValue.replace('$', ''));
-      if (precioNumerico >= precioCosto * 1.5) {
+      if (precioNumerico >= selectedItem.Costo * 1.5) {
         setColor('text-meta-3');
-      } else if (precioNumerico >= precioCosto * 1.2) {
+      } else if (precioNumerico >= selectedItem.Costo * 1.2) {
         setColor('text-black');
-      } else if (precioNumerico < precioCosto) {
+      } else if (precioNumerico < selectedItem.Costo) {
         setColor('text-danger');
       }
     }
   };
 
-  //* OBTENER PRECIO DE COSTO //
-  useEffect(() => {
-    const obtenerPrecioCosto = async () => {
-      if (selectedItem?.ArticuloCodigo) {
-        try {
-          const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/facturas/item/costo`, { ArticuloCodigo: selectedItem.ArticuloCodigo });
-          setPrecioCosto(data);
-        } catch (error) {
-          console.log(error);
-        }
-      } else {
-        setPrecioCosto(0);
-      }
-    }
-    obtenerPrecioCosto();
-  }, [selectedItem]);
 
   //* OBTENER ÚLTIMO PRECIO
   useEffect(() => {
     const obtenerUltimoPrecio = async () => {
-      if (selectedItem?.ArticuloCodigo && selectedCliente?.Codigo) {
+      if (selectedItem?.Codigo && selectedCliente?.Codigo) {
         try {
-          const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/facturas/item/ultimoPrecio`, { ArticuloCodigo: selectedItem.ArticuloCodigo, Codigo: selectedCliente.Codigo });
+          const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/facturas/item/ultimoPrecio`, { ArticuloCodigo: selectedItem.Codigo, Codigo: selectedCliente.Codigo });
           setUltimoPrecio(data);
         } catch (error) {
           console.log(error);
@@ -174,26 +156,25 @@ const FormLayout = () => {
 
   //* AGREGAR LINEAS DE LA FACTURA
   const handleAgregarArticulo = () => {
-    // Buscar el selectedItem en listaArticulos y obtener el iVACodigo
-    const ivaSelectedItem = listaArticulos.find(articulo => articulo.Codigo === selectedItem.ArticuloCodigo);
+
     // Agregar el nuevo artículo al estado de los artículos
     setArticulos(prevArticulos => [...prevArticulos, {
-      CodigoArticulo: selectedItem.ArticuloCodigo,
-      NombreArticulo: selectedItem.ArticuloNombre,
+      CodigoArticulo: selectedItem.Codigo,
+      NombreArticulo: selectedItem.Nombre,
       Cantidad: selectedCantidad,
       // Convertir el precio a número y formatearlo con dos decimales
       PrecioUnitario: Number(precioVenta.replace('$', '')).toLocaleString('es-UY', { minimumFractionDigits: 2 }),
-      costo: precioCosto,
-      CodigoIVA: ivaSelectedItem.IVACodigo,
+      costo: selectedItem.Costo,
+      CodigoIVA: selectedItem.IVACodigo,
       total: precioVenta * selectedCantidad,
       Notas: ""
     }]);
     // Calcular el total del IVA y agregarlo al estado totalIVA, teniendo en cuenta el IVACodigo de articulo: 1 = 10%, 2 = 22%, 3 = 0%
-    if (ivaSelectedItem.IVACodigo === 1) {
+    if (selectedItem.IVACodigo === 1) {
       setTotalIVA(totalIVA + (precioVenta * selectedCantidad * 0.1));
-    } else if (ivaSelectedItem.IVACodigo === 2) {
+    } else if (selectedItem.IVACodigo === 2) {
       setTotalIVA(totalIVA + (precioVenta * selectedCantidad * 0.22));
-    } else if (ivaSelectedItem.IVACodigo === 3) {
+    } else if (selectedItem.IVACodigo === 3) {
       setTotalIVA(totalIVA + 0);
     }
     handleCloseModal();
@@ -203,9 +184,9 @@ const FormLayout = () => {
   //* CONTRSTUIR LA FACTURA
   useEffect(() => {
     // Eliminar el campo articuloNombre,costo y total del array articulos y eliminar el signo $ del precio
-    const articulosSinNombre = articulos.map(({ NombreArticulo, costo, total, ...rest }) => ({ ...rest, PrecioUnitario: precioVenta.replace('$', '') }));
+    const articulosSinNombre = articulos.map(({ NombreArticulo, costo, total, Stock, ...rest }) => ({ ...rest, PrecioUnitario: currency(rest.PrecioUnitario, {  precision: 2, separator: '.', decimal: ',' }).value }));
     // convertir el campo precio a número de la forma 1234.56 del array articulos
-    articulosSinNombre.forEach(articulo => articulo.PrecioUnitario = parseFloat(articulo.PrecioUnitario.replace(',', '.')));
+    // articulosSinNombre.forEach(articulo => articulo.PrecioUnitario = parseFloat(articulo.PrecioUnitario.replace(',', '.')));
     // Construir el objeto factura
     setMovimiento({
       CodigoComprobante: selectedComprobante.Codigo,
@@ -274,6 +255,7 @@ const FormLayout = () => {
     setSelectedCantidad(1);
     setPrecio('');
     setColor('text-gray-700');
+    setPrecioVenta('');
   };
 
   //* LIMPIAR FORMULARIO ENVIAR FACTURA
@@ -285,6 +267,7 @@ const FormLayout = () => {
     setSelectedItem(null);
     setSelectedCantidad(1);
     setPrecio('');
+    setPrecioVenta('');
     setColor('text-gray-700');
     window.location.reload();
   };
@@ -334,8 +317,9 @@ const FormLayout = () => {
               }}
               placeholder="Seleccione un comprobante"
               defaultValue={selectedComprobante}
+              // No funciona  value = { (selectedCliente.Nombre === 'Consumidor Final') ? { value: 'Venta Contado (CFE)', label: 'Venta Contado (CFE)' } : {value: selectedComprobante.Nombre, label: selectedComprobante.Nombre }}
               isClearable={true}
-              isSearchable={true}
+              isSearchable={true} 
               name="comprobante"
               options={comprobanteOptions}
               onChange={handleChangeComprobante}
@@ -415,7 +399,7 @@ const FormLayout = () => {
           </div>
         ))}
 
-        <Button sx={{ mt: 3 }}
+        <Button sx={{ mt: 3, mb: 2, bgcolor: '#00aaad', p: 1, color: '#fff', '&:hover': { bgcolor: '#007d7f' }}}
           color="primary"
           onClick={handleOpenModal}
           variant="contained"
@@ -496,7 +480,7 @@ const FormLayout = () => {
                   }}
                   placeholder="Seleccione un artículo"
                   defaultValue={selectedItem}
-                  // value={selectedItem}
+                  value= { (selectedItem) ? { value: selectedItem.Nombre, label: selectedItem.Nombre } : null }
                   isClearable={true}
                   isSearchable={true}
                   name="item"
@@ -513,7 +497,7 @@ const FormLayout = () => {
                     className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
                     type="text"
                     // eliminar los últimos 3 dígitos 
-                    value={currency((Number(precioCosto)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format()}
+                    value={selectedItem ? currency((Number(selectedItem.Costo)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format() : ''}
                     readOnly />
                 </div>
 
@@ -522,7 +506,7 @@ const FormLayout = () => {
                   <input
                     className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
                     type="text"
-                    value={currency((Number(precioCosto * 1.2)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format()}
+                    value={selectedItem ? currency((Number(selectedItem.Costo * 1.2)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format() : ''}
                     readOnly
                   />
                 </div>
@@ -532,15 +516,14 @@ const FormLayout = () => {
                   <input
                     className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
                     type="text"
-                    value={currency((Number(precioCosto * 1.5)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format()}
+                    value={selectedItem ? currency((Number(selectedItem.Costo * 1.5)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format() : ''}
                     readOnly
                   />
                 </div>
 
                 <div className="mb-4 w-32">
                   <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">Ultimo</label>
-                  <input className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${getColor(ultimoPrecio, precioCosto)}`}
-                    type="text"
+                  <input className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${selectedItem ? getColor(ultimoPrecio, selectedItem.Costo) : ''}`}                    type="text"
                     value={currency((Number(ultimoPrecio)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format()}
                     readOnly />
                 </div>
@@ -566,6 +549,7 @@ const FormLayout = () => {
                       type="number"
                       value={precio}
                       onChange={handlePrecioChange}
+                      required
                     />
                   </div>
 
@@ -574,7 +558,7 @@ const FormLayout = () => {
 
               <div className="mt-4 text-right">
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                  <Button
+                  <Button sx={{ mt: 3, mb: 2, p: 2, color: '#007d7f', '&:hover': { color: '#007d7f', bgcolor: '#fffffff' }}}
                     color="primary"
                     onClick={handleCloseModal}
                     variant="outlined"
@@ -582,10 +566,11 @@ const FormLayout = () => {
                     Cancelar
                   </Button>
 
-                  <Button
+                  <Button sx={{ mt: 3, mb: 2, bgcolor: '#00aaad', p: 2, color: '#fff', '&:hover': { bgcolor: '#007d7f' }}}
                     color="primary"
                     onClick={handleAgregarArticulo}
                     variant="contained"
+                    disabled = {!selectedItem || !selectedCantidad || !precio}
                   >
                     Agregar
                   </Button>

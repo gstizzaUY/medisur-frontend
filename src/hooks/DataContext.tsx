@@ -94,7 +94,6 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     const mesActual = new Date().getMonth() + 1;
     const anioActual = new Date().getFullYear();
     const [clientes, setClientes] = useState<Cliente[]>([]);
-    const [items, setItems] = useState<Item[]>([]);
     const [comprobantes, setComprobantes] = useState<Comprobantes[]>([]);
     const [precioCosto, setPrecioCosto] = useState(0);
     const [precioVenta, setPrecioVenta] = useState(0);
@@ -178,29 +177,7 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
         obtenerArticulos();
     }, []);
 
-    //* Obtener items y agregar PrecioCosto de cada item con el costo del artículo
-    useEffect(() => {
-        const obtenerItems = async () => {
-            try {
-                const { data } = await clienteAxios.get(`${import.meta.env.VITE_API_URL}/facturas/items`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-                const itemsConCosto = data.map(item => {
-                    const articulo = listaArticulos.find(articulo => articulo.Codigo === item.ArticuloCodigo);
-                    // Crear una nueva copia de item y modificar PrecioCosto
-                    return articulo ? { ...item, PrecioCosto: articulo.Costo } : { ...item, PrecioCosto: "0.00000" };
-                });
-                setItems(itemsConCosto);
-            } catch (error) {
-                console.log(error);
-            }
-        }
-        if (listaArticulos.length > 0) {
-            obtenerItems();
-        }
-    }, [listaArticulos]);
+
 
     //* Obtener comprobantes
     useEffect(() => {
@@ -361,8 +338,6 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
             anioActual,
             clientes,
             setClientes,
-            items,
-            setItems,
             selectedItem,
             setSelectedItem,
             selectedCliente,
