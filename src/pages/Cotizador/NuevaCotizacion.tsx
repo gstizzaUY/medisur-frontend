@@ -1,5 +1,4 @@
-import React from 'react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { dataContext } from '../../hooks/DataContext';
 import Select from 'react-select';
@@ -20,7 +19,7 @@ const NuevaCotizacion = () => {
   const [cotizacion, setCotizacion] = useState({});
   const [selectedFechaCotizacion, setSelectedFechaCotizacion] = useState(new Date().toISOString().slice(0, 10));
   const [productos, setProductos] = useState([]);
-  const [selectedProducto, setSelectedProducto] = useState();
+  const [selectedProducto, setSelectedProducto] = useState(null);
   const [selectedCantidadProducto, setSelectedCantidadProducto] = useState(1);
   const [ultimoPrecioProducto, setUltimoPrecioProducto] = useState(0);
   const [precioCostoProducto, setPrecioCostoProducto] = useState(0);
@@ -29,30 +28,16 @@ const NuevaCotizacion = () => {
   const [referencia, setReferencia] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [modalInput, setModalInput] = useState({ nombre: '', email: '' });
+  const precioInputRef = useRef(null);
 
-  //* OBTENER PRECIO DE COSTO DEL PRODUCTO //
-  useEffect(() => {
-    const obtenerPrecioCostoProducto = async () => {
-      if (selectedProducto?.ArticuloCodigo) {
-        try {
-          const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/facturas/item/costo`, { ArticuloCodigo: selectedProducto.ArticuloCodigo });
-          setPrecioCostoProducto(data);
-        } catch (error) {
-          console.log(error);
-        }
-      } else {
-        setPrecioCostoProducto(0);
-      }
-    }
-    obtenerPrecioCostoProducto();
-  }, [selectedProducto]);
+
 
   //* OBTENER ÚLTIMO PRECIO
   useEffect(() => {
     const obtenerUltimoPrecio = async () => {
-      if (selectedProducto?.ArticuloCodigo && selectedLead?.Codigo) {
+      if (selectedProducto?.Codigo && selectedLead?.Codigo) {
         try {
-          const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/facturas/item/ultimoPrecio`, { ArticuloCodigo: selectedProducto.ArticuloCodigo, Codigo: selectedLead.Codigo });
+          const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/facturas/item/ultimoPrecio`, { ArticuloCodigo: selectedProducto.Codigo, Codigo: selectedLead.Codigo });
           setUltimoPrecioProducto(data);
         } catch (error) {
           console.log(error);
@@ -149,29 +134,25 @@ const NuevaCotizacion = () => {
 
   //* AGREGAR LINEAS A LA COTIZACIÓN
   const handleAgregarProducto = () => {
-
-    // Buscar el selectedProducto en listaArticulos y obtener el iVACodigo
-    const ivaSelectedProducto = listaArticulos.find(producto => producto.Codigo === selectedProducto.Codigo);
-
     // Agregar el nuevo artículo al estado de los artículos
     setProductos(prevProductos => [...prevProductos, {
-      CodigoArticulo: selectedProducto.ArticuloCodigo,
+      CodigoArticulo: selectedProducto.Codigo,
       NombreArticulo: selectedProducto.Nombre,
       Cantidad: selectedCantidadProducto,
       // Convertir el precio a número y formatearlo con dos decimales
       PrecioUnitario: typeof precioVentaProducto === 'string'
         ? Number(precioVentaProducto.replace('$', '')).toLocaleString('es-UY', { minimumFractionDigits: 2 })
         : precioVentaProducto,
-      IVACodigo: ivaSelectedProducto.IVACodigo,
+      IVACodigo: selectedProducto.IVACodigo,
       total: precioVentaProducto * selectedCantidadProducto,
       Notas: ""
     }]);
     // Calcular el total del IVA y agregarlo al estado totalIVA, teniendo en cuenta el IVACodigo de producto: 1 = 10%, 2 = 22%, 3 = 0%
-    if (ivaSelectedProducto.IVACodigo === 1) {
+    if (selectedProducto.IVACodigo === 1) {
       setTotalIVA(totalIVA + (precioVentaProducto * selectedCantidadProducto * 0.1));
-    } else if (ivaSelectedProducto.IVACodigo === 2) {
+    } else if (selectedProducto.IVACodigo === 2) {
       setTotalIVA(totalIVA + (precioVentaProducto * selectedCantidadProducto * 0.22));
-    } else if (ivaSelectedProducto.IVACodigo === 3) {
+    } else if (selectedProducto.IVACodigo === 3) {
       setTotalIVA(totalIVA + 0);
     }
     handleCloseModal();
@@ -229,22 +210,24 @@ const NuevaCotizacion = () => {
   }
   //* LIMPIAR FORMULARIO AGREGAR ARTÍCULO
   const limpiarFormularioAgregarProducto = () => {
-    setSelectedProducto(null);
+    setSelectedProducto('');
     setSelectedCantidadProducto(1);
     setPrecio('');
     setColor('text-gray-700');
+    setPrecioVentaProducto('');
   };
   //* LIMPIAR FORMULARIO CREAR COTIZACIÓN
   const limpiarFormularioCrearCotizacion = () => {
     setNotaCotizacion('');
-    setSelectedLead(null);
+    setSelectedLead('');
     setProductos([]);
     setNotaCotizacion('');
-    setSelectedProducto(null);
+    setSelectedProducto('');
     setSelectedCantidadProducto(1);
     setPrecio('');
     setTotalIVA(0);
     setColor('text-gray-700');
+    setPrecioVentaProducto('');
     setReferencia('');
     // recargar la página
     window.location.reload();
@@ -430,6 +413,7 @@ const NuevaCotizacion = () => {
           <div key={index} className="flex pt-3 pb-3 border-b">
             <div className="flex-1 ">
               <p className="text-gray-800">{producto.NombreArticulo}</p>
+              <p className="text-gray-600">{producto.Notas}</p>
             </div>
 
             <div className="px-1 w-20 text-right">
@@ -543,12 +527,18 @@ const NuevaCotizacion = () => {
                   }}
                   placeholder="Seleccione un artículo"
                   defaultValue={selectedProducto}
-                  // value={selectedProducto}
+                  value= { (selectedProducto) ? { value: selectedProducto.Nombre, label: selectedProducto.Nombre } : null }
                   isClearable={true}
                   isSearchable={true}
                   name="item"
-                  onChange={handleChangeItem}
                   options={itemOptions}
+                  onChange={(selectedOption) => {
+                    handleChangeItem(selectedOption);
+                    if (precioInputRef.current) {
+                      precioInputRef.current.focus();
+                    }
+                  }}
+                  
 
                 />
               </div>
@@ -560,7 +550,7 @@ const NuevaCotizacion = () => {
                     className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
                     type="text"
                     // eliminar los últimos 3 dígitos 
-                    value={currency((Number(precioCostoProducto)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format()}
+                    value={selectedProducto ? currency((Number(selectedProducto.Costo)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format() : ''}
                     readOnly />
                 </div>
 
@@ -569,7 +559,7 @@ const NuevaCotizacion = () => {
                   <input
                     className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
                     type="text"
-                    value={currency((Number(precioCostoProducto * 1.2)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format()}
+                    value={selectedProducto ? currency((Number(selectedProducto.Costo * 1.2)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format() : ''}
                     readOnly
                   />
                 </div>
@@ -579,14 +569,14 @@ const NuevaCotizacion = () => {
                   <input
                     className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
                     type="text"
-                    value={currency((Number(precioCostoProducto * 1.5)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format()}
+                    value={selectedProducto ? currency((Number(selectedProducto.Costo * 1.5)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format() : ''}
                     readOnly
                   />
                 </div>
 
                 <div className="mb-4 w-32">
                   <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">Ultimo</label>
-                  <input className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${getColor(ultimoPrecioProducto, precioCostoProducto)}`}
+                  <input className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${selectedProducto ? getColor(ultimoPrecioProducto, selectedProducto.Costo) : ''}`}
                     type="text"
                     value={currency((Number(ultimoPrecioProducto)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format()}
                     readOnly />
@@ -610,6 +600,7 @@ const NuevaCotizacion = () => {
                   <div className="relative">
                     <label className="text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide ">Precio</label>
                     <input
+                      ref={precioInputRef}
                       className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${color}`}
                       type="number"
                       value={precio}
@@ -634,6 +625,7 @@ const NuevaCotizacion = () => {
                     color="primary"
                     onClick={handleAgregarProducto}
                     variant="contained"
+                    disabled = { !selectedProducto || !precioVentaProducto  }
                   >
                     Agregar
                   </Button>

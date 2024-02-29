@@ -53,6 +53,7 @@ const FormLayout = () => {
   const itemOptions = listaArticulos
     .filter(item => item !== null && item !== undefined)
     .map(item => ({ value: item.Nombre, label: item.Nombre }));
+    
   const comprobanteOptions = comprobantes
     .filter(comprobante => comprobante.Nombre.includes('(CFE)') && !comprobante.Nombre.includes('Débito'))
     .map(comprobante => ({ value: comprobante.Nombre, label: comprobante.Nombre }));
