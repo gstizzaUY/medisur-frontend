@@ -46,6 +46,7 @@ const FormLayout = () => {
   const [totalIVA, setTotalIVA] = useState(0);
   const [snakBarOpen, setSnakBarOpen] = useState(false);
   const cantidadInputRef = useRef(null);
+  const selectRef = useRef();
 
 
   //* OPCIONES SELECTS //
@@ -53,7 +54,7 @@ const FormLayout = () => {
   const itemOptions = listaArticulos
     .filter(item => item !== null && item !== undefined)
     .map(item => ({ value: item.Nombre, label: item.Nombre }));
-    
+
   const comprobanteOptions = comprobantes
     .filter(comprobante => comprobante.Nombre.includes('(CFE)') && !comprobante.Nombre.includes('Débito'))
     .map(comprobante => ({ value: comprobante.Nombre, label: comprobante.Nombre }));
@@ -240,6 +241,9 @@ const FormLayout = () => {
     // Eliminar la clase hidden del modal
     const modal = document.querySelector('#modal');
     modal.classList.remove('hidden');
+    if (selectRef.current) {
+      selectRef.current.focus();
+    }
   }
   //* CONTROL CERRAR MODAL //
   const handleCloseModal = () => {
@@ -487,6 +491,7 @@ const FormLayout = () => {
                   isClearable={true}
                   isSearchable={true}
                   name="item"
+                  ref={selectRef}
                   options={itemOptions}
                   onChange={(selectedOption) => {
                     handleChangeItem(selectedOption);

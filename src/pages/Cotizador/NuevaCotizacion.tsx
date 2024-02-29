@@ -29,6 +29,7 @@ const NuevaCotizacion = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalInput, setModalInput] = useState({ nombre: '', email: '' });
   const precioInputRef = useRef(null);
+  const selectRef = useRef();
 
 
 
@@ -292,6 +293,10 @@ const NuevaCotizacion = () => {
     // Eliminar la clase hidden del modal
     const modal = document.querySelector('#modal');
     modal.classList.remove('hidden');
+        // Enfocar el Select
+        if (selectRef.current) {
+          selectRef.current.focus();
+        }
   }
   //* CONTROL CERRAR MODAL //
   const handleCloseModal = () => {
@@ -530,6 +535,7 @@ const NuevaCotizacion = () => {
                   value= { (selectedProducto) ? { value: selectedProducto.Nombre, label: selectedProducto.Nombre } : null }
                   isClearable={true}
                   isSearchable={true}
+                  ref={selectRef}
                   name="item"
                   options={itemOptions}
                   onChange={(selectedOption) => {
