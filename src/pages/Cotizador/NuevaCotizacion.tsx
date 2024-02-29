@@ -9,7 +9,7 @@ import { Box, Button } from '@mui/material';
 import Breadcrumb from '../../components/Breadcrumb';
 
 const NuevaCotizacion = () => {
-  const { contadorCotizaciones, setContadorCotizaciones, clientes, items, usuario, articulos, listaArticulos } = React.useContext(dataContext);
+  const { contadorCotizaciones, setContadorCotizaciones, clientes, usuario, articulos, listaArticulos } = React.useContext(dataContext);
   const [openModal, setOpenModal] = React.useState(false);
   const [precio, setPrecio] = useState('');
   const [color, setColor] = useState('text-gray-700');
@@ -66,7 +66,10 @@ const NuevaCotizacion = () => {
 
   //* OPCIONES SELECTS //
   const clienteOptions = clientes ? clientes.map(cliente => ({ value: cliente.Nombre, label: cliente.Nombre })) : [];
-  const itemOptions = items ? items.map(item => ({ value: item.ArticuloNombre, label: item.ArticuloNombre })) : [];
+  const itemOptions = listaArticulos ? 
+  listaArticulos
+  .filter(item => item !== null && item !== undefined)
+  .map(item => ({ value: item.Nombre, label: item.Nombre })) : [];
   //* CONTROL SELECT CLIENTE //
   const handleChangeCliente = selectedOption => {
     if (selectedOption) {
@@ -85,7 +88,7 @@ const NuevaCotizacion = () => {
   }
   //* CONTROL SELECT ITEMS //
   const handleChangeItem = selectedOption => {
-    setSelectedProducto(items.find(item => item.ArticuloNombre === selectedOption.value));
+    setSelectedProducto(listaArticulos.find(item => item.Nombre === selectedOption.value));
   };
   //* CONTROL ELIMINAR ARTÍCULOS
   const handleEliminarProducto = (index) => {
@@ -148,12 +151,12 @@ const NuevaCotizacion = () => {
   const handleAgregarProducto = () => {
 
     // Buscar el selectedProducto en listaArticulos y obtener el iVACodigo
-    const ivaSelectedProducto = listaArticulos.find(producto => producto.Codigo === selectedProducto.ArticuloCodigo);
+    const ivaSelectedProducto = listaArticulos.find(producto => producto.Codigo === selectedProducto.Codigo);
 
     // Agregar el nuevo artículo al estado de los artículos
     setProductos(prevProductos => [...prevProductos, {
       CodigoArticulo: selectedProducto.ArticuloCodigo,
-      NombreArticulo: selectedProducto.ArticuloNombre,
+      NombreArticulo: selectedProducto.Nombre,
       Cantidad: selectedCantidadProducto,
       // Convertir el precio a número y formatearlo con dos decimales
       PrecioUnitario: typeof precioVentaProducto === 'string'
