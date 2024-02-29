@@ -65,9 +65,8 @@ const NuevaCotizacion = () => {
   }, [selectedLead, selectedProducto]);
 
   //* OPCIONES SELECTS //
-  const clienteOptions = clientes.map(cliente => ({ value: cliente.Nombre, label: cliente.Nombre }));
-  const itemOptions = items.map(item => ({ value: item.ArticuloNombre, label: item.ArticuloNombre }));
-
+  const clienteOptions = clientes ? clientes.map(cliente => ({ value: cliente.Nombre, label: cliente.Nombre })) : [];
+  const itemOptions = items ? items.map(item => ({ value: item.ArticuloNombre, label: item.ArticuloNombre })) : [];
   //* CONTROL SELECT CLIENTE //
   const handleChangeCliente = selectedOption => {
     if (selectedOption) {

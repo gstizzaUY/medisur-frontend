@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useMemo } from 'react';
 
 import Breadcrumb from '../../components/Breadcrumb';
@@ -172,7 +172,7 @@ const ComprobantesPendientes = () => {
         data,
         enableStickyHeader : true,
         enableStickyFooter: true,
-        muiTableContainerProps: { sx: { maxHeight: 420 } },
+        muiTableContainerProps: { sx: { maxHeight: 400 } },
         enableRowSelection: true,
         enableGrouping: true,
         // enableGlobalFilterRankedResults: true,

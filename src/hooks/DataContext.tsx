@@ -102,7 +102,7 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     const [notas, setNotas] = useState('');
     const [selectedItem, setSelectedItem] = useState(null);
     const [selectedCliente, setSelectedCliente] = useState('');
-    const [selectedCantidad, setSelectedCantidad] = useState(1);
+    const [selectedCantidad, setSelectedCantidad] = useState('');
     const [selectedComprobante, setSelectedComprobante] = useState('');
     const [selectedFechaFactura, setSelectedFechaFactura] = useState('');
     const [movimiento, setMovimiento] = useState({});

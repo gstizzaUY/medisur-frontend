@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { dataContext } from '../../hooks/DataContext';
@@ -45,6 +45,7 @@ const FormLayout = () => {
   const fechaActual = new Date().toISOString().slice(0, 10);
   const [totalIVA, setTotalIVA] = useState(0);
   const [snakBarOpen, setSnakBarOpen] = useState(false);
+  const cantidadInputRef = useRef(null);
 
 
   //* OPCIONES SELECTS //
@@ -133,6 +134,7 @@ const FormLayout = () => {
       if (selectedItem?.Codigo && selectedCliente?.Codigo) {
         try {
           const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/facturas/item/ultimoPrecio`, { ArticuloCodigo: selectedItem.Codigo, Codigo: selectedCliente.Codigo });
+          console.log('ultimo precio', data);
           setUltimoPrecio(data);
         } catch (error) {
           console.log(error);
@@ -161,7 +163,7 @@ const FormLayout = () => {
     setArticulos(prevArticulos => [...prevArticulos, {
       CodigoArticulo: selectedItem.Codigo,
       NombreArticulo: selectedItem.Nombre,
-      Cantidad: selectedCantidad,
+      Cantidad: currency(selectedCantidad, {  precision: 2, separator: '.', decimal: ',' }).value ,
       // Convertir el precio a número y formatearlo con dos decimales
       PrecioUnitario: Number(precioVenta.replace('$', '')).toLocaleString('es-UY', { minimumFractionDigits: 2 }),
       costo: selectedItem.Costo,
@@ -251,8 +253,8 @@ const FormLayout = () => {
 
   //* LIMPIAR FORMULARIO AGREGAR ARTÍCULO
   const limpiarFormularioAgregarArticulo = () => {
-    setSelectedItem(null);
-    setSelectedCantidad(1);
+    setSelectedItem('');
+    setSelectedCantidad('');
     setPrecio('');
     setColor('text-gray-700');
     setPrecioVenta('');
@@ -260,12 +262,12 @@ const FormLayout = () => {
 
   //* LIMPIAR FORMULARIO ENVIAR FACTURA
   const limpiarFormularioEnviarFactura = () => {
-    setSelectedCliente({});
+    setSelectedCliente('');
     setSelectedComprobante('');
     setArticulos([]);
     setNotas('');
-    setSelectedItem(null);
-    setSelectedCantidad(1);
+    setSelectedItem('');
+    setSelectedCantidad('');
     setPrecio('');
     setPrecioVenta('');
     setColor('text-gray-700');
@@ -442,7 +444,7 @@ const FormLayout = () => {
             <Button
               color="primary"
               onClick={handleEnviarFactura}
-              disabled={articulos.length === 0}
+              disabled={articulos.length === 0 }
               variant="contained"
             >
               Enviar
@@ -484,8 +486,13 @@ const FormLayout = () => {
                   isClearable={true}
                   isSearchable={true}
                   name="item"
-                  onChange={handleChangeItem}
                   options={itemOptions}
+                  onChange={(selectedOption) => {
+                    handleChangeItem(selectedOption);
+                    if (cantidadInputRef.current) {
+                      cantidadInputRef.current.focus();
+                    }
+                  }}
 
                 />
               </div>
@@ -535,11 +542,14 @@ const FormLayout = () => {
                   <div className="relative">
                     <label className="text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide ">Cantidad</label>
                     <input
-                      className="text-right text-sm  mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+                      ref={cantidadInputRef}
+                      className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
                       type="number"
-                      // defaultValue={1}
                       value={selectedCantidad}
-                      onChange={(e) => setSelectedCantidad(e.target.value)} min={1} />
+                      onChange={(e) => setSelectedCantidad(e.target.value)} 
+                      required
+                    />
+                      
                   </div>
 
                   <div className="relative">
