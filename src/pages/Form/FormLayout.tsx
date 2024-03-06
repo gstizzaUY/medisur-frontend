@@ -488,6 +488,7 @@ const FormLayout = () => {
                   placeholder="Seleccione un artículo"
                   defaultValue={selectedItem}
                   value= { (selectedItem) ? { value: selectedItem.Nombre, label: selectedItem.Nombre } : null }
+                  // value={selectedItem ? { value: selectedItem.Nombre, label: `${selectedItem.Codigo} - ${selectedItem.Nombre}` } : null}
                   isClearable={true}
                   isSearchable={true}
                   name="item"

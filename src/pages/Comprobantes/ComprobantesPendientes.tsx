@@ -183,9 +183,6 @@ const ComprobantesPendientes = () => {
             grouping: ['ClienteNombre'], //an array of columns to group by by default (can be multiple)
             pagination: { pageIndex: 0, pageSize: 100 },
             sorting: [{ id: 'ClienteNombre', desc: false }], //sort by state by default
-            columnVisibility: {
-                'ClienteZona': false,
-            },
         },
         muiToolbarAlertBannerChipProps: { color: 'primary' },
         

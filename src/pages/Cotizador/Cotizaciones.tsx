@@ -93,6 +93,8 @@ const FormElements = () => {
             ),
             columnVisibility: {
                 'Subtotal': false,
+                'numero_cotizacion': false,
+                'total': false,
             },
         },
     });
