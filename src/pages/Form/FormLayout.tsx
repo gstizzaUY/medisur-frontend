@@ -47,6 +47,7 @@ const FormLayout = () => {
   const [snakBarOpen, setSnakBarOpen] = useState(false);
   const cantidadInputRef = useRef(null);
   const selectRef = useRef();
+  const [itemStock, setItemStock] = useState(0);
 
 
   //* OPCIONES SELECTS //
@@ -148,6 +149,24 @@ const FormLayout = () => {
     obtenerUltimoPrecio();
   }, [selectedCliente, selectedItem]);
 
+  //* OBTENER STOCK DE ARTÍCULO
+  useEffect(() => {
+    const obtenerStock = async () => {
+      if (selectedItem?.Codigo) {
+        try {
+          const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/facturas/item/stock`, { Codigo: selectedItem.Codigo });
+          setItemStock(data[0].StockActual);
+          console.log(data[0].StockActual);
+        } catch (error) {
+          console.log(error);
+        }
+      } else {
+        setItemStock(0);
+      }
+    }
+    obtenerStock();
+  }, [selectedItem, itemStock]);
+
   function getColor(ultimoPrecio, precioCosto) {
     if (ultimoPrecio >= precioCosto * 1.5) {
       return 'text-meta-3';
@@ -165,7 +184,7 @@ const FormLayout = () => {
     setArticulos(prevArticulos => [...prevArticulos, {
       CodigoArticulo: selectedItem.Codigo,
       NombreArticulo: selectedItem.Nombre,
-      Cantidad: currency(selectedCantidad, {  precision: 2, separator: '.', decimal: ',' }).value ,
+      Cantidad: currency(selectedCantidad, { precision: 2, separator: '.', decimal: ',' }).value,
       // Convertir el precio a número y formatearlo con dos decimales
       PrecioUnitario: Number(precioVenta.replace('$', '')).toLocaleString('es-UY', { minimumFractionDigits: 2 }),
       costo: selectedItem.Costo,
@@ -188,7 +207,7 @@ const FormLayout = () => {
   //* CONTRSTUIR LA FACTURA
   useEffect(() => {
     // Eliminar el campo articuloNombre,costo y total del array articulos y eliminar el signo $ del precio
-    const articulosSinNombre = articulos.map(({ NombreArticulo, costo, total, Stock, ...rest }) => ({ ...rest, PrecioUnitario: currency(rest.PrecioUnitario, {  precision: 2, separator: '.', decimal: ',' }).value }));
+    const articulosSinNombre = articulos.map(({ NombreArticulo, costo, total, Stock, ...rest }) => ({ ...rest, PrecioUnitario: currency(rest.PrecioUnitario, { precision: 2, separator: '.', decimal: ',' }).value }));
     // convertir el campo precio a número de la forma 1234.56 del array articulos
     // articulosSinNombre.forEach(articulo => articulo.PrecioUnitario = parseFloat(articulo.PrecioUnitario.replace(',', '.')));
     // Construir el objeto factura
@@ -326,7 +345,7 @@ const FormLayout = () => {
               defaultValue={selectedComprobante}
               // No funciona  value = { (selectedCliente.Nombre === 'Consumidor Final') ? { value: 'Venta Contado (CFE)', label: 'Venta Contado (CFE)' } : {value: selectedComprobante.Nombre, label: selectedComprobante.Nombre }}
               isClearable={true}
-              isSearchable={true} 
+              isSearchable={true}
               name="comprobante"
               options={comprobanteOptions}
               onChange={handleChangeComprobante}
@@ -406,7 +425,7 @@ const FormLayout = () => {
           </div>
         ))}
 
-        <Button sx={{ mt: 3, mb: 2, bgcolor: '#00aaad', p: 1, color: '#fff', '&:hover': { bgcolor: '#007d7f' }}}
+        <Button sx={{ mt: 3, mb: 2, bgcolor: '#00aaad', p: 1, color: '#fff', '&:hover': { bgcolor: '#007d7f' } }}
           color="primary"
           onClick={handleOpenModal}
           variant="contained"
@@ -449,7 +468,7 @@ const FormLayout = () => {
             <Button
               color="primary"
               onClick={handleEnviarFactura}
-              disabled={articulos.length === 0 }
+              disabled={articulos.length === 0}
               variant="contained"
             >
               Enviar
@@ -487,7 +506,7 @@ const FormLayout = () => {
                   }}
                   placeholder="Seleccione un artículo"
                   defaultValue={selectedItem}
-                  value= { (selectedItem) ? { value: selectedItem.Nombre, label: selectedItem.Nombre } : null }
+                  value={(selectedItem) ? { value: selectedItem.Nombre, label: selectedItem.Nombre } : null}
                   // value={selectedItem ? { value: selectedItem.Nombre, label: `${selectedItem.Codigo} - ${selectedItem.Nombre}` } : null}
                   isClearable={true}
                   isSearchable={true}
@@ -537,15 +556,23 @@ const FormLayout = () => {
 
                 <div className="mb-4 w-32">
                   <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">Ultimo</label>
-                  <input className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${selectedItem ? getColor(ultimoPrecio, selectedItem.Costo) : ''}`}                    type="text"
+                  <input className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${selectedItem ? getColor(ultimoPrecio, selectedItem.Costo) : ''}`} type="text"
                     value={currency((Number(ultimoPrecio)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format()}
                     readOnly />
                 </div>
               </div>
 
-              <div className="flex justify-end">
-                <div className="mb-4 w-28 text-right">
+              <div className="flex justify-between mb-4">
+                <div className="w-28 text-left">
+                  <label className="font-bold text-sm uppercase tracking-wide mt-5">
+                    Stock:
+                    <span className={itemStock > 0 ? 'text-black' : 'text-red-500'}>
+                      {itemStock}
+                    </span>
+                  </label>
+                </div>
 
+                <div className="mb-4 w-28 text-right">
                   <div className="relative">
                     <label className="text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide ">Cantidad</label>
                     <input
@@ -553,10 +580,9 @@ const FormLayout = () => {
                       className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
                       type="number"
                       value={selectedCantidad}
-                      onChange={(e) => setSelectedCantidad(e.target.value)} 
+                      onChange={(e) => setSelectedCantidad(e.target.value)}
                       required
                     />
-                      
                   </div>
 
                   <div className="relative">
@@ -575,7 +601,7 @@ const FormLayout = () => {
 
               <div className="mt-4 text-right">
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                  <Button sx={{ mt: 3, mb: 2, p: 2, color: '#007d7f', '&:hover': { color: '#007d7f', bgcolor: '#fffffff' }}}
+                  <Button sx={{ mt: 3, mb: 2, p: 2, color: '#007d7f', '&:hover': { color: '#007d7f', bgcolor: '#fffffff' } }}
                     color="primary"
                     onClick={handleCloseModal}
                     variant="outlined"
@@ -583,11 +609,11 @@ const FormLayout = () => {
                     Cancelar
                   </Button>
 
-                  <Button sx={{ mt: 3, mb: 2, bgcolor: '#00aaad', p: 2, color: '#fff', '&:hover': { bgcolor: '#007d7f' }}}
+                  <Button sx={{ mt: 3, mb: 2, bgcolor: '#00aaad', p: 2, color: '#fff', '&:hover': { bgcolor: '#007d7f' } }}
                     color="primary"
                     onClick={handleAgregarArticulo}
                     variant="contained"
-                    disabled = {!selectedItem || !selectedCantidad || !precio}
+                    disabled={!selectedItem || !selectedCantidad || !precio}
                   >
                     Agregar
                   </Button>

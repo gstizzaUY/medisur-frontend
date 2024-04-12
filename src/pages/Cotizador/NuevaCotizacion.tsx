@@ -348,6 +348,14 @@ const NuevaCotizacion = () => {
               options={clienteOptions}
               onChange={handleChangeCliente}
             />
+
+          {/* Agregar los datos del nuevo lead si existe o no es vacio y es un nuevo cliente */}
+          {selectedLead && (
+            <div className="flex flex-col">
+              <p className="text-gray-800 text-l pl-1 pb-5 ">Cliente Seleccionado: {selectedLead.Nombre} - Email: {selectedLead.EmailAdministracion}</p>
+            </div>
+          )}
+          
           </div>
 
           <div className="col-span-6 md:col-span-6">
