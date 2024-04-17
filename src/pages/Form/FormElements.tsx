@@ -62,7 +62,7 @@ const FormElements = () => {
         size: 90,
         muiTableBodyCellProps: {
           align: 'right',
-      },
+        },
         Cell: ({ cell }) => (
           <div>
             {currency(cell.getValue().slice(0, -3), { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
@@ -75,7 +75,7 @@ const FormElements = () => {
         size: 90,
         muiTableBodyCellProps: {
           align: 'right',
-      },
+        },
         Cell: ({ cell }) => (
           <div>
             {currency(cell.getValue().slice(0, -3), { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
@@ -90,7 +90,7 @@ const FormElements = () => {
     columns,
     localization: MRT_Localization_ES,
     data,
-    enableStickyHeader : true,
+    enableStickyHeader: true,
     enableStickyFooter: true,
     muiTableContainerProps: { sx: { maxHeight: 430 } },
     enableTopToolbar: true,
@@ -100,7 +100,9 @@ const FormElements = () => {
     enableGlobalFilterRankedResults: true,
     renderRowActions: ({ row }) => (
       <Box>
-        <IconButton onClick={() => { obtenerFacturaPDF(row) }}>
+        <IconButton
+          style={{ color: '#00aaad' }}
+          onClick={() => { obtenerFacturaPDF(row) }}>
           <RemoveRedEyeIcon />
         </IconButton>
       </Box>
@@ -118,7 +120,7 @@ const FormElements = () => {
       ),
       columnVisibility: {
         'Subtotal': false,
-    },
+      },
     },
   });
 

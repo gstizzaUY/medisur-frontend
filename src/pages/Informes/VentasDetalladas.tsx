@@ -11,9 +11,9 @@ import dayjs from 'dayjs';
 const VentasDetalladas = () => {
     const { mesActual, anioActual, clientes, ventasDetalladas } = useContext(dataContext);
 
-    const [ clienteSeleccionado, setClienteSeleccionado ] = useState(undefined);
-    const [ ventasFiltradasAgrupadas, setVentasFiltradasAgrupadas ] = useState({});
-    const [ data, setData ] = useState([]);
+    const [clienteSeleccionado, setClienteSeleccionado] = useState(undefined);
+    const [ventasFiltradasAgrupadas, setVentasFiltradasAgrupadas] = useState({});
+    const [data, setData] = useState([]);
 
     const clienteOptions = clientes.map(cliente => ({ value: cliente.Nombre, label: cliente.Nombre }));
     const handleChangeCliente = selectedOption => {
@@ -90,7 +90,7 @@ const VentasDetalladas = () => {
             { accessorKey: 'nombre', header: 'Nombre del Artículo', sortDescFirst: true, size: 200 },
         ];
         for (let i = 0; i < 5; i++) {
-            let mes = mesActual - i ;
+            let mes = mesActual - i;
             let anio = anioActual;
             if (mes < 1) {
                 mes += 12;
@@ -110,7 +110,7 @@ const VentasDetalladas = () => {
         positionActionsColumn: "last",
         globalFilterFn: 'contains',
         enableGlobalFilterRankedResults: true,
-        enableStickyHeader : true,
+        enableStickyHeader: true,
         enableStickyFooter: true,
         muiTableContainerProps: { sx: { maxHeight: 430 } },
         initialState: {
@@ -150,7 +150,11 @@ const VentasDetalladas = () => {
                     />
                 </div>
                 <div className="col-span-12 md:col-span-6">
-                    <Button variant="contained" className="mb-2" onClick={handleConsultar}>
+                    <Button
+                        style={{ backgroundColor: '#00aaad', color: 'white' }}
+                        variant="contained"
+                        className="mb-2"
+                        onClick={handleConsultar}>
                         Consultar
                     </Button>
                 </div>

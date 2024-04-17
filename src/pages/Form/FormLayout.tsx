@@ -7,6 +7,8 @@ import currency from 'currency.js';
 import Snackbar from '@mui/material/Snackbar';
 import { Box, Button } from '@mui/material';
 import Breadcrumb from '../../components/Breadcrumb';
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const FormLayout = () => {
   const {
@@ -155,8 +157,11 @@ const FormLayout = () => {
       if (selectedItem?.Codigo) {
         try {
           const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/facturas/item/stock`, { Codigo: selectedItem.Codigo });
-          setItemStock(data[0].StockActual);
-          console.log(data[0].StockActual);
+          let stockEntero = 0;
+          if (data.length > 0) {
+            stockEntero = Math.floor(data[0].StockActual);
+          }
+          setItemStock(stockEntero);
         } catch (error) {
           console.log(error);
         }
@@ -413,14 +418,20 @@ const FormLayout = () => {
             </div>
 
             <div className="px-5 w-30" style={{ textAlign: 'right' }}>
-              <Button
+              {/* <Button
                 color="error"
                 onClick={() => handleEliminarArticulo(index)}
                 variant="contained"
                 size="small"
               >
                 Eliminar
-              </Button>
+              </Button> */}
+              <IconButton
+                style={{ color: '#C70039' }}
+                onClick={() => handleEliminarArticulo(index)}
+              >
+                <DeleteIcon />
+              </IconButton>
             </div>
           </div>
         ))}
@@ -480,13 +491,13 @@ const FormLayout = () => {
         <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }} id="modal" className="fixed z-40 top-0 right-0 left-0 bottom-0 h-full w-full hidden">
           <div className="p-4 max-w-xl mx-auto left-0 right-0 overflow-hidden mt-24">
 
-            <div className="shadow absolute right-0 top-0 w-10 h-10 rounded-full bg-white text-gray-500 hover:text-gray-800 inline-flex items-center justify-center cursor-pointer"
+            {/* <div className="shadow absolute right-0 top-0 w-10 h-10 rounded-full bg-white text-gray-500 hover:text-gray-800 inline-flex items-center justify-center cursor-pointer"
               onClick={handleCloseModal}>
               <svg className="fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                 <path
                   d="M16.192 6.344L11.949 10.586 7.707 6.344 6.293 7.758 10.535 12 6.293 16.242 7.707 17.656 11.949 13.414 16.192 17.656 17.606 16.242 13.364 12 17.606 7.758z" />
               </svg>
-            </div>
+            </div> */}
 
             <div className="shadow w-full rounded-lg bg-white overflow-hidden block p-3">
               <h2 className="font-bold text-2xl mb-6 text-gray-800 border-b pb-2">Agregar Artículos</h2>
@@ -562,14 +573,14 @@ const FormLayout = () => {
                 </div>
               </div>
 
-              <div className="flex justify-between mb-4">
-                <div className="w-28 text-left">
-                  <label className="font-bold text-sm uppercase tracking-wide mt-5">
-                    Stock:
-                    <span className={itemStock > 0 ? 'text-black' : 'text-red-500'}>
-                      {itemStock}
-                    </span>
-                  </label>
+              <div className="flex justify-end mb-4">
+                <div className="mb-4 w-32 mr-2">
+                  <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">Stock</label>
+                  <input
+                    className={`text-right text-sm mb-1 border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none  ${Number(itemStock) > 0 ? 'bg-white' : 'bg-primary text-white'}`}
+                    type="text"
+                    value={itemStock}
+                    readOnly />
                 </div>
 
                 <div className="mb-4 w-28 text-right">
@@ -601,7 +612,8 @@ const FormLayout = () => {
 
               <div className="mt-4 text-right">
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                  <Button sx={{ mt: 3, mb: 2, p: 2, color: '#007d7f', '&:hover': { color: '#007d7f', bgcolor: '#fffffff' } }}
+                  <Button
+                    style={{ borderColor: '#00aaad', color: '#00aaad'}}
                     color="primary"
                     onClick={handleCloseModal}
                     variant="outlined"
@@ -609,8 +621,8 @@ const FormLayout = () => {
                     Cancelar
                   </Button>
 
-                  <Button sx={{ mt: 3, mb: 2, bgcolor: '#00aaad', p: 2, color: '#fff', '&:hover': { bgcolor: '#007d7f' } }}
-                    color="primary"
+                  <Button 
+                    style={{ backgroundColor: '#00aaad', color: 'white' }}
                     onClick={handleAgregarArticulo}
                     variant="contained"
                     disabled={!selectedItem || !selectedCantidad || !precio}
@@ -624,7 +636,7 @@ const FormLayout = () => {
           </div>
         </div>
         {/* /Modal */}
-      </div>
+      </div >
     </>
   )
 }

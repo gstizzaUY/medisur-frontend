@@ -73,7 +73,7 @@ const coreRoutes = [
     path: '/app/ui/buttons',
     title: 'Buttons',
     component: Buttons,
-  },
+  }
 ];
 
 const routes = [...coreRoutes];

@@ -92,17 +92,36 @@ const FormElements = () => {
         enableRowActions: true,
         globalFilterFn: 'contains', //turn off fuzzy matching and use simple contains filter function
         enableGlobalFilterRankedResults: true,
-        enableStickyHeader : true,
+        enableStickyHeader: true,
         enableStickyFooter: true,
         muiTableContainerProps: { sx: { maxHeight: 430 } },
         renderRowActions: ({ row }) => (
             <Box>
-                <IconButton onClick={() => window.open(`${row.original.url_pdf}`, '_blank')} >
+                <IconButton 
+                    style={{ color: '#00aaad' }}
+                    onClick={() => window.open(`${row.original.url_pdf}`, '_blank')} >
                     <RemoveRedEyeIcon />
                 </IconButton>
-                <IconButton onClick={() => eliminarCotizacion(row.original._id)} >
+                <IconButton 
+                    style={{ color: '#C70039' }}
+                    onClick={() => eliminarCotizacion(row.original._id)} >
                     <DeleteIcon />
                 </IconButton>
+            </Box>
+        ),
+        //add custom action buttons to top-left of top toolbar
+        renderTopToolbarCustomActions: ({ table }) => (
+            <Box sx={{ display: 'flex', gap: '1rem', p: '4px' }}>
+                <Button
+                    style={{ backgroundColor: '#00aaad', color: 'white' }}
+                    onClick={() => {
+                        // Recargar página
+                        window.location.reload();
+                    }}
+                    variant="contained"
+                >
+                    Actualizar Listado
+                </Button>
             </Box>
         ),
         initialState: {
@@ -135,7 +154,7 @@ const FormElements = () => {
             <MaterialReactTable
                 table={table}
             />
-                        <Dialog
+            <Dialog
                 open={open}
                 onClose={handleClose}
             >
