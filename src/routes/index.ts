@@ -10,6 +10,7 @@ const Alerts = lazy(() => import('../pages/UiElements/Alerts'));
 const Buttons = lazy(() => import('../pages/UiElements/Buttons'));
 const ComprobantesPendientes = lazy(() => import('../pages/Comprobantes/ComprobantesPendientes'));
 const VentasDetalladas = lazy(() => import('../pages/Informes/VentasDetalladas'));
+const ListaClientes = lazy(() => import('../pages/Informes/ListaClientes'));
 const NuevaCotizacion = lazy(() => import('../pages/Cotizador/NuevaCotizacion'));
 const Cotizaciones = lazy(() => import('../pages/Cotizador/Cotizaciones'));
 
@@ -23,6 +24,11 @@ const coreRoutes = [
     path: '/app/informes/ventas-detalladas',
     title: 'Ventas Detalladas',
     component: VentasDetalladas,
+  },
+  {
+    path: '/app/informes/lista-clientes',
+    title: 'Clientes',
+    component: ListaClientes,
   },
   {
     path: '/app/cotizador/nueva-cotizacion',

@@ -261,6 +261,11 @@ const FormLayout = () => {
 
   //* CONTROL ABRIR MODAL //
   const handleOpenModal = () => {
+    // Comprobar si el largo de artículos es mayor a 16
+    if (articulos.length >= 16) {
+      alert('No se pueden agregar más de 16 artículos a una factura');
+      return;
+    }
     setOpenModal(true);
     // Eliminar la clase hidden del modal
     const modal = document.querySelector('#modal');
@@ -269,6 +274,7 @@ const FormLayout = () => {
       selectRef.current.focus();
     }
   }
+
   //* CONTROL CERRAR MODAL //
   const handleCloseModal = () => {
     setOpenModal(false);
@@ -368,9 +374,17 @@ const FormLayout = () => {
           </div>
         </div>
 
-        <div className="flex border-b items-start">
+        <div className="flex border-b items-start pb-2">
           <div className="flex-1">
-            <p className="text-gray-800 uppercase tracking-wide text-sm font-bold">Artículos</p>
+            <p className="text-gray-800 uppercase tracking-wide text-sm font-bold">Artículos
+              <Button
+                style={{ color: '#64748B', marginLeft: '10px', borderColor: '#64748B' }}
+                variant="outlined"
+                size='small'
+              >
+                {articulos.length}
+              </Button>
+            </p>
           </div>
 
           <div className="px-1 w-20 text-right">
@@ -500,7 +514,16 @@ const FormLayout = () => {
             </div> */}
 
             <div className="shadow w-full rounded-lg bg-white overflow-hidden block p-3">
-              <h2 className="font-bold text-2xl mb-6 text-gray-800 border-b pb-2">Agregar Artículos</h2>
+              <h2 className="font-bold text-2xl mb-6 text-gray-800 border-b pb-2">
+                Agregar Artículos
+                <Button
+                  style={{ color: '#64748B', marginLeft: '10px', borderColor: '#64748B' }}
+                  variant="outlined"
+                  size='small'
+                >
+                  {articulos.length}
+                </Button>
+              </h2>
 
               <div className="mb-4">
                 <label className="text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide">Artículo</label>
@@ -613,7 +636,7 @@ const FormLayout = () => {
               <div className="mt-4 text-right">
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                   <Button
-                    style={{ borderColor: '#00aaad', color: '#00aaad'}}
+                    style={{ borderColor: '#00aaad', color: '#00aaad' }}
                     color="primary"
                     onClick={handleCloseModal}
                     variant="outlined"
@@ -621,7 +644,7 @@ const FormLayout = () => {
                     Cancelar
                   </Button>
 
-                  <Button 
+                  <Button
                     style={{ backgroundColor: '#00aaad', color: 'white' }}
                     onClick={handleAgregarArticulo}
                     variant="contained"

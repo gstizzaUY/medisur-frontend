@@ -20,7 +20,6 @@ const FormElements = () => {
       const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/factura-pdf`, {
         "RegistroId": row.original.RegistroId
       });
-      console.log(data);
       // Descargar el pdf de la url que viene en data
       window.open(data);
     } catch (error) {
