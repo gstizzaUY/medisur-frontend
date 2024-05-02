@@ -385,7 +385,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                                 (isActive && '!text-white')
                               }
                             >
-                              Lista Clientes
+                              Contactos
                             </NavLink>
                           </li>
                         </ul>

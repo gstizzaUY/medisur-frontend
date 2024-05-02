@@ -10,7 +10,9 @@ import { Box, Button } from '@mui/material';
 const FormElements = () => {
     const { contactos, setContactos } = React.useContext(dataContext);
     
-    const data = contactos;
+    // Construir un nuevo objeto donde se filtran los contactos con la propiedad "ContactoActivo" es "S" y guardarlo en la variable "data"
+    const data = useMemo(() => contactos.filter((contacto) => contacto.ContactoActivo === 'S'), [contactos]);
+
 
     const columns = useMemo(
         () => [
@@ -59,6 +61,11 @@ const FormElements = () => {
                 header: 'Email',
                 size: 80,
             },
+            {
+                accessorKey: 'Notas',
+                header: 'Notas',
+                size: 80,
+            },
         ],
         [data],
     );
@@ -81,8 +88,9 @@ const FormElements = () => {
             pagination: { pageIndex: 0, pageSize: 100 },
             density: 'compact',
             sorting: [
-                { id: 'RazonSocial', desc: true },
+                { id: 'RazonSocial', desc: false },
             ],
+            columnVisibility: { DepartamentoCodigo: false },
             renderTopToolbarCustomActions: ({ table }) => (
                 <Button >
                     Clear All Sorting
@@ -94,7 +102,7 @@ const FormElements = () => {
 
     return (
         <>
-            <Breadcrumb pageName="Lista Clientes" />
+            <Breadcrumb pageName="Contactos Activos" />
             <MaterialReactTable
                 table={table}
             />

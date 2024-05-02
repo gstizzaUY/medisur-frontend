@@ -505,16 +505,17 @@ const FormLayout = () => {
         {/* Modal */}
         <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }} id="modal" className="fixed z-40 top-0 right-0 left-0 bottom-0 h-full w-full hidden">
           <div className="p-4 max-w-xl mx-auto left-0 right-0 overflow-hidden mt-24">
-
-            {/* <div className="shadow absolute right-0 top-0 w-10 h-10 rounded-full bg-white text-gray-500 hover:text-gray-800 inline-flex items-center justify-center cursor-pointer"
-              onClick={handleCloseModal}>
-              <svg className="fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <path
-                  d="M16.192 6.344L11.949 10.586 7.707 6.344 6.293 7.758 10.535 12 6.293 16.242 7.707 17.656 11.949 13.414 16.192 17.656 17.606 16.242 13.364 12 17.606 7.758z" />
-              </svg>
-            </div> */}
-
-            <div className="shadow w-full rounded-lg bg-white overflow-hidden block p-3">
+            <div className="shadow w-full rounded-lg bg-white overflow-hidden block p-5">
+              <div className="flex justify-end">
+                <Button
+                  style={{ color: '#64748B', borderColor: '#64748B' }}
+                  variant="outlined"
+                  size='small'
+                  onClick={handleCloseModal}
+                >
+                  X
+                </Button>
+              </div>
               <h2 className="font-bold text-2xl mb-6 text-gray-800 border-b pb-2">
                 Agregar Artículos
                 <Button
@@ -525,7 +526,7 @@ const FormLayout = () => {
                   {articulos.length}
                 </Button>
               </h2>
-
+              {/* Primera fila */}
               <div className="mb-4">
                 <label className="text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide">Artículo</label>
                 <Select
@@ -554,13 +555,12 @@ const FormLayout = () => {
                       cantidadInputRef.current.focus();
                     }
                   }}
-
                 />
               </div>
-
-              <div className="flex">
-                <div className="mb-4 w-32 mr-1">
-                  <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">Costo</label>
+              {/* Segunda fila */}
+              <div className="grid grid-cols-3 gap-4">
+                <div className="mb-4">
+                  <label className="text-right text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide">Costo</label>
                   <input
                     className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
                     type="text"
@@ -568,9 +568,25 @@ const FormLayout = () => {
                     value={selectedItem ? currency((Number(selectedItem.Costo)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format() : ''}
                     readOnly />
                 </div>
-
-                <div className="mb-4 w-32 mr-1">
-                  <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">+20%</label>
+                <div className="mb-4">
+                  <label className="text-right text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide">Stock</label>
+                  <input
+                    className={`text-right text-sm mb-1 border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none  ${Number(itemStock) > 0 ? 'text-gray-800' : 'text-danger'}`}
+                    type="text"
+                    value={itemStock}
+                    readOnly />
+                </div>
+                <div className="mb-4">
+                  <label className="text-right text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide">Último Precio</label>
+                  <input className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${selectedItem ? getColor(ultimoPrecio, selectedItem.Costo) : ''}`} type="text"
+                    value={currency((Number(ultimoPrecio)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format()}
+                    readOnly />
+                </div>
+              </div>
+              {/* Tercera fila */}
+              <div className="grid grid-cols-4 gap-4">
+                <div className="mb-4">
+                  <label className="text-right text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide">+20%</label>
                   <input
                     className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
                     type="text"
@@ -578,9 +594,8 @@ const FormLayout = () => {
                     readOnly
                   />
                 </div>
-
-                <div className="mb-4 w-32 mr-1">
-                  <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">+30%</label>
+                <div className="mb-4">
+                  <label className="text-right text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide">+30%</label>
                   <input
                     className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
                     type="text"
@@ -588,9 +603,8 @@ const FormLayout = () => {
                     readOnly
                   />
                 </div>
-
-                <div className="mb-4 w-32 mr-1">
-                  <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">+40%</label>
+                <div className="mb-4">
+                  <label className="text-right text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide">+40%</label>
                   <input
                     className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
                     type="text"
@@ -598,9 +612,8 @@ const FormLayout = () => {
                     readOnly
                   />
                 </div>
-
-                <div className="mb-4 w-32 mr-1">
-                  <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">+50%</label>
+                <div className="mb-4">
+                  <label className="text-right text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide">+50%</label>
                   <input
                     className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
                     type="text"
@@ -609,75 +622,38 @@ const FormLayout = () => {
                   />
                 </div>
               </div>
-
-              <div className="flex justify-end mb-4">
-                <div className="mb-4 w-32 mr-2">
-
-                  <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">Ultimo</label>
-                  <input className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${selectedItem ? getColor(ultimoPrecio, selectedItem.Costo) : ''}`} type="text"
-                    value={currency((Number(ultimoPrecio)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format()}
-                    readOnly />
-
-
-                  <div className="flex mb-2">
-                    <div className="w-32 mr-1 mt-2">
-                      <label className="text-left text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide">Stock</label>
-                      <input
-                        className={`text-right text-sm mb-1 border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none  ${Number(itemStock) > 0 ? 'bg-white' : 'bg-primary text-white'}`}
-                        type="text"
-                        value={itemStock}
-                        readOnly />
-                    </div>
-
-                    <div className="w-32 mr-1 mt-2">
-                      <label className="text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide ">Cantidad</label>
-                      <input
-                        ref={cantidadInputRef}
-                        className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
-                        type="number"
-                        value={selectedCantidad}
-                        onChange={(e) => setSelectedCantidad(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="relative">
-                    <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide ">Precio</label>
-                    <input
-                      className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${color}`}
-                      placeholder={precio}
-                      type="number"
-                      value={precio}
-                      onChange={handlePrecioChange}
-                      required
-                    />
-                  </div>
-
+              {/* Cuarta fila */}
+              <div className="grid grid-cols-3 gap-4 items-end">
+                <div>
+                  <label className="text-right text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide ">Cantidad</label>
+                  <input
+                    ref={cantidadInputRef}
+                    className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+                    type="number"
+                    value={selectedCantidad}
+                    onChange={(e) => setSelectedCantidad(e.target.value)}
+                    required
+                  />
                 </div>
-              </div>
-
-              <div className="mt-4 text-right">
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <div className="relative">
+                  <label className="text-right text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide ">Precio</label>
+                  <input
+                    className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${color}`}
+                    placeholder={precio}
+                    type="number"
+                    value={precio}
+                    onChange={handlePrecioChange}
+                    required
+                  />
+                </div>         
                   <Button
-                    style={{ borderColor: '#00aaad', color: '#00aaad' }}
-                    color="primary"
-                    onClick={handleCloseModal}
-                    variant="outlined"
-                  >
-                    Cancelar
-                  </Button>
-
-                  <Button
-                    style={{ backgroundColor: '#00aaad', color: 'white' }}
+                    style={{ backgroundColor: '#00aaad', color: 'white', marginBottom: '5px', padding: '10px'}}
                     onClick={handleAgregarArticulo}
                     variant="contained"
                     disabled={!selectedItem || !selectedCantidad || !precio}
                   >
                     Agregar
-                  </Button>
-                </Box>
-
+                  </Button>        
               </div>
             </div>
           </div>

@@ -537,17 +537,8 @@ const NuevaCotizacion = () => {
         </div>
 
         {/* Modal */}
-        <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }} id="modal" className="fixed z-40 top-0 right-0 left-0 bottom-0 h-full w-full hidden">
+        {/* <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }} id="modal" className="fixed z-40 top-0 right-0 left-0 bottom-0 h-full w-full hidden">
           <div className="p-4 max-w-xl mx-auto left-0 right-0 overflow-hidden mt-24">
-
-            {/* <div className="shadow absolute right-0 top-0 w-10 h-10 rounded-full bg-white text-gray-500 hover:text-gray-800 inline-flex items-center justify-center cursor-pointer"
-              onClick={handleCloseModal}>
-              <svg className="fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <path
-                  d="M16.192 6.344L11.949 10.586 7.707 6.344 6.293 7.758 10.535 12 6.293 16.242 7.707 17.656 11.949 13.414 16.192 17.656 17.606 16.242 13.364 12 17.606 7.758z" />
-              </svg>
-            </div> */}
-
             <div className="shadow w-full rounded-lg bg-white overflow-hidden block p-3">
               <h2 className="font-bold text-2xl mb-6 text-gray-800 border-b pb-2">Agregar Artículos</h2>
 
@@ -685,7 +676,190 @@ const NuevaCotizacion = () => {
               </div>
             </div>
           </div>
+        </div> */}
+        <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }} id="modal" className="fixed z-40 top-0 right-0 left-0 bottom-0 h-full w-full hidden">
+          <div className="p-4 max-w-xl mx-auto left-0 right-0 overflow-hidden mt-24">
+            <div className="shadow w-full rounded-lg bg-white overflow-hidden block p-5">
+              <div className="flex justify-end">
+                <Button
+                  style={{ color: '#64748B', borderColor: '#64748B' }}
+                  variant="outlined"
+                  size='small'
+                  onClick={handleCloseModal}
+                >
+                  X
+                </Button>
+              </div>
+              <h2 className="font-bold text-2xl mb-6 text-gray-800 border-b pb-2">
+                Agregar Artículos
+                <Button
+                  style={{ color: '#64748B', marginLeft: '10px', borderColor: '#64748B' }}
+                  variant="outlined"
+                  size='small'
+                >
+                  {articulos.length}
+                </Button>
+              </h2>
+              {/* Primera fila */}
+              <div className="mb-4">
+                <label className="text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide">Artículo</label>
+                <Select
+                  className="mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full  text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+                  styles={{
+                    control: (baseStyles, state) => ({
+                      ...baseStyles,
+                      backgroundColor: '#E5E7EB',
+                      border: '0px',
+                      // Background color on focus
+                      '&:hover': { backgroundColor: '#FFFFFF' },
+                    }),
+                  }}
+                  placeholder="Seleccione un artículo"
+                  defaultValue={selectedProducto}
+                  value={(selectedProducto) ? { value: selectedProducto.Nombre, label: selectedProducto.Nombre } : null}
+                  isClearable={true}
+                  isSearchable={true}
+                  ref={selectRef}
+                  name="item"
+                  options={itemOptions}
+                  onChange={(selectedOption) => {
+                    handleChangeItem(selectedOption);
+                    if (precioInputRef.current) {
+                      precioInputRef.current.focus();
+                    }
+                  }}
+                />
+              </div>
+              {/* Segunda fila */}
+              <div className="grid grid-cols-3 gap-4">
+                <div className="mb-4">
+                  <label className="text-right text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide">Costo</label>
+                  <input
+                    className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+                    type="text"
+                    // eliminar los últimos 3 dígitos 
+                    value={selectedProducto ? currency((Number(selectedProducto.Costo)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format() : ''}
+                    readOnly />
+                </div>
+                <div className="mb-4">
+                  <label className="text-right text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide">Stock</label>
+                  <input
+                    className={`text-right text-sm mb-1 border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none  ${Number(itemStock) > 0 ? 'text-gray-800' : 'text-danger'}`}
+                    type="text"
+                    value={itemStock}
+                    readOnly />
+                </div>
+                <div className="mb-4">
+                  <label className="text-right text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide">Último Precio</label>
+                  <input className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${selectedProducto ? getColor(ultimoPrecioProducto, selectedProducto.Costo) : ''}`}
+                    type="text"
+                    value={currency((Number(ultimoPrecioProducto)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format()}
+                    readOnly />
+                </div>
+              </div>
+              {/* Tercera fila */}
+              <div className="grid grid-cols-4 gap-4">
+                <div className="mb-4">
+                  <label className="text-right text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide">+20%</label>
+                  <input
+                    className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+                    type="text"
+                    value={selectedProducto ? currency((Number(selectedProducto.Costo * 1.2)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format() : ''}
+                    readOnly
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="text-right text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide">+30%</label>
+                  <input
+                    className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+                    type="text"
+                    value={selectedProducto ? currency((Number(selectedProducto.Costo * 1.3)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format() : ''}
+                    readOnly
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="text-right text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide">+40%</label>
+                  <input
+                    className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+                    type="text"
+                    value={selectedProducto ? currency((Number(selectedProducto.Costo * 1.4)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format() : ''}
+                    readOnly
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="text-right text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide">+50%</label>
+                  <input
+                    className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+                    type="text"
+                    value={selectedProducto ? currency((Number(selectedProducto.Costo * 1.5)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format() : ''}
+                    readOnly
+                  />
+                </div>
+              </div>
+              {/* Cuarta fila */}
+              <div className="grid grid-cols-3 gap-4 items-end">
+                <div></div>
+                <div className="relative">
+                <label className="text-right text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide ">Precio</label>
+                  <input
+                    className='text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500'
+                    placeholder={precio}
+                    type='number'
+                    value={precio}
+                    onChange={handlePrecioChange}
+                    ref={precioInputRef}
+                    required
+                  />
+                </div>
+                <Button
+                  style={{ backgroundColor: '#00aaad', color: 'white', marginBottom: '5px', padding: '10px' }}
+                  onClick={handleAgregarProducto}
+                  variant="contained"
+                  disabled={!selectedProducto || !precioVentaProducto}
+                >
+                  Agregar
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
+        {/* /Modal */}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         {/* /Modal */}
 
 
