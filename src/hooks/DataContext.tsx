@@ -115,6 +115,7 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     const [isLoading, setIsLoading] = React.useState(true);
     const [contadorCotizaciones, setContadorCotizaciones] = React.useState('');
     const [cotizaciones, setCotizaciones] = React.useState([]);
+    const [contactos, setContactos] = React.useState([]);
 
     //* AUTENTICAR USUARIO
     useEffect(() => {
@@ -328,6 +329,23 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
         obtenerCotizaciones();
     }, []);
 
+    //* OBTENER CONTACTOS
+    useEffect(() => {
+        const obtenerContactos = async () => {
+            try {
+                const { data } = await clienteAxios.get(`${import.meta.env.VITE_API_URL}/facturas/contactos`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                setContactos(data);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        obtenerContactos();
+    }, []);
+
 
 
 
@@ -385,7 +403,9 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
             contadorCotizaciones,
             setContadorCotizaciones,
             cotizaciones,
-            setCotizaciones
+            setCotizaciones,
+            contactos,
+            setContactos,
         }}>
             {children}
         </dataContext.Provider>

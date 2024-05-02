@@ -9,6 +9,7 @@ import { Box, Button } from '@mui/material';
 import Breadcrumb from '../../components/Breadcrumb';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ControlPointIcon from '@mui/icons-material/ControlPoint';
 
 const FormLayout = () => {
   const {
@@ -579,6 +580,26 @@ const FormLayout = () => {
                 </div>
 
                 <div className="mb-4 w-32 mr-1">
+                  <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">+30%</label>
+                  <input
+                    className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+                    type="text"
+                    value={selectedItem ? currency((Number(selectedItem.Costo * 1.3)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format() : ''}
+                    readOnly
+                  />
+                </div>
+
+                <div className="mb-4 w-32 mr-1">
+                  <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">+40%</label>
+                  <input
+                    className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+                    type="text"
+                    value={selectedItem ? currency((Number(selectedItem.Costo * 1.4)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format() : ''}
+                    readOnly
+                  />
+                </div>
+
+                <div className="mb-4 w-32 mr-1">
                   <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">+50%</label>
                   <input
                     className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
@@ -587,42 +608,45 @@ const FormLayout = () => {
                     readOnly
                   />
                 </div>
-
-                <div className="mb-4 w-32">
-                  <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">Ultimo</label>
-                  <input className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${selectedItem ? getColor(ultimoPrecio, selectedItem.Costo) : ''}`} type="text"
-                    value={currency((Number(ultimoPrecio)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format()}
-                    readOnly />
-                </div>
               </div>
 
               <div className="flex justify-end mb-4">
                 <div className="mb-4 w-32 mr-2">
-                  <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">Stock</label>
-                  <input
-                    className={`text-right text-sm mb-1 border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none  ${Number(itemStock) > 0 ? 'bg-white' : 'bg-primary text-white'}`}
-                    type="text"
-                    value={itemStock}
-                    readOnly />
-                </div>
 
-                <div className="mb-4 w-28 text-right">
-                  <div className="relative">
-                    <label className="text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide ">Cantidad</label>
-                    <input
-                      ref={cantidadInputRef}
-                      className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
-                      type="number"
-                      value={selectedCantidad}
-                      onChange={(e) => setSelectedCantidad(e.target.value)}
-                      required
-                    />
+                  <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">Ultimo</label>
+                  <input className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${selectedItem ? getColor(ultimoPrecio, selectedItem.Costo) : ''}`} type="text"
+                    value={currency((Number(ultimoPrecio)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format()}
+                    readOnly />
+
+
+                  <div className="flex mb-2">
+                    <div className="w-32 mr-1 mt-2">
+                      <label className="text-left text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide">Stock</label>
+                      <input
+                        className={`text-right text-sm mb-1 border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none  ${Number(itemStock) > 0 ? 'bg-white' : 'bg-primary text-white'}`}
+                        type="text"
+                        value={itemStock}
+                        readOnly />
+                    </div>
+
+                    <div className="w-32 mr-1 mt-2">
+                      <label className="text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide ">Cantidad</label>
+                      <input
+                        ref={cantidadInputRef}
+                        className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+                        type="number"
+                        value={selectedCantidad}
+                        onChange={(e) => setSelectedCantidad(e.target.value)}
+                        required
+                      />
+                    </div>
                   </div>
 
                   <div className="relative">
-                    <label className="text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide ">Precio</label>
+                    <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide ">Precio</label>
                     <input
                       className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${color}`}
+                      placeholder={precio}
                       type="number"
                       value={precio}
                       onChange={handlePrecioChange}

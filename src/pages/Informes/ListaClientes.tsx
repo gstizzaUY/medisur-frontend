@@ -8,36 +8,56 @@ import { MRT_Localization_ES } from 'material-react-table/locales/es';
 import { Box, Button } from '@mui/material';
 
 const FormElements = () => {
-    const { clientes, setClientes } = React.useContext(dataContext);
-    const data = clientes;
-
+    const { contactos, setContactos } = React.useContext(dataContext);
+    
+    const data = contactos;
 
     const columns = useMemo(
         () => [
             {
-                accessorKey: 'Nombre',
-                header: 'Nombre',
+                accessorKey: 'ZonaCodigo',
+                header: 'Zona',
                 size: 50,
             },
             {
-                accessorKey: 'EmailAdministracion',
+                accessorKey: 'RazonSocial',
+                header: 'Razón Social',
+                size: 50,
+            },
+            {
+                accessorKey: 'Direccion',
+                header: 'Dirección',
+                size: 50,
+            },
+            {
+                accessorKey: 'Localidad',
+                header: 'Localidad',
+                size: 50,
+            },
+            {
+                accessorKey: 'DepartamentoCodigo',
+                header: 'Departamento',
+                size: 50,
+            },
+            {
+                accessorKey: 'RUT',
+                header: 'RUT',
+                size: 60,
+            },
+            {
+                accessorKey: 'Celular',
+                header: 'Celular',
+                size: 50,
+            },
+            {
+                accessorKey: 'Telefono',
+                header: 'Telefono',
+                size: 50,
+            },
+            {
+                accessorKey: 'Email1',
                 header: 'Email',
                 size: 80,
-            },
-            {
-                accessorKey: 'CondicionNombre',
-                header: 'Condición',
-                size: 50,
-            },
-            {
-                accessorKey: 'PrecioVentaNombre',
-                header: 'Lista',
-                size: 90,
-            },
-            {
-                accessorKey: 'VendedorNombre',
-                header: 'Vendedor',
-                size: 50,
             },
         ],
         [data],
@@ -55,11 +75,13 @@ const FormElements = () => {
         enableRowActions: false,
         globalFilterFn: 'contains', //turn off fuzzy matching and use simple contains filter function
         enableGlobalFilterRankedResults: true,
+        positionGlobalFilter: 'left', //show the global filter on the left side of the top toolbar
         initialState: {
+            showGlobalFilter: true, //show the global filter by default
             pagination: { pageIndex: 0, pageSize: 100 },
             density: 'compact',
             sorting: [
-                { id: 'Nombre', desc: true },
+                { id: 'RazonSocial', desc: true },
             ],
             renderTopToolbarCustomActions: ({ table }) => (
                 <Button >

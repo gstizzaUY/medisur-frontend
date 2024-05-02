@@ -53,34 +53,34 @@ const NuevaCotizacion = () => {
     obtenerUltimoPrecio();
   }, [selectedLead, selectedProducto]);
 
-    //* OBTENER STOCK DE ARTÍCULO
-    useEffect(() => {
-      const obtenerStock = async () => {
-        if (selectedProducto?.Codigo) {
-          try {
-            const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/facturas/item/stock`, { Codigo: selectedProducto.Codigo });
-            let stockEntero = 0;
-            if (data.length > 0) {
-              stockEntero = Math.floor(data[0].StockActual);
-            }
-            setItemStock(stockEntero);
-            console.log(stockEntero);
-          } catch (error) {
-            console.log(error);
+  //* OBTENER STOCK DE ARTÍCULO
+  useEffect(() => {
+    const obtenerStock = async () => {
+      if (selectedProducto?.Codigo) {
+        try {
+          const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/facturas/item/stock`, { Codigo: selectedProducto.Codigo });
+          let stockEntero = 0;
+          if (data.length > 0) {
+            stockEntero = Math.floor(data[0].StockActual);
           }
-        } else {
-          setItemStock(0);
+          setItemStock(stockEntero);
+          console.log(stockEntero);
+        } catch (error) {
+          console.log(error);
         }
+      } else {
+        setItemStock(0);
       }
-      obtenerStock();
-    }, [selectedProducto, itemStock]);
+    }
+    obtenerStock();
+  }, [selectedProducto, itemStock]);
 
   //* OPCIONES SELECTS //
   const clienteOptions = clientes ? clientes.map(cliente => ({ value: cliente.Nombre, label: cliente.Nombre })) : [];
-  const itemOptions = listaArticulos ? 
-  listaArticulos
-  .filter(item => item !== null && item !== undefined)
-  .map(item => ({ value: item.Nombre, label: item.Nombre })) : [];
+  const itemOptions = listaArticulos ?
+    listaArticulos
+      .filter(item => item !== null && item !== undefined)
+      .map(item => ({ value: item.Nombre, label: item.Nombre })) : [];
   //* CONTROL SELECT CLIENTE //
   const handleChangeCliente = selectedOption => {
     if (selectedOption) {
@@ -318,10 +318,10 @@ const NuevaCotizacion = () => {
     // Eliminar la clase hidden del modal
     const modal = document.querySelector('#modal');
     modal.classList.remove('hidden');
-        // Enfocar el Select
-        if (selectRef.current) {
-          selectRef.current.focus();
-        }
+    // Enfocar el Select
+    if (selectRef.current) {
+      selectRef.current.focus();
+    }
   }
   //* CONTROL CERRAR MODAL //
   const handleCloseModal = () => {
@@ -374,19 +374,19 @@ const NuevaCotizacion = () => {
               onChange={handleChangeCliente}
             />
 
-          {/* Agregar los datos del nuevo lead si existe o no es vacio y es un nuevo cliente */}
-          {selectedLead && (
-            <div className="flex flex-col">
-              <p className="text-gray-800 text-l pl-1 pb-5 ">Cliente Seleccionado: {selectedLead.Nombre} - Email: {selectedLead.EmailAdministracion}</p>
-            </div>
-          )}
-          
+            {/* Agregar los datos del nuevo lead si existe o no es vacio y es un nuevo cliente */}
+            {selectedLead && (
+              <div className="flex flex-col">
+                <p className="text-gray-800 text-l pl-1 pb-5 ">Cliente Seleccionado: {selectedLead.Nombre} - Email: {selectedLead.EmailAdministracion}</p>
+              </div>
+            )}
+
           </div>
 
           <div className="col-span-6 md:col-span-6">
-            <Button 
+            <Button
               style={{ backgroundColor: '#00aaad', color: 'white' }}
-              variant="contained" 
+              variant="contained"
               onClick={handleOpenModal2}>
               Nuevo Cliente
             </Button>
@@ -475,7 +475,7 @@ const NuevaCotizacion = () => {
             </div>
 
             <div className="px-5 w-30" style={{ textAlign: 'right' }}>
-              <IconButton 
+              <IconButton
                 style={{ color: '#C70039' }}
                 onClick={() => handleEliminarProducto(index)} >
                 <DeleteIcon />
@@ -566,7 +566,7 @@ const NuevaCotizacion = () => {
                   }}
                   placeholder="Seleccione un artículo"
                   defaultValue={selectedProducto}
-                  value= { (selectedProducto) ? { value: selectedProducto.Nombre, label: selectedProducto.Nombre } : null }
+                  value={(selectedProducto) ? { value: selectedProducto.Nombre, label: selectedProducto.Nombre } : null}
                   isClearable={true}
                   isSearchable={true}
                   ref={selectRef}
@@ -578,7 +578,7 @@ const NuevaCotizacion = () => {
                       precioInputRef.current.focus();
                     }
                   }}
-                  
+
 
                 />
               </div>
@@ -605,6 +605,26 @@ const NuevaCotizacion = () => {
                 </div>
 
                 <div className="mb-4 w-32 mr-1">
+                  <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">+30%</label>
+                  <input
+                    className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+                    type="text"
+                    value={selectedProducto ? currency((Number(selectedProducto.Costo * 1.3)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format() : ''}
+                    readOnly
+                  />
+                </div>
+
+                <div className="mb-4 w-32 mr-1">
+                  <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">+40%</label>
+                  <input
+                    className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+                    type="text"
+                    value={selectedProducto ? currency((Number(selectedProducto.Costo * 1.4)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format() : ''}
+                    readOnly
+                  />
+                </div>
+
+                <div className="mb-4 w-32 mr-1">
                   <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">+50%</label>
                   <input
                     className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
@@ -614,55 +634,38 @@ const NuevaCotizacion = () => {
                   />
                 </div>
 
-                <div className="mb-4 w-32">
+              </div>
+
+              <div className="flex justify-end mb-4">
+                <div className="mb-4 w-32 mr-2">
                   <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">Ultimo</label>
                   <input className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${selectedProducto ? getColor(ultimoPrecioProducto, selectedProducto.Costo) : ''}`}
                     type="text"
                     value={currency((Number(ultimoPrecioProducto)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format()}
                     readOnly />
-                </div>
-              </div>
 
-              <div className="flex justify-end mb-4">
-                <div className="mb-4 w-32 mr-2">
                   <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">Stock</label>
                   <input
                     className={`text-right text-sm mb-1 border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none  ${Number(itemStock) > 0 ? 'bg-white' : 'bg-primary text-white'}`}
                     type="text"
                     value={itemStock}
                     readOnly />
-                
 
-              {/* <div className="flex justify-end">
-                <div className="mb-4 w-28 text-right"> */}
-                  {/* <div className="relative">
-                    <label className="text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide ">Cantidad</label>
-                    <input
-                      className="text-right text-sm  mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
-                      type="number"
-                      // defaultValue={1}
-                      value={selectedCantidadProducto}
-                      onChange={(e) => setSelectedCantidadProducto(e.target.value)} min={1} />
-                  </div> */}
-
-                  <div className="relative">
-                    <label className="text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide ">Precio</label>
-                    <input
-                      ref={precioInputRef}
-                      className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${color}`}
-                      type="number"
-                      value={precio}
-                      onChange={handlePrecioChange}
-                    />
-                  </div>
-
+                  <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide ">Precio</label>
+                  <input
+                    ref={precioInputRef}
+                    className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${color}`}
+                    type="number"
+                    value={precio}
+                    onChange={handlePrecioChange}
+                  />
                 </div>
               </div>
 
               <div className="mt-4 text-right">
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                   <Button
-                    style={{ borderColor: '#00aaad', color: '#00aaad'}}
+                    style={{ borderColor: '#00aaad', color: '#00aaad' }}
                     onClick={handleCloseModal}
                     variant="outlined"
                   >
@@ -673,7 +676,7 @@ const NuevaCotizacion = () => {
                     style={{ backgroundColor: '#00aaad', color: 'white' }}
                     onClick={handleAgregarProducto}
                     variant="contained"
-                    disabled = { !selectedProducto || !precioVentaProducto  }
+                    disabled={!selectedProducto || !precioVentaProducto}
                   >
                     Agregar
                   </Button>
@@ -725,7 +728,7 @@ const NuevaCotizacion = () => {
               <div className="mt-4 text-right">
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                   <Button
-                    style={{ borderColor: '#00aaad', color: '#00aaad'}}
+                    style={{ borderColor: '#00aaad', color: '#00aaad' }}
                     onClick={handleCloseModal2}
                     variant="outlined"
                   >
