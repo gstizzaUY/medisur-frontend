@@ -58,7 +58,12 @@ const FormElements = () => {
             },
             {
                 accessorKey: 'Email1',
-                header: 'Email',
+                header: 'Email 1',
+                size: 80,
+            },
+            {
+                accessorKey: 'Email2',
+                header: 'Email 2',
                 size: 80,
             },
             {
