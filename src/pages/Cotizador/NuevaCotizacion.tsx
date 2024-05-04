@@ -8,6 +8,7 @@ import { Box, Button } from '@mui/material';
 import Breadcrumb from '../../components/Breadcrumb';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 
 const NuevaCotizacion = () => {
   const { contadorCotizaciones, setContadorCotizaciones, clientes, usuario, articulos, listaArticulos } = React.useContext(dataContext);
@@ -536,159 +537,15 @@ const NuevaCotizacion = () => {
           </Box>
         </div>
 
-        {/* Modal */}
-        {/* <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }} id="modal" className="fixed z-40 top-0 right-0 left-0 bottom-0 h-full w-full hidden">
-          <div className="p-4 max-w-xl mx-auto left-0 right-0 overflow-hidden mt-24">
-            <div className="shadow w-full rounded-lg bg-white overflow-hidden block p-3">
-              <h2 className="font-bold text-2xl mb-6 text-gray-800 border-b pb-2">Agregar Artículos</h2>
-
-              <div className="mb-4">
-                <label className="text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide">Artículo</label>
-                <Select
-                  className="mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full  text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
-                  styles={{
-                    control: (baseStyles, state) => ({
-                      ...baseStyles,
-                      backgroundColor: '#E5E7EB',
-                      border: '0px',
-                      // Background color on focus
-                      '&:hover': { backgroundColor: '#FFFFFF' },
-                    }),
-                  }}
-                  placeholder="Seleccione un artículo"
-                  defaultValue={selectedProducto}
-                  value={(selectedProducto) ? { value: selectedProducto.Nombre, label: selectedProducto.Nombre } : null}
-                  isClearable={true}
-                  isSearchable={true}
-                  ref={selectRef}
-                  name="item"
-                  options={itemOptions}
-                  onChange={(selectedOption) => {
-                    handleChangeItem(selectedOption);
-                    if (precioInputRef.current) {
-                      precioInputRef.current.focus();
-                    }
-                  }}
-
-
-                />
-              </div>
-
-              <div className="flex">
-                <div className="mb-4 w-32 mr-1">
-                  <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">Costo</label>
-                  <input
-                    className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
-                    type="text"
-                    // eliminar los últimos 3 dígitos 
-                    value={selectedProducto ? currency((Number(selectedProducto.Costo)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format() : ''}
-                    readOnly />
-                </div>
-
-                <div className="mb-4 w-32 mr-1">
-                  <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">+20%</label>
-                  <input
-                    className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
-                    type="text"
-                    value={selectedProducto ? currency((Number(selectedProducto.Costo * 1.2)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format() : ''}
-                    readOnly
-                  />
-                </div>
-
-                <div className="mb-4 w-32 mr-1">
-                  <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">+30%</label>
-                  <input
-                    className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
-                    type="text"
-                    value={selectedProducto ? currency((Number(selectedProducto.Costo * 1.3)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format() : ''}
-                    readOnly
-                  />
-                </div>
-
-                <div className="mb-4 w-32 mr-1">
-                  <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">+40%</label>
-                  <input
-                    className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
-                    type="text"
-                    value={selectedProducto ? currency((Number(selectedProducto.Costo * 1.4)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format() : ''}
-                    readOnly
-                  />
-                </div>
-
-                <div className="mb-4 w-32 mr-1">
-                  <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">+50%</label>
-                  <input
-                    className="text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
-                    type="text"
-                    value={selectedProducto ? currency((Number(selectedProducto.Costo * 1.5)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format() : ''}
-                    readOnly
-                  />
-                </div>
-
-              </div>
-
-              <div className="flex justify-end mb-4">
-                <div className="mb-4 w-32 mr-2">
-                  <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">Ultimo</label>
-                  <input className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${selectedProducto ? getColor(ultimoPrecioProducto, selectedProducto.Costo) : ''}`}
-                    type="text"
-                    value={currency((Number(ultimoPrecioProducto)).toString().replace('.', ','), { symbol: "$ ", separator: ".", decimal: "," }).format()}
-                    readOnly />
-
-                  <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide">Stock</label>
-                  <input
-                    className={`text-right text-sm mb-1 border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none  ${Number(itemStock) > 0 ? 'bg-white' : 'bg-primary text-white'}`}
-                    type="text"
-                    value={itemStock}
-                    readOnly />
-
-                  <label className="text-right text-gray-800 block mb-1 font-bold text-sm uppercase tracking-wide ">Precio</label>
-                  <input
-                    ref={precioInputRef}
-                    className={`text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 ${color}`}
-                    type="number"
-                    value={precio}
-                    onChange={handlePrecioChange}
-                  />
-                </div>
-              </div>
-
-              <div className="mt-4 text-right">
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                  <Button
-                    style={{ borderColor: '#00aaad', color: '#00aaad' }}
-                    onClick={handleCloseModal}
-                    variant="outlined"
-                  >
-                    Cancelar
-                  </Button>
-
-                  <Button
-                    style={{ backgroundColor: '#00aaad', color: 'white' }}
-                    onClick={handleAgregarProducto}
-                    variant="contained"
-                    disabled={!selectedProducto || !precioVentaProducto}
-                  >
-                    Agregar
-                  </Button>
-                </Box>
-
-              </div>
-            </div>
-          </div>
-        </div> */}
         <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }} id="modal" className="fixed z-40 top-0 right-0 left-0 bottom-0 h-full w-full hidden">
           <div className="p-4 max-w-xl mx-auto left-0 right-0 overflow-hidden mt-24">
             <div className="shadow w-full rounded-lg bg-white overflow-hidden block p-5">
               <div className="flex justify-end">
-                <Button
-                  style={{ color: '#64748B', borderColor: '#64748B' }}
-                  variant="outlined"
-                  size='small'
-                  onClick={handleCloseModal}
-                >
-                  X
-                </Button>
+                <IconButton
+                  style={{ color: '#00AAAF', fontSize:'large' }}
+                  onClick={handleCloseModal} >
+                  <HighlightOffIcon />
+                </IconButton>
               </div>
               <h2 className="font-bold text-2xl mb-6 text-gray-800 border-b pb-2">
                 Agregar Artículos
@@ -800,7 +657,7 @@ const NuevaCotizacion = () => {
               <div className="grid grid-cols-3 gap-4 items-end">
                 <div></div>
                 <div className="relative">
-                <label className="text-right text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide ">Precio</label>
+                  <label className="text-right text-gray-800 block mb-1 font-bold text-xs uppercase tracking-wide ">Precio</label>
                   <input
                     className='text-right text-sm mb-1 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-3 px-1 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500'
                     placeholder={precio}
@@ -824,47 +681,6 @@ const NuevaCotizacion = () => {
           </div>
         </div>
         {/* /Modal */}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        {/* /Modal */}
-
-
-
-
 
         {/* Modal 2 */}
         <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }} id="modal2" className="fixed z-40 top-0 right-0 left-0 bottom-0 h-full w-full hidden">

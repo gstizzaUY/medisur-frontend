@@ -9,7 +9,7 @@ import { Box, Button } from '@mui/material';
 import Breadcrumb from '../../components/Breadcrumb';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
-import ControlPointIcon from '@mui/icons-material/ControlPoint';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 
 const FormLayout = () => {
   const {
@@ -506,15 +506,13 @@ const FormLayout = () => {
         <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }} id="modal" className="fixed z-40 top-0 right-0 left-0 bottom-0 h-full w-full hidden">
           <div className="p-4 max-w-xl mx-auto left-0 right-0 overflow-hidden mt-24">
             <div className="shadow w-full rounded-lg bg-white overflow-hidden block p-5">
-              <div className="flex justify-end">
-                <Button
-                  style={{ color: '#64748B', borderColor: '#64748B' }}
-                  variant="outlined"
-                  size='small'
-                  onClick={handleCloseModal}
-                >
-                  X
-                </Button>
+            <div className="flex justify-end">
+                <IconButton
+                  variant="contained"
+                  style={{ color: '#00AAAF', fontSize:'large' }}
+                  onClick={handleCloseModal} >
+                  <HighlightOffIcon />
+                </IconButton>
               </div>
               <h2 className="font-bold text-2xl mb-6 text-gray-800 border-b pb-2">
                 Agregar Artículos
