@@ -62,7 +62,7 @@ const Facturacion = () => {
         enableTopToolbar: true,
         positionActionsColumn: "last",
         globalFilterFn: 'contains',
-        enableGlobalFilterRankedResults: false,
+        enableGlobalFilterRankedResults: true,
         enableStickyHeader: true,
         enableStickyFooter: true,
         muiTableContainerProps: { sx: { maxHeight: 430 } },

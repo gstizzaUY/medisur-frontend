@@ -89,7 +89,7 @@ const VentasDetalladas = () => {
             { accessorKey: 'codigo', header: 'Código', size: 50 },
             { accessorKey: 'nombre', header: 'Nombre del Artículo', sortDescFirst: true, size: 200 },
         ];
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 7; i++) {
             let mes = mesActual - i;
             let anio = anioActual;
             if (mes < 1) {
