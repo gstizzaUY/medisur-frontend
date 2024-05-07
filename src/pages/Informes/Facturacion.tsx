@@ -50,7 +50,7 @@ const Facturacion = () => {
                 anio -= 1;
             }
             const mesAni = `${mes.toString().padStart(2, '0')}/${anio.toString().slice(-2)}`;
-            cols.push({ accessorKey: mesAni, header: `${mesAni}`, size: 140 });
+            cols.push({ accessorKey: mesAni, header: `${mesAni}`, size: 140, disableFilters: true });
         }
         return cols;
     }, [mesActual, anioActual]);
@@ -62,7 +62,7 @@ const Facturacion = () => {
         enableTopToolbar: true,
         positionActionsColumn: "last",
         globalFilterFn: 'contains',
-        enableGlobalFilterRankedResults: true,
+        enableGlobalFilterRankedResults: false,
         enableStickyHeader: true,
         enableStickyFooter: true,
         muiTableContainerProps: { sx: { maxHeight: 430 } },
