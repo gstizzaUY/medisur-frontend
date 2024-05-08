@@ -9,6 +9,7 @@ import ChatCard from '../../components/ChatCard.tsx';
 import MapOne from '../../components/MapOne.tsx';
 import TableOne from '../../components/TableOne.tsx';
 
+
 const ECommerce = () => {
   return (
     <>
@@ -22,10 +23,10 @@ const ECommerce = () => {
 
 
       <div className="mt-4 grid-cols-1 grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
-        {/* <ChartOne /> */}
-        {/* <ChartTwo />
-        <ChartThree />
-        <MapOne /> */}
+        <ChartOne />
+        {/* <ChartTwo /> */}
+        {/* <ChartThree />
+        <MapOne />  */}
         {/* <div className="col-span-12 xl:col-span-8">
           <TableOne />
         </div>

@@ -1,6 +1,9 @@
 import { ApexOptions } from 'apexcharts';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactApexChart from 'react-apexcharts';
+import { dataContext } from '../hooks/DataContext';
+import currency from "currency.js";
+import dayjs from 'dayjs';
 
 const options: ApexOptions = {
   legend: {
@@ -8,7 +11,7 @@ const options: ApexOptions = {
     position: 'top',
     horizontalAlign: 'left',
   },
-  colors: ['#3C50E0', '#80CAEE'],
+  colors: ['#00aaad', '#80CAEE'],
   chart: {
     fontFamily: 'Satoshi, sans-serif',
     height: 335,
@@ -21,7 +24,6 @@ const options: ApexOptions = {
       left: 0,
       opacity: 0.1,
     },
-
     toolbar: {
       show: false,
     },
@@ -48,10 +50,6 @@ const options: ApexOptions = {
     width: [2, 2],
     curve: 'straight',
   },
-  // labels: {
-  //   show: false,
-  //   position: "top",
-  // },
   grid: {
     xaxis: {
       lines: {
@@ -70,7 +68,7 @@ const options: ApexOptions = {
   markers: {
     size: 4,
     colors: '#fff',
-    strokeColors: ['#3056D3', '#80CAEE'],
+    strokeColors: ['#00aaad', '#80CAEE'],
     strokeWidth: 3,
     strokeOpacity: 0.9,
     strokeDashArray: 0,
@@ -111,7 +109,7 @@ const options: ApexOptions = {
       },
     },
     min: 0,
-    max: 100,
+    max: 6000000,
   },
 };
 
@@ -123,53 +121,96 @@ interface ChartOneState {
 }
 
 const ChartOne: React.FC = () => {
+  const { mesActual, anioActual, facturasClientes } = React.useContext(dataContext);
   const [state, setState] = useState<ChartOneState>({
     series: [
       {
-        name: 'Product One',
-        data: [23, 11, 22, 27, 13, 22, 37, 21, 44, 22, 30, 45],
+        name: 'Ventas 1',
+        data: Array(12).fill(0),
       },
-
       {
-        name: 'Product Two',
-        data: [30, 25, 36, 30, 45, 35, 64, 52, 59, 36, 39, 51],
+        name: '',
+        data: '',
       },
     ],
   });
+
+  // Función para generar los últimos 12 meses en formato 'MM/YY'
+function generateLast12Months() {
+  const months = [];
+  for (let i = 0; i < 12; i++) {
+    const month = dayjs().subtract(i, 'month').format('MM/YY');
+    months.unshift(month);
+  }
+  return months;
+}
+
+useEffect(() => {
+  const ventasPorMes = {};
+  const devolucionesPorMes = {};
+
+  facturasClientes.forEach(factura => {
+    const mesAnio = dayjs(factura.Fecha).format('MM/YY');
+    let totalFactura = parseFloat(factura.Total);
+
+    if (factura.ComprobanteCodigo === 701 || factura.ComprobanteCodigo === 703) {
+      if (!ventasPorMes[mesAnio]) {
+        ventasPorMes[mesAnio] = 0;
+      }
+      ventasPorMes[mesAnio] += totalFactura;
+    } else if (factura.ComprobanteCodigo === 702 || factura.ComprobanteCodigo === 704) {
+      if (!devolucionesPorMes[mesAnio]) {
+        devolucionesPorMes[mesAnio] = 0;
+      }
+      devolucionesPorMes[mesAnio] += totalFactura;
+    }
+  });
+
+  const facturacionNetoPorMes = {};
+  for (let mesAnio in ventasPorMes) {
+    facturacionNetoPorMes[mesAnio] = ventasPorMes[mesAnio] - (devolucionesPorMes[mesAnio] || 0);
+  }
+
+  setState(prevState => ({
+    ...prevState,
+    series: [
+      {
+        name: 'Facturación Neta',
+        data: Object.values(facturacionNetoPorMes).reverse(),
+      },
+      {
+        name: '',
+        data: Array(12).fill(0),
+      },
+    ],
+  }));
+
+  options.xaxis.categories = generateLast12Months();
+}, [facturasClientes]);
+
+
+  // Actualizar las opciones del gráfico para formatear los valores en el eje y
+  options.yaxis.labels = {
+    formatter: (value: number) => currency(value, { separator: '.', decimal: ',' }).format(),
+  };
 
   return (
     <div className="col-span-12 rounded-sm border border-stroke bg-white px-5 pt-7.5 pb-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-8">
       <div className="flex flex-wrap items-start justify-between gap-3 sm:flex-nowrap">
         <div className="flex w-full flex-wrap gap-3 sm:gap-5">
           <div className="flex min-w-47.5">
-            <span className="mt-1 mr-2 flex h-4 w-full max-w-4 items-center justify-center rounded-full border border-primary">
-              <span className="block h-2.5 w-full max-w-2.5 rounded-full bg-primary"></span>
-            </span>
-            <div className="w-full">
-              <p className="font-semibold text-primary">Total Revenue</p>
-              <p className="text-sm font-medium">12.04.2022 - 12.05.2022</p>
-            </div>
-          </div>
-          <div className="flex min-w-47.5">
             <span className="mt-1 mr-2 flex h-4 w-full max-w-4 items-center justify-center rounded-full border border-secondary">
               <span className="block h-2.5 w-full max-w-2.5 rounded-full bg-secondary"></span>
             </span>
             <div className="w-full">
-              <p className="font-semibold text-secondary">Total Sales</p>
-              <p className="text-sm font-medium">12.04.2022 - 12.05.2022</p>
+              <p className="font-semibold text-primary">Total Facturado</p>
             </div>
           </div>
         </div>
         <div className="flex w-full max-w-45 justify-end">
           <div className="inline-flex items-center rounded-md bg-whiter p-1.5 dark:bg-meta-4">
-            <button className="rounded bg-white py-1 px-3 text-xs font-medium text-black shadow-card hover:bg-white hover:shadow-card dark:bg-boxdark dark:text-white dark:hover:bg-boxdark">
-              Day
-            </button>
             <button className="rounded py-1 px-3 text-xs font-medium text-black hover:bg-white hover:shadow-card dark:text-white dark:hover:bg-boxdark">
-              Week
-            </button>
-            <button className="rounded py-1 px-3 text-xs font-medium text-black hover:bg-white hover:shadow-card dark:text-white dark:hover:bg-boxdark">
-              Month
+              Mensual
             </button>
           </div>
         </div>

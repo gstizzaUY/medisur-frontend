@@ -4,7 +4,7 @@ import Breadcrumb from '../../components/Breadcrumb';
 import Select from 'react-select';
 import { MaterialReactTable, useMaterialReactTable } from 'material-react-table';
 import { MRT_Localization_ES } from 'material-react-table/locales/es';
-import { Button, CircularProgress } from '@mui/material';
+import { Button, CircularProgress, Box } from '@mui/material';
 import currency from "currency.js";
 import axios from 'axios';
 
@@ -37,7 +37,7 @@ const ListaPrecios = () => {
         setLoading(true);
         if (!listaDePreciosSeleccionada) {
             console.error('No se ha seleccionado ninguna lista de precios');
-            setLoading(false); 
+            setLoading(false);
             return;
         }
         const listaArticulosConPrecio = await axios.post(`${import.meta.env.VITE_API_URL}/facturas/lista-precios`, {
@@ -48,6 +48,13 @@ const ListaPrecios = () => {
         setLoading(false);
     }, [listaDePreciosSeleccionada]);
 
+    const exportarPDF = async (data) => {
+        const response = await axios.post(`${import.meta.env.VITE_API_URL}/facturas/lista-precios/exportar-pdf`, {
+            data: articulosConPrecio,
+            lista: listaDePreciosSeleccionada
+        });
+        window.open(response.data.data.url, '_blank');
+    };
 
 
 
@@ -108,10 +115,30 @@ const ListaPrecios = () => {
         initialState: {
             pagination: { pageIndex: 0, pageSize: 100 },
             density: 'compact',
+            columnVisibility: {
+                'Codigo': false,
+            },
             sorting: [
                 { id: 'Nombre', desc: false },
             ],
         },
+        renderTopToolbarCustomActions: ({ table }) => (
+            <Box sx={{ display: 'flex', gap: '1rem', p: '4px' }}>
+                {articulosConPrecio.length > 0 && (
+                    <Button
+                        style={{ backgroundColor: '#00aaad', color: 'white' }}
+                        onClick={() => {
+                            // Exportar Lista de Precios
+                            exportarPDF(data);
+                        }}
+                        variant="contained"
+                        disabled={articulosConPrecio.length === 0}
+                    >
+                        Exportar PDF
+                    </Button>
+                )}
+            </Box>
+        ),
     });
 
     return (

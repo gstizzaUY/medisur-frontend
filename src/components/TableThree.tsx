@@ -119,11 +119,9 @@ const TableThree = () => {
     enableStickyHeader: true,
     enableStickyFooter: true,
     muiTableContainerProps: { sx: { maxHeight: 430 } },
-
     initialState: {
       pagination: { pageIndex: 0, pageSize: 100 },
       density: 'compact',
-
       columnVisibility: {
         'Codigo': false,
       },
