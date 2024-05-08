@@ -14,6 +14,7 @@ const ListaClientes = lazy(() => import('../pages/Informes/ListaClientes'));
 const NuevaCotizacion = lazy(() => import('../pages/Cotizador/NuevaCotizacion'));
 const Cotizaciones = lazy(() => import('../pages/Cotizador/Cotizaciones'));
 const Facturacion = lazy(() => import('../pages/Informes/Facturacion'));
+const ListaPrecios = lazy(() => import('../pages/Informes/ListaPrecios'));
 
 const coreRoutes = [
   {
@@ -35,6 +36,11 @@ const coreRoutes = [
     path: '/app/informes/facturacion',
     title: 'Facturacion',
     component: Facturacion,
+  },
+  {
+    path: '/app/informes/listas-precios',
+    title: 'Lstas de Precios',
+    component: ListaPrecios,
   },
   {
     path: '/app/cotizador/nueva-cotizacion',

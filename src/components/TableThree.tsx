@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, { useEffect } from 'react';
 import clienteAxios from '../functions/clienteAxios';
 import { dataContext } from '../hooks/DataContext';
 import { useMemo } from 'react';
@@ -9,34 +9,34 @@ import currency from "currency.js";
 
 const TableThree = () => {
   const { listaArticulos, setListaArticulos } = React.useContext(dataContext);
-  const [ articulosConStock, setArticulosConStock ] = React.useState([{}]);
-  
+  const [articulosConStock, setArticulosConStock] = React.useState([{}]);
 
-      //* Obtener items y agregar Stock de cada
-      useEffect(() => {
-        const obtenerItems = async () => {
-            try {
-                const { data } = await clienteAxios.get(`${import.meta.env.VITE_API_URL}/facturas/items`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-                const articulosConStock = listaArticulos.filter(articulo => articulo !== null).map(articulo => {
-                    if (articulo) {
-                        const item = data.find(item => item.ArticuloCodigo === articulo.Codigo);
-                        // Crear una nueva copia de item y modificar PrecioCosto
-                        return item ? { ...articulo, Stock: item.StockActual } : { ...articulo, Stock: "0.00000" };
-                    }
-                    return null;
-                });
-                setArticulosConStock(articulosConStock);
 
-            } catch (error) {
-                console.log(error);
-            }
-        }
-            obtenerItems();
-    }, [listaArticulos]);
+  //* Obtener items y agregar Stock de cada
+  useEffect(() => {
+    const obtenerItems = async () => {
+      try {
+        const { data } = await clienteAxios.get(`${import.meta.env.VITE_API_URL}/facturas/items`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        const articulosConStock = listaArticulos.filter(articulo => articulo !== null).map(articulo => {
+          if (articulo) {
+            const item = data.find(item => item.ArticuloCodigo === articulo.Codigo);
+            // Crear una nueva copia de item y modificar PrecioCosto
+            return item ? { ...articulo, Stock: item.StockActual } : { ...articulo, Stock: "0.00000" };
+          }
+          return null;
+        });
+        setArticulosConStock(articulosConStock);
+
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    obtenerItems();
+  }, [listaArticulos]);
 
 
   const data = listaArticulos;
@@ -128,7 +128,7 @@ const TableThree = () => {
         'Codigo': false,
       },
     },
-    
+
 
   });
 

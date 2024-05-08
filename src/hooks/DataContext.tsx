@@ -116,6 +116,7 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     const [contadorCotizaciones, setContadorCotizaciones] = React.useState('');
     const [cotizaciones, setCotizaciones] = React.useState([]);
     const [contactos, setContactos] = React.useState([]);
+    const [listasDePrecios, setListasDePrecios] = React.useState([] as any);
 
     //* AUTENTICAR USUARIO
     useEffect(() => {
@@ -195,6 +196,23 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
             }
         }
         obtenerComprobantes();
+    }, []);
+
+    //* Obtener listas de precios
+    useEffect(() => {
+        const obtenerListasPrecios = async () => {
+            try {
+                const { data } = await clienteAxios.get(`${import.meta.env.VITE_API_URL}/facturas/listasPrecios`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                setListasDePrecios(data);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        obtenerListasPrecios();
     }, []);
 
 
@@ -406,6 +424,8 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
             setCotizaciones,
             contactos,
             setContactos,
+            listasDePrecios,
+            setListasDePrecios
         }}>
             {children}
         </dataContext.Provider>

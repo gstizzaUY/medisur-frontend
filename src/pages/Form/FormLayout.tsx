@@ -51,6 +51,7 @@ const FormLayout = () => {
   const cantidadInputRef = useRef(null);
   const selectRef = useRef();
   const [itemStock, setItemStock] = useState(0);
+  const [stockFaltante, setStockFaltante] = useState([]);
 
 
   //* OPCIONES SELECTS //
@@ -186,6 +187,10 @@ const FormLayout = () => {
   //* AGREGAR LINEAS DE LA FACTURA
   const handleAgregarArticulo = () => {
 
+    if (selectedCantidad > itemStock) {
+      setStockFaltante([...stockFaltante, { Codigo: selectedItem.Codigo, Nombre: selectedItem.Nombre, Cantidad: selectedCantidad - itemStock }]);
+    };
+
     // Agregar el nuevo artículo al estado de los artículos
     setArticulos(prevArticulos => [...prevArticulos, {
       CodigoArticulo: selectedItem.Codigo,
@@ -208,7 +213,11 @@ const FormLayout = () => {
     }
     handleCloseModal();
     limpiarFormularioAgregarArticulo();
-  }
+  };
+
+  useEffect(() => {
+    console.log('stock faltante', stockFaltante);
+  }, [stockFaltante]);
 
   //* CONTRSTUIR LA FACTURA
   useEffect(() => {
@@ -307,6 +316,7 @@ const FormLayout = () => {
     setPrecio('');
     setPrecioVenta('');
     setColor('text-gray-700');
+    setStockFaltante([]);
     window.location.reload();
   };
 
@@ -485,11 +495,34 @@ const FormLayout = () => {
           </div>
         </div>
 
-        <div className="flex-1 mt-5">
+        <div className="flex-1 mt-5 mb-5">
           <textarea className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full md:w-1/2 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500 resize-none" type="text" placeholder="Notas" onChange={(e) => setNotas(e.target.value)}></textarea>
         </div>
 
-        <div className="relative inline-block mt-5">
+        {/* renderizar una tabla con el stock faltante */}
+        {stockFaltante.length > 0 && (
+          <div className="flex mt-11 pr-9 py-2">
+            <div className="flex-1 px-1">
+              <p className="text-gray-800 uppercase tracking-wide text-sm font-bold">Stock Faltante</p>
+            </div>
+            <div className="px-1 w-32 text-right">
+              <p className="text-gray-800 uppercase tracking-wide text-sm font-bold">Cantidad</p>
+            </div>
+          </div>
+        )}
+
+        {stockFaltante.map((articulo, index) => (
+          <div key={index} className="flex pt-3 pb-3 border-b">
+            <div className="flex-1 ">
+              <p className="text-gray-800">{articulo.Nombre}</p>
+            </div>
+            <div className="px-9 w-32 text-right">
+              <p className="text-gray-800">{articulo.Cantidad}</p>
+            </div>
+          </div>
+        ))}
+
+        <div className="relative inline-block mt-10">
           <Box>
             <Button
               color="primary"
