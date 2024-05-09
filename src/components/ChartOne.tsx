@@ -130,9 +130,10 @@ const ChartOne: React.FC = () => {
       },
       {
         name: '',
-        data: '',
+        data: Array(12).fill(0),
       },
     ],
+    options: options,
   });
 
   // Función para generar los últimos 12 meses en formato 'MM/YY'
@@ -183,9 +184,14 @@ useEffect(() => {
         data: Array(12).fill(0),
       },
     ],
+    options: {
+      ...prevState.options,
+      xaxis: {
+        ...prevState.options.xaxis,
+        categories: generateLast12Months(),
+      },
+    },
   }));
-
-  options.xaxis.categories = generateLast12Months();
 }, [facturasClientes]);
 
 
@@ -219,7 +225,7 @@ useEffect(() => {
       <div>
         <div id="chartOne" className="-ml-5">
           <ReactApexChart
-            options={options}
+            options={state.options}
             series={state.series}
             type="area"
             height={350}
