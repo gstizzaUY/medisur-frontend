@@ -14,25 +14,22 @@ const data = useMemo(() => {
     facturasClientes.forEach(factura => {
         const mesAnio = dayjs(factura.Fecha).format('MM/YY');
         const cliente = factura.ClienteNombre;
-        const zona = factura.ClienteZonaCodigo; // Asegúrate de que este es el nombre correcto de la propiedad
+        const zona = factura.ClienteZonaCodigo;
         if (!facturacionPorMes[cliente]) {
-            facturacionPorMes[cliente] = { ClienteZonaCodigo: zona }; // Incluye la zona en los datos
+            facturacionPorMes[cliente] = { ClienteZonaCodigo: zona };
         }
         if (!facturacionPorMes[cliente][mesAnio]) {
             facturacionPorMes[cliente][mesAnio] = 0
         }
         let totalFactura = parseFloat(factura.TotalSigno);
-        if (factura.ComprobanteNombre === 'Nota de Crédito Venta (CFE)' || factura.ComprobanteNombre === 'Devolución Venta Contado (CFE)') {
-            totalFactura = -totalFactura;
+        if (factura.ComprobanteCodigo === 701 || factura.ComprobanteCodigo === 703 || factura.ComprobanteCodigo === 702 || factura.ComprobanteCodigo === 704) {
+            facturacionPorMes[cliente][mesAnio] += totalFactura;
         }
-        // Sumar el total de la factura al total existente para el cliente y el mes
-        facturacionPorMes[cliente][mesAnio] += totalFactura;
     });
 
-    // Convertir a formato $ 1.000,00 usando currency.js (formato uruguayo)
     for (let cliente in facturacionPorMes) {
         for (let mesAnio in facturacionPorMes[cliente]) {
-            if (mesAnio !== 'ClienteZonaCodigo') { // No formatear la zona
+            if (mesAnio !== 'ClienteZonaCodigo') {
                 facturacionPorMes[cliente][mesAnio] = `${currency(facturacionPorMes[cliente][mesAnio], { symbol: '$ ', precision: 2, separator: ".", decimal: "," }).format()}`;
             }
         }
@@ -40,6 +37,7 @@ const data = useMemo(() => {
 
     return Object.entries(facturacionPorMes).map(([cliente, facturacion]) => ({ nombre: cliente,  ...facturacion }));
 }, [facturasClientes]);
+
     const columns = useMemo(() => {
         const cols = [
             { accessorKey: 'ClienteZonaCodigo', header: 'Zona', sortDescFirst: true, size: 50 },
