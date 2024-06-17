@@ -15,6 +15,7 @@ const NuevaCotizacion = lazy(() => import('../pages/Cotizador/NuevaCotizacion'))
 const Cotizaciones = lazy(() => import('../pages/Cotizador/Cotizaciones'));
 const Facturacion = lazy(() => import('../pages/Informes/Facturacion'));
 const ListaPrecios = lazy(() => import('../pages/Informes/ListaPrecios'));
+const ComprasDetalladas = lazy(() => import('../pages/Informes/ComprasDetalladas'));
 
 const coreRoutes = [
   {
@@ -26,6 +27,11 @@ const coreRoutes = [
     path: '/app/informes/ventas-detalladas',
     title: 'Ventas Detalladas',
     component: VentasDetalladas,
+  },
+  {
+    path: '/app/informes/compras-detalladas',
+    title: 'Compras Detalladas',
+    component: ComprasDetalladas,
   },
   {
     path: '/app/informes/lista-clientes',

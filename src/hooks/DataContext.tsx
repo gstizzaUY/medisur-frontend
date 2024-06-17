@@ -117,6 +117,7 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     const [cotizaciones, setCotizaciones] = React.useState([]);
     const [contactos, setContactos] = React.useState([]);
     const [listasDePrecios, setListasDePrecios] = React.useState([] as any);
+    const [comprasDetalladas, setComprasDetalladas] = React.useState([] as any);
 
     //* AUTENTICAR USUARIO
     useEffect(() => {
@@ -256,6 +257,26 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
         }
         obtenerFacturas();
     }, []);
+
+    //* OBTENER COMPRAS DETALLADAS
+    useEffect(() => {
+        const obtenerComprasDetalladas = async () => {
+            try {
+                const datos = { Mes: mesActual, Anio: anioActual };
+                const config = {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                };
+                const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/compras`, datos, config);
+                setComprasDetalladas(data);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        obtenerComprasDetalladas();
+    }, []);
+
 
 
     //* Obtener los comprobantes pendientes
@@ -425,7 +446,9 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
             contactos,
             setContactos,
             listasDePrecios,
-            setListasDePrecios
+            setListasDePrecios,
+            comprasDetalladas,
+            setComprasDetalladas
         }}>
             {children}
         </dataContext.Provider>

@@ -8,8 +8,9 @@ import { Box, Button } from '@mui/material';
 import currency from "currency.js";
 
 const TableThree = () => {
-  const { listaArticulos, setListaArticulos } = React.useContext(dataContext);
-  const [articulosConStock, setArticulosConStock] = React.useState([{}]);
+  const { listaArticulos } = React.useContext(dataContext);
+  const { comprasDetalladas } = React.useContext(dataContext);
+  const [ articulosConStock, setArticulosConStock ] = React.useState([{}]);
 
 
   //* Obtener items y agregar Stock de cada
@@ -29,6 +30,23 @@ const TableThree = () => {
           }
           return null;
         });
+
+        // A artículos con stock, agregar la fecha de la última compra. Buscar para cada artículo la última compra detallada a partir de la
+        // propiedad "FacturaFecha", tomar la última fecha de compra y agregarla a la propiedad "FechaRegistro"
+        articulosConStock.forEach(articulo => {
+          const comprasFiltradas = comprasDetalladas.filter(compra => compra.ArticuloCodigo === articulo.Codigo);
+          if (comprasFiltradas.length > 0) {
+            const fechaUltimaCompra = comprasFiltradas.reduce((acumulador, compra) => {
+              const fecha = new Date(compra.FacturaFecha);
+              return fecha > acumulador ? fecha : acumulador;
+            }, new Date(0));
+            articulo.FechaRegistro = fechaUltimaCompra.toISOString().split('T')[0];
+            articulo.ProveedorNombre = comprasFiltradas[0].ProveedorNombre;
+          } else {
+            articulo.FechaRegistro = ""; // Dejar en blanco si no hay compras
+            articulo.ProveedorNombre = ""; // Dejar en blanco si no hay compras
+          }
+        });
         setArticulosConStock(articulosConStock);
 
       } catch (error) {
@@ -45,18 +63,18 @@ const TableThree = () => {
       {
         accessorKey: 'Codigo', //access nested data with dot notation
         header: 'Código',
-        size: 20,
+        size: 100,
       },
       {
         accessorKey: 'Nombre',
         header: 'Nombre',
         sortDescFirst: true,
-        size: 410,
+        size: 370,
       },
       {
         accessorKey: 'Stock',
         header: 'Stock',
-        size: 120,
+        size: 130,
         // Eliminar los últimos 6 digitos
         Cell: ({ cell }) => (
           <Box>
@@ -68,7 +86,7 @@ const TableThree = () => {
       {
         accessorKey: 'Costo',
         header: 'Costo',
-        size: 130,
+        size: 150,
         Cell: ({ cell }) => {
           const cellValue = cell.getValue();
           if (cellValue) {
@@ -96,8 +114,13 @@ const TableThree = () => {
       },
       {
         accessorKey: 'CostoFecha',
-        header: 'Fecha',
-        size: 120,
+        header: 'Costo Fecha',
+        size: 150,
+      },
+      {
+        accessorKey: 'FechaRegistro',
+        header: 'Última Compra',
+        size: 180,
       },
       {
         accessorKey: 'ProveedorNombre',
@@ -124,6 +147,7 @@ const TableThree = () => {
       density: 'compact',
       columnVisibility: {
         'Codigo': false,
+        'CostoFecha': false,
       },
     },
 
