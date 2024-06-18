@@ -25,9 +25,7 @@ const ComprasDetalladas = () => {
             console.error('No se ha seleccionado ningún proveedor');
             return;
         }
-
         const comprasFiltradas = comprasDetalladas.filter(compra => compra.ProveedorCodigo === proveedorSeleccionado.Codigo);
-
         const comprasAgrupadas = comprasFiltradas.reduce((acumulador, compra) => {
             const fecha = dayjs(compra.FacturaFecha);
             const mesAni = `${fecha.month() + 1}-${fecha.year()}`;
@@ -46,8 +44,9 @@ const ComprasDetalladas = () => {
                 productoExistente.Cantidad[mesAni] = 0;
                 productoExistente.Precio[mesAni] = { total: 0, count: 0 };
             }
+            const precioProducto = Number(compra.LineaSubtotal) / Number(compra.LineaCantidad);
             productoExistente.Cantidad[mesAni] += Number(compra.LineaCantidad);
-            productoExistente.Precio[mesAni].total += Number(compra.LineaPrecio) * Number(compra.LineaCantidad);
+            productoExistente.Precio[mesAni].total += precioProducto * Number(compra.LineaCantidad);
             productoExistente.Precio[mesAni].count += Number(compra.LineaCantidad);
             return acumulador;
         }, {});
@@ -60,9 +59,8 @@ const ComprasDetalladas = () => {
                 }
             }
         }
-
         setComrasFiltradasAgrupadas(Object.values(comprasAgrupadas));
-    }
+    };
 
     useEffect(() => {
         const data = Object.values(comprasFiltradasAgrupadas).map(producto => {
@@ -84,6 +82,7 @@ const ComprasDetalladas = () => {
         });
         setData(data);
     }, [comprasFiltradasAgrupadas]);
+
 
     const columns = useMemo(() => {
         const cols = [
