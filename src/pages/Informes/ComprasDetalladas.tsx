@@ -20,56 +20,58 @@ const ComprasDetalladas = () => {
         setProveedorSeleccionado(proveedores.find(proveedor => proveedor.Nombre === selectedOption.value));
     };
 
-const handleConsultar = () => {
-    if (!proveedorSeleccionado) {
-        console.error('No se ha seleccionado ningún proveedor');
-        return;
-    }
-    const comprasFiltradas = comprasDetalladas.filter(compra => compra.ProveedorCodigo === proveedorSeleccionado.Codigo);
-    const comprasAgrupadas = comprasFiltradas.reduce((acumulador, compra) => {
-        const fecha = dayjs(compra.FacturaFecha);
-        const mesAni = `${fecha.month() + 1}-${fecha.year()}`;
-        const moneda = compra.MonedaCodigo === 2 ? 'dolares' : 'pesos';
-        let productoExistente = acumulador[`${compra.ArticuloCodigo}-${moneda}`];
-        if (!productoExistente) {
-            productoExistente = {
-                codigo: compra.ArticuloCodigo,
-                nombre: compra.ArticuloNombre,
-                Cantidad: {},
-                Precio: {},
-                MonedaCodigo: compra.MonedaCodigo,
-            };
-            acumulador[`${compra.ArticuloCodigo}-${moneda}`] = productoExistente;
+    const handleConsultar = () => {
+        if (!proveedorSeleccionado) {
+            console.error('No se ha seleccionado ningún proveedor');
+            return;
         }
-        const precioProducto = Number(compra.LineaSubtotal) / Number(compra.LineaCantidad);
-        productoExistente.Cantidad[mesAni] = Number(compra.LineaCantidad);
-        productoExistente.Precio[mesAni] = precioProducto;
-        return acumulador;
-    }, {});
+        const comprasFiltradas = comprasDetalladas.filter(compra => compra.ProveedorCodigo === proveedorSeleccionado.Codigo);
+        const comprasAgrupadas = comprasFiltradas.reduce((acumulador, compra) => {
+            const fecha = dayjs(compra.FacturaFecha);
+            const mesAni = `${fecha.month() + 1}-${fecha.year()}`;
+            const moneda = compra.MonedaCodigo === 2 ? 'dolares' : 'pesos';
+            let productoExistente = acumulador[`${compra.ArticuloCodigo}-${moneda}`];
+            if (!productoExistente) {
+                productoExistente = {
+                    codigo: compra.ArticuloCodigo,
+                    nombre: compra.ArticuloNombre,
+                    Cantidad: {},
+                    Precio: {},
+                    MonedaCodigo: compra.MonedaCodigo,
+                    count: 0,
+                };
+                acumulador[`${compra.ArticuloCodigo}-${moneda}`] = productoExistente;
+            }
+            const precioProducto = Number(compra.LineaSubtotal) / Number(compra.LineaCantidad);
+            productoExistente.Cantidad[mesAni] = (productoExistente.Cantidad[mesAni] || 0) + Number(compra.LineaCantidad);
+            productoExistente.Precio[mesAni] = precioProducto;
+            productoExistente.count += 1;
+            return acumulador;
+        }, {});
 
-    setComrasFiltradasAgrupadas(Object.values(comprasAgrupadas));
-};
+        setComrasFiltradasAgrupadas(Object.values(comprasAgrupadas));
+    };
 
-useEffect(() => {
-    const data = Object.values(comprasFiltradasAgrupadas).map(producto => {
-        const { codigo, nombre, Cantidad, Precio, MonedaCodigo } = producto;
-        const row = { codigo, nombre };
+    useEffect(() => {
+        const data = Object.values(comprasFiltradasAgrupadas).map(producto => {
+            const { codigo, nombre, Cantidad, Precio, MonedaCodigo } = producto;
+            const row = { codigo, nombre };
 
-        for (let mesAni in Cantidad) {
-            let [mes, anio] = mesAni.split('-');
-            mes = mes.padStart(2, '0');
-            anio = anio.slice(-2);
-            const newMesAni = `${mes}/${anio}`;
-            // Verificar el valor de MonedaCodigo y ajustar el símbolo de la moneda si es necesario
-            const monedaSimbolo = MonedaCodigo === 2 ? "U$S " : "$ ";
-            const decimales = MonedaCodigo === 2 ? 3 : 2;
-            const precioFormateado = currency(Precio[mesAni], { symbol: monedaSimbolo, separator: ".", decimal: ",", precision: decimales }).format();
-            row[`Cantidad_${newMesAni}`] = `${Cantidad[mesAni]} (${precioFormateado})`;
-        }
-        return row;
-    });
-    setData(data);
-}, [comprasFiltradasAgrupadas]);
+            for (let mesAni in Cantidad) {
+                let [mes, anio] = mesAni.split('-');
+                mes = mes.padStart(2, '0');
+                anio = anio.slice(-2);
+                const newMesAni = `${mes}/${anio}`;
+                // Verificar el valor de MonedaCodigo y ajustar el símbolo de la moneda si es necesario
+                const monedaSimbolo = MonedaCodigo === 2 ? "U$S " : "$ ";
+                const decimales = MonedaCodigo === 2 ? 3 : 2;
+                const precioFormateado = currency(Precio[mesAni], { symbol: monedaSimbolo, separator: ".", decimal: ",", precision: decimales }).format();
+                row[`Cantidad_${newMesAni}`] = `${Cantidad[mesAni]} (${precioFormateado})`;
+            }
+            return row;
+        });
+        setData(data);
+    }, [comprasFiltradasAgrupadas]);
 
 
     const columns = useMemo(() => {
