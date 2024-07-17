@@ -434,12 +434,12 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
                         ProveedorNombre: compraInfo ? compraInfo.compra.ProveedorNombre : "",
                     };
 
-                    // Calcular stock valorizado
-                    const stockValorizado = Number(stockActual) * articulo.Costo;
-                    articuloModificado.StockValorizado = currency(stockValorizado, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format();
+                    // // Calcular stock valorizado
+                    // const stockValorizado = Number(stockActual) * articulo.Costo;
+                    // articuloModificado.StockValorizado = currency(stockValorizado, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format();
 
-                    // Acumular para el total
-                    stockValorizadoTotal += stockValorizado;
+                    // // Acumular para el total
+                    // stockValorizadoTotal += stockValorizado;
 
                     return articuloModificado;
                 });
