@@ -446,8 +446,9 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
 
                 // Formatear el total valorizado
                 const stockValorizadoTotalFormateado = currency(stockValorizadoTotal, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format();
-                setArticulosConStock(articulosConStock);
+                
                 setValorTotalStock(stockValorizadoTotalFormateado);
+                setArticulosConStock(articulosConStock);
 
             } catch (error) {
                 console.log(error);
