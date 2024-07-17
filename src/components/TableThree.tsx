@@ -6,7 +6,8 @@ import { Box } from '@mui/material';
 import currency from "currency.js";
 
 const TableThree = () => {
-  const { listaArticulos, articulosConStock } = useContext(dataContext);
+  const { articulosConStock } = useContext(dataContext);
+  console.log('articulosConStock', articulosConStock);
 
   const columns = useMemo(
     () => [
@@ -88,7 +89,7 @@ const TableThree = () => {
         ),
       },
     ],
-    [listaArticulos],
+    [articulosConStock],
   );
 
   const table = useMaterialReactTable({
