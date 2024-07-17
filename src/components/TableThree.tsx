@@ -1,14 +1,12 @@
-import React from 'react';
+import { useContext, useMemo } from 'react';
 import { dataContext } from '../hooks/DataContext';
-import { useMemo } from 'react';
 import { MaterialReactTable, useMaterialReactTable } from 'material-react-table';
 import { MRT_Localization_ES } from 'material-react-table/locales/es';
 import { Box } from '@mui/material';
 import currency from "currency.js";
 
 const TableThree = () => {
-  const { listaArticulos } = React.useContext(dataContext);
-  const { articulosConStock } = React.useContext(dataContext);
+  const { listaArticulos, articulosConStock } = useContext(dataContext);
 
   const columns = useMemo(
     () => [
