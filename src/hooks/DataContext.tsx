@@ -400,7 +400,7 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
 
 
 
-    //* Obtener items y agregar Stock de cada
+    //* Obtener items y agregar Stock de cada artículo
     useEffect(() => {
         const obtenerItems = async () => {
             try {
@@ -409,40 +409,45 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     }
                 });
+
+                // Crear mapas para acceso rápido
+                const itemsMap = new Map(data.map(item => [item.ArticuloCodigo, item]));
+                const comprasMap = comprasDetalladas.reduce((acc, compra) => {
+                    const fecha = new Date(compra.FacturaFecha).getTime();
+                    if (!acc[compra.ArticuloCodigo] || fecha > acc[compra.ArticuloCodigo].fecha) {
+                        acc[compra.ArticuloCodigo] = { fecha, compra };
+                    }
+                    return acc;
+                }, {});
+
+                let stockValorizadoTotal = 0;
+
                 const articulosConStock = listaArticulos.filter(articulo => articulo !== null).map(articulo => {
-                    if (articulo) {
-                        const item = data.find(item => item.ArticuloCodigo === articulo.Codigo);
-                        // Crear una nueva copia de item y modificar PrecioCosto
-                        return item ? { ...articulo, Stock: item.StockActual } : { ...articulo, Stock: "0.00000" };
-                    }
-                    return null;
-                });
-                // A artículos con stock, agregar la fecha de la última compra. Buscar para cada artículo la última compra detallada a partir de la
-                // propiedad "FacturaFecha", tomar la última fecha de compra y agregarla a la propiedad "FechaRegistro"
-                articulosConStock.forEach(articulo => {
-                    const comprasFiltradas = comprasDetalladas.filter(compra => compra.ArticuloCodigo === articulo.Codigo);
-                    if (comprasFiltradas.length > 0) {
-                        const fechaUltimaCompra = comprasFiltradas.reduce((acumulador, compra) => {
-                            const fecha = new Date(compra.FacturaFecha);
-                            return fecha > acumulador ? fecha : acumulador;
-                        }, new Date(0));
-                        articulo.FechaRegistro = fechaUltimaCompra.toISOString().split('T')[0];
-                        articulo.ProveedorNombre = comprasFiltradas[0].ProveedorNombre;
-                    } else {
-                        articulo.FechaRegistro = ""; // Dejar en blanco si no hay compras
-                        articulo.ProveedorNombre = ""; // Dejar en blanco si no hay compras
-                    }
-                });
-                setArticulosConStock(articulosConStock);
-                articulosConStock.forEach(articulo => {
-                    articulo.StockValorizado = currency(articulo.Stock * articulo.Costo, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format();
+                    const item = itemsMap.get(articulo.Codigo);
+                    const stockActual = item ? item.StockActual : "0.00000";
+                    const compraInfo = comprasMap[articulo.Codigo];
+
+                    const articuloModificado = {
+                        ...articulo,
+                        Stock: stockActual,
+                        FechaRegistro: compraInfo ? new Date(compraInfo.fecha).toISOString().split('T')[0] : "",
+                        ProveedorNombre: compraInfo ? compraInfo.compra.ProveedorNombre : "",
+                    };
+
+                    // Calcular stock valorizado
+                    const stockValorizado = Number(stockActual) * articulo.Costo;
+                    articuloModificado.StockValorizado = currency(stockValorizado, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format();
+
+                    // Acumular para el total
+                    stockValorizadoTotal += stockValorizado;
+
+                    return articuloModificado;
                 });
 
-                // Calcular el stock valorizado total
-                const stockValorizadoTotal = articulosConStock.reduce((total, articulo) => total + Number(articulo.Stock * articulo.Costo), 0);
+                // Formatear el total valorizado
                 const stockValorizadoTotalFormateado = currency(stockValorizadoTotal, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format();
+                setArticulosConStock(articulosConStock);
                 setValorTotalStock(stockValorizadoTotalFormateado);
-                console.log(valorTotalStock);
 
             } catch (error) {
                 console.log(error);
