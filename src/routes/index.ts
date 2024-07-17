@@ -16,7 +16,7 @@ const Cotizaciones = lazy(() => import('../pages/Cotizador/Cotizaciones'));
 const Facturacion = lazy(() => import('../pages/Informes/Facturacion'));
 const ListaPrecios = lazy(() => import('../pages/Informes/ListaPrecios'));
 const ComprasDetalladas = lazy(() => import('../pages/Informes/ComprasDetalladas'));
-const GananciasPorArticulo = lazy(() => import('../pages/Informes/GananciasPorArticulo'));
+const GananciasPorArticulo = lazy(() => import('../pages/Informes/GananciasporArticulo'));
 
 const coreRoutes = [
   {
