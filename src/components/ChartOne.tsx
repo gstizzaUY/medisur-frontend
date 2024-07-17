@@ -170,14 +170,6 @@ useEffect(() => {
     facturacionNetoPorMes[mesAnio] = ventasPorMes[mesAnio] - (devolucionesPorMes[mesAnio] || 0);
   }
 
-  comprasDetalladas.forEach(compra => {
-    const mesAnio = dayjs(compra.FacturaFecha).format('MM/YY');
-    let totalCompra = parseFloat(compra.LineaSubtotal);
-    if (!facturacionNetoPorMes[mesAnio]) {
-      facturacionNetoPorMes[mesAnio] = 0;
-    }
-    facturacionNetoPorMes[mesAnio] -= totalCompra;
-  }
 
   setState(prevState => ({
     ...prevState,
