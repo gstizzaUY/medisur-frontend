@@ -16,6 +16,7 @@ const Cotizaciones = lazy(() => import('../pages/Cotizador/Cotizaciones'));
 const Facturacion = lazy(() => import('../pages/Informes/Facturacion'));
 const ListaPrecios = lazy(() => import('../pages/Informes/ListaPrecios'));
 const ComprasDetalladas = lazy(() => import('../pages/Informes/ComprasDetalladas'));
+const GananciasPorArticulo = lazy(() => import('../pages/Informes/GananciasPorArticulo'));
 
 const coreRoutes = [
   {
@@ -47,6 +48,11 @@ const coreRoutes = [
     path: '/app/informes/listas-precios',
     title: 'Lstas de Precios',
     component: ListaPrecios,
+  },
+  {
+    path: '/app/informes/ganancias-por-articulo',
+    title: 'Ganancias por Articulo',
+    component: GananciasPorArticulo,
   },
   {
     path: '/app/cotizador/nueva-cotizacion',

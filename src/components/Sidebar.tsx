@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import Logo from '../images/logo/logo.svg';
+// import Logo from '../images/logo/logo.svg';
 import SidebarLinkGroup from './SidebarLinkGroup';
 import DashboardCustomizeTwoToneIcon from '@mui/icons-material/DashboardCustomizeTwoTone';
 import ReceiptLongTwoToneIcon from '@mui/icons-material/ReceiptLongTwoTone';
@@ -421,6 +421,19 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                               Listas de Precios
                             </NavLink>
                           </li>
+
+                          {/* <li>
+                            <NavLink onClick={() => setSidebarOpen(!sidebarOpen)}
+                              to="/app/informes/ganancias-por-articulo"
+                              className={({ isActive }) =>
+                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
+                                (isActive && '!text-white')
+                              }
+                            >
+                              Ganancias por Artículo
+                            </NavLink>
+                          </li> */}
+
                         </ul>
                       </div>
                       {/* <!-- Dropdown Menu End --> */}

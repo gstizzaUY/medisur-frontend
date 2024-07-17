@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { dataContext } from '../hooks/DataContext';
 import { useMemo } from 'react';
 import { MaterialReactTable, useMaterialReactTable } from 'material-react-table';

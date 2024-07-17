@@ -444,15 +444,6 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
                 setValorTotalStock(stockValorizadoTotalFormateado);
                 console.log(valorTotalStock);
 
-                // Hacer un objeto con los 10 artículos con mayot valor de stock valorizado, ordenarlos de mayor a menor. No permitir artículos duplicados
-                const articulosUnicos = new Map(articulosConStock.map(articulo => [articulo.Codigo, articulo]));
-                const articulosSinDuplicados = Array.from(articulosUnicos.values());
-
-                const articulosOrdenados = articulosSinDuplicados.sort((a, b) => b.Stock * b.Costo - a.Stock * a.Costo);
-                const articulosTop10 = articulosOrdenados.slice(0, 10);
-                setTop10ArticulosValorizados(articulosTop10);
-                console.log(top10ArticulosValorizados);
-
             } catch (error) {
                 console.log(error);
             }
