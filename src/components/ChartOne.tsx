@@ -129,7 +129,7 @@ const ChartOne: React.FC = () => {
         data: Array(12).fill(0),
       },
       {
-        name: '',
+        name: 'Compras',
         data: Array(12).fill(0),
       },
     ],
@@ -153,7 +153,6 @@ useEffect(() => {
   facturasClientes.forEach(factura => {
     const mesAnio = dayjs(factura.Fecha).format('MM/YY');
     let totalFactura = parseFloat(factura.Total);
-
     if (factura.ComprobanteCodigo === 701 || factura.ComprobanteCodigo === 703) {
       if (!ventasPorMes[mesAnio]) {
         ventasPorMes[mesAnio] = 0;
@@ -166,10 +165,18 @@ useEffect(() => {
       devolucionesPorMes[mesAnio] += totalFactura;
     }
   });
-
   const facturacionNetoPorMes = {};
   for (let mesAnio in ventasPorMes) {
     facturacionNetoPorMes[mesAnio] = ventasPorMes[mesAnio] - (devolucionesPorMes[mesAnio] || 0);
+  }
+
+  comprasDetalladas.forEach(compra => {
+    const mesAnio = dayjs(compra.FacturaFecha).format('MM/YY');
+    let totalCompra = parseFloat(compra.LineaSubtotal);
+    if (!facturacionNetoPorMes[mesAnio]) {
+      facturacionNetoPorMes[mesAnio] = 0;
+    }
+    facturacionNetoPorMes[mesAnio] -= totalCompra;
   }
 
   setState(prevState => ({

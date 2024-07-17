@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect, useMemo } from 'react';
+import { useContext, useState, useEffect, useMemo } from 'react';
 import { dataContext } from '../../hooks/DataContext';
 import Breadcrumb from '../../components/Breadcrumb';
 import Select from 'react-select';
@@ -10,14 +10,22 @@ import dayjs from 'dayjs';
 
 const ComprasDetalladas = () => {
     const { mesActual, anioActual, contactos, comprasDetalladas } = useContext(dataContext);
-    const [proveedorSeleccionado, setProveedorSeleccionado] = useState(undefined);
-    const [comprasFiltradasAgrupadas, setComrasFiltradasAgrupadas] = useState({});
+    const [proveedorSeleccionado, setProveedorSeleccionado] = useState(() => {
+        const proveedorGuardado = localStorage.getItem('proveedorSeleccionado');
+        return proveedorGuardado ? JSON.parse(proveedorGuardado) : undefined;
+    });
+    const [comprasFiltradasAgrupadas, setComrasFiltradasAgrupadas] = useState(() => {
+        const datosTablaGuardados = localStorage.getItem('datosTabla');
+        return datosTablaGuardados ? JSON.parse(datosTablaGuardados) : {};
+    });
     const [data, setData] = useState([]);
-    // De contactos, filtrar sólo los contactos que tiene la propiedad "EsProveedor" en "S"
     const proveedores = contactos.filter(contacto => contacto.EsProveedor === "S");
     const proveedoresOptions = proveedores.map(proveedor => ({ value: proveedor.Nombre, label: proveedor.Nombre }));
+
     const handleChangeProveedor = selectedOption => {
-        setProveedorSeleccionado(proveedores.find(proveedor => proveedor.Nombre === selectedOption.value));
+        const proveedor = proveedores.find(proveedor => proveedor.Nombre === selectedOption.value);
+        setProveedorSeleccionado(proveedor);
+        localStorage.setItem('proveedorSeleccionado', JSON.stringify(proveedor));
     };
 
     const handleConsultar = () => {
@@ -50,6 +58,7 @@ const ComprasDetalladas = () => {
         }, {});
 
         setComrasFiltradasAgrupadas(Object.values(comprasAgrupadas));
+        localStorage.setItem('datosTabla', JSON.stringify(Object.values(comprasAgrupadas)));
     };
 
     useEffect(() => {
@@ -62,7 +71,6 @@ const ComprasDetalladas = () => {
                 mes = mes.padStart(2, '0');
                 anio = anio.slice(-2);
                 const newMesAni = `${mes}/${anio}`;
-                // Verificar el valor de MonedaCodigo y ajustar el símbolo de la moneda si es necesario
                 const monedaSimbolo = MonedaCodigo === 2 ? "U$S " : "$ ";
                 const decimales = MonedaCodigo === 2 ? 3 : 2;
                 const precioFormateado = currency(Precio[mesAni], { symbol: monedaSimbolo, separator: ".", decimal: ",", precision: decimales }).format();
@@ -72,7 +80,6 @@ const ComprasDetalladas = () => {
         });
         setData(data);
     }, [comprasFiltradasAgrupadas]);
-
 
     const columns = useMemo(() => {
         const cols = [
@@ -131,7 +138,7 @@ const ComprasDetalladas = () => {
                             }),
                         }}
                         placeholder="Seleccione un Proveedor"
-                        defaultValue={proveedoresOptions[0]}
+                        defaultValue={proveedoresOptions.find(option => option.value === proveedorSeleccionado?.Nombre) || ''}
                         isClearable={true}
                         isSearchable={true}
                         name="cliente"

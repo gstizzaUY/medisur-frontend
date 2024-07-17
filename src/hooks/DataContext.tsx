@@ -2,6 +2,7 @@ import React, { ReactNode } from "react";
 import { useState, useEffect } from "react";
 import clienteAxios from '../functions/clienteAxios';
 import dayjs from 'dayjs';
+import currency from "currency.js";
 
 export const dataContext = React.createContext({});
 
@@ -118,6 +119,9 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     const [contactos, setContactos] = React.useState([]);
     const [listasDePrecios, setListasDePrecios] = React.useState([] as any);
     const [comprasDetalladas, setComprasDetalladas] = React.useState([] as any);
+    const [articulosConStock, setArticulosConStock] = React.useState([{}]);
+    const [valorTotalStock, setValorTotalStock] = React.useState(0);
+    const [top10ArticulosValorizados, setTop10ArticulosValorizados] = React.useState([{}]);
 
     //* AUTENTICAR USUARIO
     useEffect(() => {
@@ -389,6 +393,80 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
 
 
 
+
+
+
+
+
+
+
+    //* Obtener items y agregar Stock de cada
+    useEffect(() => {
+        const obtenerItems = async () => {
+            try {
+                const { data } = await clienteAxios.get(`${import.meta.env.VITE_API_URL}/facturas/items`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                const articulosConStock = listaArticulos.filter(articulo => articulo !== null).map(articulo => {
+                    if (articulo) {
+                        const item = data.find(item => item.ArticuloCodigo === articulo.Codigo);
+                        // Crear una nueva copia de item y modificar PrecioCosto
+                        return item ? { ...articulo, Stock: item.StockActual } : { ...articulo, Stock: "0.00000" };
+                    }
+                    return null;
+                });
+                // A artículos con stock, agregar la fecha de la última compra. Buscar para cada artículo la última compra detallada a partir de la
+                // propiedad "FacturaFecha", tomar la última fecha de compra y agregarla a la propiedad "FechaRegistro"
+                articulosConStock.forEach(articulo => {
+                    const comprasFiltradas = comprasDetalladas.filter(compra => compra.ArticuloCodigo === articulo.Codigo);
+                    if (comprasFiltradas.length > 0) {
+                        const fechaUltimaCompra = comprasFiltradas.reduce((acumulador, compra) => {
+                            const fecha = new Date(compra.FacturaFecha);
+                            return fecha > acumulador ? fecha : acumulador;
+                        }, new Date(0));
+                        articulo.FechaRegistro = fechaUltimaCompra.toISOString().split('T')[0];
+                        articulo.ProveedorNombre = comprasFiltradas[0].ProveedorNombre;
+                    } else {
+                        articulo.FechaRegistro = ""; // Dejar en blanco si no hay compras
+                        articulo.ProveedorNombre = ""; // Dejar en blanco si no hay compras
+                    }
+                });
+                setArticulosConStock(articulosConStock);
+                articulosConStock.forEach(articulo => {
+                    articulo.StockValorizado = currency(articulo.Stock * articulo.Costo, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format();
+                });
+
+                // Calcular el stock valorizado total
+                const stockValorizadoTotal = articulosConStock.reduce((total, articulo) => total + Number(articulo.Stock * articulo.Costo), 0);
+                const stockValorizadoTotalFormateado = currency(stockValorizadoTotal, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format();
+                setValorTotalStock(stockValorizadoTotalFormateado);
+                console.log(valorTotalStock);
+
+                // Hacer un objeto con los 10 artículos con mayot valor de stock valorizado, ordenarlos de mayor a menor. No permitir artículos duplicados
+                const articulosUnicos = new Map(articulosConStock.map(articulo => [articulo.Codigo, articulo]));
+                const articulosSinDuplicados = Array.from(articulosUnicos.values());
+
+                const articulosOrdenados = articulosSinDuplicados.sort((a, b) => b.Stock * b.Costo - a.Stock * a.Costo);
+                const articulosTop10 = articulosOrdenados.slice(0, 10);
+                setTop10ArticulosValorizados(articulosTop10);
+                console.log(top10ArticulosValorizados);
+
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        obtenerItems();
+    }, [listaArticulos]);
+
+
+
+
+
+
+
+
     return (
         <dataContext.Provider value={{
             mesActual,
@@ -448,7 +526,13 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
             listasDePrecios,
             setListasDePrecios,
             comprasDetalladas,
-            setComprasDetalladas
+            setComprasDetalladas,
+            articulosConStock,
+            setArticulosConStock,
+            valorTotalStock,
+            setValorTotalStock,
+            top10ArticulosValorizados,
+            setTop10ArticulosValorizados
         }}>
             {children}
         </dataContext.Provider>

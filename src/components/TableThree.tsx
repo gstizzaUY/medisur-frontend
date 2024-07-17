@@ -1,63 +1,15 @@
 import React, { useEffect } from 'react';
-import clienteAxios from '../functions/clienteAxios';
 import { dataContext } from '../hooks/DataContext';
 import { useMemo } from 'react';
 import { MaterialReactTable, useMaterialReactTable } from 'material-react-table';
 import { MRT_Localization_ES } from 'material-react-table/locales/es';
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import currency from "currency.js";
 
 const TableThree = () => {
   const { listaArticulos } = React.useContext(dataContext);
-  const { comprasDetalladas } = React.useContext(dataContext);
-  const [ articulosConStock, setArticulosConStock ] = React.useState([{}]);
+  const { articulosConStock } = React.useContext(dataContext);
 
-
-  //* Obtener items y agregar Stock de cada
-  useEffect(() => {
-    const obtenerItems = async () => {
-      try {
-        const { data } = await clienteAxios.get(`${import.meta.env.VITE_API_URL}/facturas/items`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        const articulosConStock = listaArticulos.filter(articulo => articulo !== null).map(articulo => {
-          if (articulo) {
-            const item = data.find(item => item.ArticuloCodigo === articulo.Codigo);
-            // Crear una nueva copia de item y modificar PrecioCosto
-            return item ? { ...articulo, Stock: item.StockActual } : { ...articulo, Stock: "0.00000" };
-          }
-          return null;
-        });
-
-        // A artículos con stock, agregar la fecha de la última compra. Buscar para cada artículo la última compra detallada a partir de la
-        // propiedad "FacturaFecha", tomar la última fecha de compra y agregarla a la propiedad "FechaRegistro"
-        articulosConStock.forEach(articulo => {
-          const comprasFiltradas = comprasDetalladas.filter(compra => compra.ArticuloCodigo === articulo.Codigo);
-          if (comprasFiltradas.length > 0) {
-            const fechaUltimaCompra = comprasFiltradas.reduce((acumulador, compra) => {
-              const fecha = new Date(compra.FacturaFecha);
-              return fecha > acumulador ? fecha : acumulador;
-            }, new Date(0));
-            articulo.FechaRegistro = fechaUltimaCompra.toISOString().split('T')[0];
-            articulo.ProveedorNombre = comprasFiltradas[0].ProveedorNombre;
-          } else {
-            articulo.FechaRegistro = ""; // Dejar en blanco si no hay compras
-            articulo.ProveedorNombre = ""; // Dejar en blanco si no hay compras
-          }
-        });
-        setArticulosConStock(articulosConStock);
-
-      } catch (error) {
-        console.log(error);
-      }
-    }
-    obtenerItems();
-  }, [listaArticulos]);
-
-
-  const data = listaArticulos;
   const columns = useMemo(
     () => [
       {
@@ -86,7 +38,7 @@ const TableThree = () => {
       {
         accessorKey: 'Costo',
         header: 'Costo',
-        size: 150,
+        size: 120,
         Cell: ({ cell }) => {
           const cellValue = cell.getValue();
           if (cellValue) {
@@ -115,18 +67,28 @@ const TableThree = () => {
       {
         accessorKey: 'CostoFecha',
         header: 'Costo Fecha',
-        size: 150,
+        size: 120,
       },
       {
         accessorKey: 'FechaRegistro',
         header: 'Última Compra',
-        size: 180,
+        size: 170,
       },
       {
         accessorKey: 'ProveedorNombre',
         header: 'Proveedor',
+        size: 180,
+      },
+      {
+        accessorKey: 'StockValorizado',
+        header: 'Stock Valorizado',
         size: 150,
-      }
+        Cell: ({ cell }) => (
+          <Box>
+            {cell.getValue()}
+          </Box>
+        ),
+      },
     ],
     [listaArticulos],
   );

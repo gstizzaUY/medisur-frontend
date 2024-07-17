@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect, useMemo } from 'react';
+import { useContext, useState, useEffect, useMemo } from 'react';
 import { dataContext } from '../../hooks/DataContext';
 import Breadcrumb from '../../components/Breadcrumb';
 import Select from 'react-select';
@@ -10,14 +10,22 @@ import dayjs from 'dayjs';
 
 const VentasDetalladas = () => {
     const { mesActual, anioActual, clientes, ventasDetalladas } = useContext(dataContext);
-
-    const [clienteSeleccionado, setClienteSeleccionado] = useState(undefined);
-    const [ventasFiltradasAgrupadas, setVentasFiltradasAgrupadas] = useState({});
+    const [clienteSeleccionado, setClienteSeleccionado] = useState(() => {
+        const clienteGuardado = localStorage.getItem('clienteSeleccionado');
+        return clienteGuardado ? JSON.parse(clienteGuardado) : undefined;
+    });
+    const [ventasFiltradasAgrupadas, setVentasFiltradasAgrupadas] = useState(() => {
+        const datosTablaClientes = localStorage.getItem('datosTablaClientes');
+        return datosTablaClientes ? JSON.parse(datosTablaClientes) : {};
+    });
     const [data, setData] = useState([]);
-
     const clienteOptions = clientes.map(cliente => ({ value: cliente.Nombre, label: cliente.Nombre }));
+
+
     const handleChangeCliente = selectedOption => {
-        setClienteSeleccionado(clientes.find(cliente => cliente.Nombre === selectedOption.value));
+        const cliente = clientes.find(cliente => cliente.Nombre === selectedOption.value);
+        setClienteSeleccionado(cliente);
+        localStorage.setItem('clienteSeleccionado', JSON.stringify(cliente));
     };
 
     const handleConsultar = () => {
@@ -25,13 +33,10 @@ const VentasDetalladas = () => {
             console.error('No se ha seleccionado ningún cliente');
             return;
         }
-
         const ventasFiltradas = ventasDetalladas.filter(venta => venta.ClienteCodigo === clienteSeleccionado.Codigo);
-
         const ventasAgrupadas = ventasFiltradas.reduce((acumulador, venta) => {
             const fecha = dayjs(venta.FacturaRegistroFecha);
             const mesAni = `${fecha.month() + 1}-${fecha.year()}`;
-
             let productoExistente = acumulador[venta.ArticuloCodigo];
             if (!productoExistente) {
                 productoExistente = {
@@ -42,19 +47,15 @@ const VentasDetalladas = () => {
                 };
                 acumulador[venta.ArticuloCodigo] = productoExistente;
             }
-
             if (!productoExistente.Cantidad[mesAni]) {
                 productoExistente.Cantidad[mesAni] = 0;
                 productoExistente.Precio[mesAni] = { total: 0, count: 0 };
             }
-
             productoExistente.Cantidad[mesAni] += Number(venta.LineaCantidad);
             productoExistente.Precio[mesAni].total += Number(venta.LineaPrecio) * Number(venta.LineaCantidad);
             productoExistente.Precio[mesAni].count += Number(venta.LineaCantidad);
-
             return acumulador;
         }, {});
-
         for (let codigo in ventasAgrupadas) {
             let producto = ventasAgrupadas[codigo];
             for (let mesAni in producto.Precio) {
@@ -63,8 +64,8 @@ const VentasDetalladas = () => {
                 }
             }
         }
-
         setVentasFiltradasAgrupadas(Object.values(ventasAgrupadas));
+        localStorage.setItem('datosTablaClientes', JSON.stringify(Object.values(ventasAgrupadas)));
     }
 
     useEffect(() => {
@@ -141,7 +142,7 @@ const VentasDetalladas = () => {
                             }),
                         }}
                         placeholder="Seleccione un cliente"
-                        defaultValue={clienteOptions[0]}
+                        defaultValue={clienteOptions.find(cliente => cliente.value === clienteSeleccionado?.Nombre) || ''}
                         isClearable={true}
                         isSearchable={true}
                         name="cliente"

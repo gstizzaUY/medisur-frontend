@@ -39,6 +39,10 @@ const DropdownUser = () => {
 
   const handleLogOut = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('clienteSeleccionado');
+    localStorage.removeItem('proveedorSeleccionado');
+    localStorage.removeItem('datosTabla');
+    localStorage.removeItem('datosTablaClientes');
   }
 
   return (
