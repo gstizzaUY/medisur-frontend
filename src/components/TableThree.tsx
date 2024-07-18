@@ -9,13 +9,10 @@ import currency from "currency.js";
 const TableThree = () => {
   const { listaArticulos, comprasDetalladas } = React.useContext(dataContext);
   const [ articulosConStock, setArticulosConStock ] = React.useState([{}]);
-  const [totalStockValorizado, setTotalStockValorizado] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
 
   //* Obtener items y agregar Stock de cada
   useEffect(() => {
     const obtenerItems = async () => {
-      setIsLoading(true);
       try {
         const { data } = await clienteAxios.get(`${import.meta.env.VITE_API_URL}/facturas/items`, {
           headers: {
@@ -53,21 +50,10 @@ const TableThree = () => {
       } catch (error) {
         console.log(error);
       }
-      setIsLoading(false);
     };
     obtenerItems();
   }, [ listaArticulos, comprasDetalladas ]);
 
-  useEffect(() => {
-    if (!isLoading) {
-      let total = 0;
-      articulosConStock.forEach(articulo => {
-        total += parseFloat(articulo.StockValorizado)
-      });
-      setTotalStockValorizado(total);
-    
-  }
-  } , [articulosConStock, isLoading]);
     
   const data = listaArticulos;
 
@@ -195,11 +181,6 @@ const TableThree = () => {
             );
           }
         },
-        Footer: () => (
-          <Box sx={{ textAlign: 'right' }}>
-            {currency(totalStockValorizado, { symbol: "$ ", separator: ".", decimal: "," }).format()}
-          </Box>
-        ),
       },
       
     ],

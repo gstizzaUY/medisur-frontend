@@ -184,6 +184,25 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
         obtenerArticulos();
     }, []);
 
+        //* OBTENER COMPRAS DETALLADAS
+        useEffect(() => {
+            const obtenerComprasDetalladas = async () => {
+                try {
+                    const datos = { Mes: mesActual, Anio: anioActual };
+                    const config = {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    };
+                    const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/compras`, datos, config);
+                    setComprasDetalladas(data);
+                } catch (error) {
+                    console.log(error);
+                }
+            }
+            obtenerComprasDetalladas();
+        }, []);
+
 
 
     //* Obtener comprobantes
@@ -262,24 +281,7 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
         obtenerFacturas();
     }, []);
 
-    //* OBTENER COMPRAS DETALLADAS
-    useEffect(() => {
-        const obtenerComprasDetalladas = async () => {
-            try {
-                const datos = { Mes: mesActual, Anio: anioActual };
-                const config = {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                };
-                const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/compras`, datos, config);
-                setComprasDetalladas(data);
-            } catch (error) {
-                console.log(error);
-            }
-        }
-        obtenerComprasDetalladas();
-    }, []);
+
 
 
 
