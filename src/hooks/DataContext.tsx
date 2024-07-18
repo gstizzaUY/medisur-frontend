@@ -121,7 +121,6 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     const [comprasDetalladas, setComprasDetalladas] = React.useState([] as any);
     const [articulosConStock, setArticulosConStock] = React.useState([{}]);
     const [valorTotalStock, setValorTotalStock] = React.useState(0);
-    const [top10ArticulosValorizados, setTop10ArticulosValorizados] = React.useState([{}]);
 
     //* AUTENTICAR USUARIO
     useEffect(() => {
@@ -184,24 +183,24 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
         obtenerArticulos();
     }, []);
 
-        //* OBTENER COMPRAS DETALLADAS
-        useEffect(() => {
-            const obtenerComprasDetalladas = async () => {
-                try {
-                    const datos = { Mes: mesActual, Anio: anioActual };
-                    const config = {
-                        headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
-                        }
-                    };
-                    const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/compras`, datos, config);
-                    setComprasDetalladas(data);
-                } catch (error) {
-                    console.log(error);
-                }
+    //* OBTENER COMPRAS DETALLADAS
+    useEffect(() => {
+        const obtenerComprasDetalladas = async () => {
+            try {
+                const datos = { Mes: mesActual, Anio: anioActual };
+                const config = {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                };
+                const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/compras`, datos, config);
+                setComprasDetalladas(data);
+            } catch (error) {
+                console.log(error);
             }
-            obtenerComprasDetalladas();
-        }, []);
+        }
+        obtenerComprasDetalladas();
+    }, []);
 
 
 
@@ -402,7 +401,6 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
 
 
 
-    //* Obtener items y agregar Stock de cada artículo
     useEffect(() => {
         const obtenerItems = async () => {
             try {
@@ -411,53 +409,50 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     }
                 });
+                // Transformar data en un Map para acceso rápido
+                const dataMap = new Map(data.map(item => [item.ArticuloCodigo, item]));
 
-                // Crear mapas para acceso rápido
-                const itemsMap = new Map(data.map(item => [item.ArticuloCodigo, item]));
-                const comprasMap = comprasDetalladas.reduce((acc, compra) => {
-                    const fecha = new Date(compra.FacturaFecha).getTime();
-                    if (!acc[compra.ArticuloCodigo] || fecha > acc[compra.ArticuloCodigo].fecha) {
-                        acc[compra.ArticuloCodigo] = { fecha, compra };
-                    }
-                    return acc;
-                }, {});
-
-                let stockValorizadoTotal = 0;
-
-                const articulosConStock = listaArticulos.filter(articulo => articulo !== null).map(articulo => {
-                    const item = itemsMap.get(articulo.Codigo);
-                    const stockActual = item ? item.StockActual : "0.00000";
-                    const compraInfo = comprasMap[articulo.Codigo];
-
-                    const articuloModificado = {
-                        ...articulo,
-                        Stock: stockActual,
-                        FechaRegistro: compraInfo ? new Date(compraInfo.fecha).toISOString().split('T')[0] : "",
-                        ProveedorNombre: compraInfo ? compraInfo.compra.ProveedorNombre : "",
-                    };
-
-                    // Calcular stock valorizado
-                    const stockValorizado = Number(stockActual) * articulo.Costo;
-                    articuloModificado.StockValorizado = currency(stockValorizado, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format();
-
-                    // Acumular para el total
-                    stockValorizadoTotal += stockValorizado;
-
-                    return articuloModificado;
+                let articulosMap = new Map();
+                listaArticulos.filter(articulo => articulo !== null).forEach(articulo => {
+                    const item = dataMap.get(articulo.Codigo);
+                    const articuloConStock = item ? { ...articulo, Stock: item.StockActual } : { ...articulo, Stock: "0.00000" };
+                    articulosMap.set(articulo.Codigo, articuloConStock);
                 });
 
-                // Formatear el total valorizado
-                const stockValorizadoTotalFormateado = currency(stockValorizadoTotal, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format();
-                
-                setValorTotalStock(stockValorizadoTotalFormateado);
-                setArticulosConStock(articulosConStock);
+                articulosMap.forEach((articulo, codigo) => {
+                    const comprasFiltradas = comprasDetalladas.filter(compra => compra.ArticuloCodigo === codigo);
+                    if (comprasFiltradas.length > 0) {
+                        const fechaUltimaCompra = comprasFiltradas.reduce((acumulador, compra) => {
+                            const fecha = new Date(compra.FacturaFecha);
+                            return fecha > acumulador ? fecha : acumulador;
+                        }, new Date(0));
+                        articulo.FechaRegistro = fechaUltimaCompra.toISOString().split('T')[0];
+                        articulo.ProveedorNombre = comprasFiltradas[0].ProveedorNombre;
+                    } else {
+                        articulo.FechaRegistro = "";
+                        articulo.ProveedorNombre = "";
+                    }
+                    const stock = parseFloat(articulo.Stock);
+                    const costo = parseFloat(articulo.Costo);
+                    articulo.StockValorizado = stock * costo;
+                });
+                setArticulosConStock([...articulosMap.values()]);
 
             } catch (error) {
                 console.log(error);
             }
-        }
+        };
         obtenerItems();
-    }, [listaArticulos]);
+    }, [listaArticulos, comprasDetalladas]);
+
+
+    // Calcular el valor total del stock
+    useEffect(() => {
+        const valorTotal = articulosConStock.reduce((total, articulo) => total + Number(articulo.StockValorizado), 0);
+        setValorTotalStock(valorTotal);
+        console.log(valorTotalStock);
+    }, [articulosConStock]);
+
 
 
 
@@ -530,8 +525,6 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
             setArticulosConStock,
             valorTotalStock,
             setValorTotalStock,
-            top10ArticulosValorizados,
-            setTop10ArticulosValorizados
         }}>
             {children}
         </dataContext.Provider>

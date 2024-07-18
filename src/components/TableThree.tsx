@@ -47,6 +47,7 @@ const TableThree = () => {
           articulo.StockValorizado = stock * costo;
         });
         setArticulosConStock([...articulosMap.values()]);
+
       } catch (error) {
         console.log(error);
       }
