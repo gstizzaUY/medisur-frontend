@@ -1,4 +1,5 @@
-import { useContext, useMemo } from 'react';
+import React, { useContext, useMemo, useEffect, useState } from 'react';
+import clienteAxios from '../functions/clienteAxios';
 import { dataContext } from '../hooks/DataContext';
 import { MaterialReactTable, useMaterialReactTable } from 'material-react-table';
 import { MRT_Localization_ES } from 'material-react-table/locales/es';
@@ -6,8 +7,69 @@ import { Box } from '@mui/material';
 import currency from "currency.js";
 
 const TableThree = () => {
-  const { articulosConStock } = useContext(dataContext);
-  console.log('articulosConStock', articulosConStock);
+  const { listaArticulos, comprasDetalladas } = React.useContext(dataContext);
+  const [ articulosConStock, setArticulosConStock ] = React.useState([{}]);
+  const [totalStockValorizado, setTotalStockValorizado] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  //* Obtener items y agregar Stock de cada
+  useEffect(() => {
+    const obtenerItems = async () => {
+      setIsLoading(true);
+      try {
+        const { data } = await clienteAxios.get(`${import.meta.env.VITE_API_URL}/facturas/items`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        let articulosMap = new Map();
+        listaArticulos.filter(articulo => articulo !== null).forEach(articulo => {
+          if (articulo) {
+            const item = data.find(item => item.ArticuloCodigo === articulo.Codigo);
+            const articuloConStock = item ? { ...articulo, Stock: item.StockActual } : { ...articulo, Stock: "0.00000" };
+            articulosMap.set(articulo.Codigo, articuloConStock);
+          }
+        });
+
+        articulosMap.forEach((articulo, codigo) => {
+          const comprasFiltradas = comprasDetalladas.filter(compra => compra.ArticuloCodigo === codigo);
+          if (comprasFiltradas.length > 0) {
+            const fechaUltimaCompra = comprasFiltradas.reduce((acumulador, compra) => {
+              const fecha = new Date(compra.FacturaFecha);
+              return fecha > acumulador ? fecha : acumulador;
+            }, new Date(0));
+            articulo.FechaRegistro = fechaUltimaCompra.toISOString().split('T')[0];
+            articulo.ProveedorNombre = comprasFiltradas[0].ProveedorNombre;
+          } else {
+            articulo.FechaRegistro = "";
+            articulo.ProveedorNombre = "";
+          }
+
+          const stock = parseFloat(articulo.Stock);
+          const costo = parseFloat(articulo.Costo);
+          articulo.StockValorizado = stock * costo;
+        });
+        setArticulosConStock([...articulosMap.values()]);
+      } catch (error) {
+        console.log(error);
+      }
+      setIsLoading(false);
+    };
+    obtenerItems();
+  }, [ listaArticulos, comprasDetalladas ]);
+
+  useEffect(() => {
+    if (!isLoading) {
+      let total = 0;
+      articulosConStock.forEach(articulo => {
+        total += parseFloat(articulo.StockValorizado)
+      });
+      setTotalStockValorizado(total);
+    
+  }
+  } , [articulosConStock, isLoading]);
+    
+  const data = listaArticulos;
 
   const columns = useMemo(
     () => [
@@ -20,12 +82,18 @@ const TableThree = () => {
         accessorKey: 'Nombre',
         header: 'Nombre',
         sortDescFirst: true,
-        size: 370,
+        size: 340,
       },
       {
         accessorKey: 'Stock',
         header: 'Stock',
         size: 130,
+        muiTableHeadCellProps: {
+          align: 'right',
+        },
+        muiTableBodyCellProps: {
+          align: 'right',
+        },
         // Eliminar los últimos 6 digitos
         Cell: ({ cell }) => (
           <Box>
@@ -38,6 +106,12 @@ const TableThree = () => {
         accessorKey: 'Costo',
         header: 'Costo',
         size: 120,
+        muiTableHeadCellProps: {
+          align: 'right',
+        },
+        muiTableBodyCellProps: {
+          align: 'right',
+        },
         Cell: ({ cell }) => {
           const cellValue = cell.getValue();
           if (cellValue) {
@@ -72,6 +146,12 @@ const TableThree = () => {
         accessorKey: 'FechaRegistro',
         header: 'Última Compra',
         size: 170,
+        muiTableHeadCellProps: {
+          align: 'right',
+        },
+        muiTableBodyCellProps: {
+          align: 'right',
+        },
       },
       {
         accessorKey: 'ProveedorNombre',
@@ -81,15 +161,49 @@ const TableThree = () => {
       {
         accessorKey: 'StockValorizado',
         header: 'Stock Valorizado',
-        size: 150,
-        Cell: ({ cell }) => (
-          <Box>
-            {cell.getValue()}
+        size: 180,
+        muiTableHeadCellProps: {
+          align: 'right',
+        },
+        muiTableBodyCellProps: {
+          align: 'right',
+        },
+        muiTableFooterCellProps: {
+          align: 'right',
+        },
+        Cell: ({ cell }) => {
+          const cellValue = cell.getValue();
+          if (cellValue) {
+            return (
+              <Box >
+                {
+                  (() => {
+                    const numberValue = parseFloat(cellValue);
+                    if (numberValue <= 0.99) {
+                      return currency(numberValue, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format();
+                    }
+                    return currency(numberValue, { symbol: "$ ", separator: ".", decimal: "," }).format();
+                  })()
+                }
+              </Box>
+            );
+          } else {
+            return (
+              <Box>
+                {currency(0, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
+              </Box>
+            );
+          }
+        },
+        Footer: () => (
+          <Box sx={{ textAlign: 'right' }}>
+            {currency(totalStockValorizado, { symbol: "$ ", separator: ".", decimal: "," }).format()}
           </Box>
         ),
       },
+      
     ],
-    [articulosConStock],
+    [listaArticulos],
   );
 
   const table = useMaterialReactTable({
