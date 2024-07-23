@@ -422,7 +422,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             </NavLink>
                           </li>
 
-                          {/* <li>
+                          <li>
                             <NavLink onClick={() => setSidebarOpen(!sidebarOpen)}
                               to="/app/informes/ganancias-por-articulo"
                               className={({ isActive }) =>
@@ -432,7 +432,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             >
                               Ganancias por Artículo
                             </NavLink>
-                          </li> */}
+                          </li>
 
                         </ul>
                       </div>

@@ -2,7 +2,6 @@ import React, { ReactNode } from "react";
 import { useState, useEffect } from "react";
 import clienteAxios from '../functions/clienteAxios';
 import dayjs from 'dayjs';
-import currency from "currency.js";
 
 export const dataContext = React.createContext({});
 
@@ -121,6 +120,8 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     const [comprasDetalladas, setComprasDetalladas] = React.useState([] as any);
     const [articulosConStock, setArticulosConStock] = React.useState([{}]);
     const [valorTotalStock, setValorTotalStock] = React.useState(0);
+    const [totalGananciasMensual, setTotalGananciasMensual] = React.useState(0);
+    const [porentajeGananciasMensual, setPorcentajeGananciasMensual] = React.useState(0);
 
     //* AUTENTICAR USUARIO
     useEffect(() => {
@@ -392,15 +393,7 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
 
 
 
-
-
-
-
-
-
-
-
-
+    //* STOCK VALORIZADO DE ARTÍCULOS
     useEffect(() => {
         const obtenerItems = async () => {
             try {
@@ -450,15 +443,52 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     useEffect(() => {
         const valorTotal = articulosConStock.reduce((total, articulo) => total + Number(articulo.StockValorizado), 0);
         setValorTotalStock(valorTotal);
-        console.log(valorTotalStock);
     }, [articulosConStock]);
 
 
 
-
-
-
-
+    //* GANAANCIAS POR ARTÍCULO
+    useEffect(() => {
+        const obtenerGananciaTotalMes = async () => {
+            const ventasDelMes = ventasDetalladas.filter(
+                venta => venta.FacturaMes === mesActual && venta.FacturaAnio === anioActual
+            );
+            const agrupadasPorArticulo = ventasDelMes.reduce((acc, venta) => {
+                const codigo = venta.ArticuloCodigo;
+                if (!acc[codigo]) {
+                    acc[codigo] = { ...venta, CantidadTotal: 0 };
+                }
+                acc[codigo].CantidadTotal += parseFloat(venta.LineaCantidad);
+                return acc;
+            }, {});
+            const dataFinal = Object.values(agrupadasPorArticulo).map(venta => {
+                const articulo = listaArticulos.find(art => art.Codigo === venta.ArticuloCodigo);
+                const costoUnitario = parseFloat(articulo?.Costo || 0);
+                const cantidadVendida = venta.CantidadTotal;
+                const costoTotal = costoUnitario * cantidadVendida;
+                const precioVentaTotal = parseFloat(venta.LineaPrecio) * cantidadVendida;
+                const gananciaTotal = precioVentaTotal - costoTotal;
+                return {
+                    Codigo: venta.ArticuloCodigo,
+                    Nombre: venta.ArticuloNombre,
+                    Cantidad: venta.CantidadTotal,
+                    Costo: costoTotal,
+                    Precio: precioVentaTotal,
+                    Ganancia: gananciaTotal,
+                    Porcentaje: ((gananciaTotal / costoTotal) * 100).toFixed(2).replace('.', ',') + '%'
+                };
+            });
+            // En base a dataFinal, sumar el valor total de la propiedad Ganancia para todos los artículos y establecerlo en totalGananciasMensual
+            const totalGanancias = dataFinal.reduce((total, articulo) => total + Number(articulo.Ganancia), 0);
+            setTotalGananciasMensual(totalGanancias);
+            console.log(totalGanancias);
+            // Calcular el porcentaje de ganancias mensual promedio haciendo el promedio de Porcentaje
+            const promedioPorcentaje = dataFinal.reduce((total, articulo) => total + parseFloat(articulo.Porcentaje.replace(',', '.')), 0) / dataFinal.length;
+            setPorcentajeGananciasMensual(promedioPorcentaje);
+            console.log(promedioPorcentaje);
+        }
+        obtenerGananciaTotalMes();
+    }, [mesActual, anioActual, ventasDetalladas, listaArticulos]);
 
 
     return (
@@ -525,6 +555,10 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
             setArticulosConStock,
             valorTotalStock,
             setValorTotalStock,
+            totalGananciasMensual,
+            setTotalGananciasMensual,
+            porentajeGananciasMensual,
+            setPorcentajeGananciasMensual,
         }}>
             {children}
         </dataContext.Provider>

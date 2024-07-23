@@ -1,20 +1,17 @@
-import React from 'react';
-import { useContext, useState, useEffect } from 'react';
+import { useContext } from 'react';
 import { dataContext } from '../hooks/DataContext';
 import currency from 'currency.js';
-import MonetizationOnSharpIcon from '@mui/icons-material/MonetizationOnSharp';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 
 
 const CardOne = () => {
-const {mesActual, setMesActual} = React.useContext(dataContext);
-const {anioActual, setAnioActual} = React.useContext(dataContext);
-const {totalFacturadoMesActual, setTotalFacturadoMesActual} = React.useContext(dataContext);
+const {mesActual, anioActual, totalFacturadoMesActual } = useContext(dataContext);
 
 
   return (
     <div className="rounded-sm border border-stroke bg-white py-6 px-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
       <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-meta-2 dark:bg-meta-4">
-      < MonetizationOnSharpIcon className="text-primary" />
+      < ReceiptLongIcon className="text-primary" />
       </div>
 
       <div className="mt-4 flex items-end justify-between">

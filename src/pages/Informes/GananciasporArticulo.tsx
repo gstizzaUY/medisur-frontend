@@ -1,19 +1,61 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { dataContext } from '../../hooks/DataContext';
-import { useMemo } from 'react';
+import Breadcrumb from '../../components/Breadcrumb';
 import { MaterialReactTable, useMaterialReactTable } from 'material-react-table';
 import { MRT_Localization_ES } from 'material-react-table/locales/es';
-import { Box } from '@mui/material';
 import currency from "currency.js";
 
 const GananciasPorArticulo = () => {
-    const { listaArticulos } = React.useContext(dataContext);
-    const { articulosConStock } = React.useContext(dataContext);
+    const { mesActual, anioActual, ventasDetalladas, listaArticulos } = React.useContext(dataContext);
+    const [data, setData] = useState([]);
+
+    useEffect(() => {
+        const ventasDelMes = ventasDetalladas.filter(
+            venta => venta.FacturaMes === mesActual && venta.FacturaAnio === anioActual
+        );
+
+        const agrupadasPorArticulo = ventasDelMes.reduce((acc, venta) => {
+            const codigo = venta.ArticuloCodigo;
+            if (!acc[codigo]) {
+                acc[codigo] = { ...venta, CantidadTotal: 0 };
+            }
+            acc[codigo].CantidadTotal += parseFloat(venta.LineaCantidad);
+            return acc;
+        }, {});
+
+        const dataFinal = Object.values(agrupadasPorArticulo).map(venta => {
+            const articulo = listaArticulos.find(art => art.Codigo === venta.ArticuloCodigo);
+            const costoUnitario = parseFloat(articulo?.Costo || 0);
+            const cantidadVendida = venta.CantidadTotal;
+            const costoTotal = costoUnitario * cantidadVendida;
+            const precioVentaTotal = parseFloat(venta.LineaPrecio) * cantidadVendida;
+            const gananciaTotal = precioVentaTotal - costoTotal;
+
+            return {
+                Codigo: venta.ArticuloCodigo,
+                Nombre: venta.ArticuloNombre,
+                Cantidad: venta.CantidadTotal,
+                Costo: currency(costoTotal, { symbol: "$ ", separator: ".", decimal: "," }).format(),
+                Precio: currency(precioVentaTotal, { symbol: "$ ", separator: ".", decimal: "," }).format(),
+                Ganancia: currency(gananciaTotal, { symbol: "$ ", separator: ".", decimal: "," }).format(),
+                Porcentaje: ((gananciaTotal / costoTotal) * 100).toFixed(2).replace('.', ',') + '%'
+            };
+        });
+
+        setData(dataFinal);
+    }, [mesActual, anioActual, ventasDetalladas, listaArticulos]);
+
+    // Obtener el nombre del mes actual en español
+    const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    const fechaActual = new Date();
+    const nombreMesActual = meses[fechaActual.getMonth()];
+    const anioActualTexto = fechaActual.getFullYear();
+
 
     const columns = useMemo(
         () => [
             {
-                accessorKey: 'Codigo', //access nested data with dot notation
+                accessorKey: 'Codigo',
                 header: 'Código',
                 size: 100,
             },
@@ -24,82 +66,71 @@ const GananciasPorArticulo = () => {
                 size: 370,
             },
             {
-                accessorKey: 'Stock',
-                header: 'Stock',
+                accessorKey: 'Cantidad',
+                header: 'Cantidad',
                 size: 130,
-                // Eliminar los últimos 6 digitos
-                Cell: ({ cell }) => (
-                    <Box>
-                        {cell.getValue() ? cell.getValue().slice(0, -6) : ''}
-                    </Box>
-                ),
+                muiTableHeadCellProps: {
+                    align: 'right',
+                },
+                muiTableBodyCellProps: {
+                    align: 'right',
+                },
             },
-
             {
                 accessorKey: 'Costo',
                 header: 'Costo',
                 size: 120,
-                Cell: ({ cell }) => {
-                    const cellValue = cell.getValue();
-                    if (cellValue) {
-                        return (
-                            <Box >
-                                {
-                                    (() => {
-                                        const numberValue = parseFloat(cellValue);
-                                        if (numberValue <= 0.99) {
-                                            return currency(numberValue, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format();
-                                        }
-                                        return currency(numberValue, { symbol: "$ ", separator: ".", decimal: "," }).format();
-                                    })()
-                                }
-                            </Box>
-                        );
-                    } else {
-                        return (
-                            <Box>
-                                {currency(0, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
-                            </Box>
-                        );
-                    }
+                muiTableHeadCellProps: {
+                    align: 'right',
+                },
+                muiTableBodyCellProps: {
+                    align: 'right',
                 },
             },
             {
-                accessorKey: 'CostoFecha',
-                header: 'Costo Fecha',
-                size: 120,
+                accessorKey: 'Precio',
+                header: 'Precio',
+                size: 160,
+                muiTableHeadCellProps: {
+                    align: 'right',
+                },
+                muiTableBodyCellProps: {
+                    align: 'right',
+                },
             },
             {
-                accessorKey: 'FechaRegistro',
-                header: 'Última Compra',
+                accessorKey: 'Ganancia',
+                header: 'Ganancia',
                 size: 170,
+                muiTableHeadCellProps: {
+                    align: 'right',
+                },
+                muiTableBodyCellProps: {
+                    align: 'right',
+                },
             },
             {
-                accessorKey: 'ProveedorNombre',
-                header: 'Proveedor',
+                accessorKey: 'Porcentaje',
+                header: 'Porcentaje',
                 size: 180,
-            },
-            {
-                accessorKey: 'StockValorizado',
-                header: 'Stock Valorizado',
-                size: 150,
-                Cell: ({ cell }) => (
-                    <Box>
-                        {cell.getValue()}
-                    </Box>
-                ),
+                muiTableHeadCellProps: {
+                    align: 'right',
+                },
+                muiTableBodyCellProps: {
+                    align: 'right',
+                },
             },
         ],
-        [listaArticulos],
+        []
     );
 
     const table = useMaterialReactTable({
         columns,
         layoutMode: 'grid-no-grow',
         localization: MRT_Localization_ES,
-        data: articulosConStock, //data must be memoized or stable (useState, useMemo, defined outside of this component, etc.)
+        data,
         enableTopToolbar: true,
-        globalFilterFn: 'contains', //turn off fuzzy matching and use simple contains filter function
+        globalFilterFn: 'contains',
         enableGlobalFilterRankedResults: true,
         enableStickyHeader: true,
         enableStickyFooter: true,
@@ -109,24 +140,21 @@ const GananciasPorArticulo = () => {
             density: 'compact',
             columnVisibility: {
                 'Codigo': false,
-                'CostoFecha': false,
             },
+            sorting: [
+                { id: 'Nombre', desc: false },
+            ],
         },
-
-
     });
-
-
 
     return (
         <>
+            <Breadcrumb pageName={`Ganancias por Artículo - ${nombreMesActual} ${anioActualTexto}`} />
             <MaterialReactTable
                 table={table}
             />
         </>
     );
-
-
 };
 
 export default GananciasPorArticulo;
