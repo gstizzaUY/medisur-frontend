@@ -17,23 +17,24 @@ const GananciasPorArticulo = () => {
         const agrupadasPorArticulo = ventasDelMes.reduce((acc, venta) => {
             const codigo = venta.ArticuloCodigo;
             if (!acc[codigo]) {
-                acc[codigo] = { ...venta, CantidadTotal: 0 };
+                acc[codigo] = { CantidadTotal: 0, PrecioVentaTotal: 0 };
             }
             acc[codigo].CantidadTotal += parseFloat(venta.LineaCantidad);
+            acc[codigo].PrecioVentaTotal += parseFloat(venta.LineaCantidad) * parseFloat(venta.LineaPrecio);
+            console.log(acc);
             return acc;
         }, {});
 
-        const dataFinal = Object.values(agrupadasPorArticulo).map(venta => {
-            const articulo = listaArticulos.find(art => art.Codigo === venta.ArticuloCodigo);
+        const dataFinal = Object.keys(agrupadasPorArticulo).map(codigo => {
+            const venta = agrupadasPorArticulo[codigo];
+            const articulo = listaArticulos.find(art => art.Codigo === codigo);
             const costoUnitario = parseFloat(articulo?.Costo || 0);
-            const cantidadVendida = venta.CantidadTotal;
-            const costoTotal = costoUnitario * cantidadVendida;
-            const precioVentaTotal = parseFloat(venta.LineaPrecio) * cantidadVendida;
+            const costoTotal = costoUnitario * venta.CantidadTotal;
+            const precioVentaTotal = venta.PrecioVentaTotal;
             const gananciaTotal = precioVentaTotal - costoTotal;
-
             return {
-                Codigo: venta.ArticuloCodigo,
-                Nombre: venta.ArticuloNombre,
+                Codigo: codigo,
+                Nombre: articulo?.Nombre || '',
                 Cantidad: venta.CantidadTotal,
                 Costo: currency(costoTotal, { symbol: "$ ", separator: ".", decimal: "," }).format(),
                 Precio: currency(precioVentaTotal, { symbol: "$ ", separator: ".", decimal: "," }).format(),

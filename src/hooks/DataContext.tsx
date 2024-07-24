@@ -453,43 +453,51 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
             const ventasDelMes = ventasDetalladas.filter(
                 venta => venta.FacturaMes === mesActual && venta.FacturaAnio === anioActual
             );
+    
             const agrupadasPorArticulo = ventasDelMes.reduce((acc, venta) => {
                 const codigo = venta.ArticuloCodigo;
                 if (!acc[codigo]) {
-                    acc[codigo] = { ...venta, CantidadTotal: 0 };
+                    acc[codigo] = { CantidadTotal: 0, PrecioVentaTotal: 0 };
                 }
                 acc[codigo].CantidadTotal += parseFloat(venta.LineaCantidad);
+                acc[codigo].PrecioVentaTotal += parseFloat(venta.LineaCantidad) * parseFloat(venta.LineaPrecio);
+                console.log(acc);
                 return acc;
             }, {});
-            const dataFinal = Object.values(agrupadasPorArticulo).map(venta => {
-                const articulo = listaArticulos.find(art => art.Codigo === venta.ArticuloCodigo);
+    
+            const dataFinal = Object.keys(agrupadasPorArticulo).map(codigo => {
+                const venta = agrupadasPorArticulo[codigo];
+                const articulo = listaArticulos.find(art => art.Codigo === codigo);
                 const costoUnitario = parseFloat(articulo?.Costo || 0);
-                const cantidadVendida = venta.CantidadTotal;
-                const costoTotal = costoUnitario * cantidadVendida;
-                const precioVentaTotal = parseFloat(venta.LineaPrecio) * cantidadVendida;
+                const costoTotal = costoUnitario * venta.CantidadTotal;
+                const precioVentaTotal = venta.PrecioVentaTotal;
                 const gananciaTotal = precioVentaTotal - costoTotal;
+
                 return {
-                    Codigo: venta.ArticuloCodigo,
-                    Nombre: venta.ArticuloNombre,
+                    Codigo: codigo,
+                    Nombre: articulo?.Nombre || '',
                     Cantidad: venta.CantidadTotal,
                     Costo: costoTotal,
                     Precio: precioVentaTotal,
                     Ganancia: gananciaTotal,
-                    Porcentaje: ((gananciaTotal / costoTotal) * 100).toFixed(2).replace('.', ',') + '%'
+                    Porcentaje: ((gananciaTotal / costoTotal) * 100).toFixed(2) + '%'
                 };
             });
-            // En base a dataFinal, sumar el valor total de la propiedad Ganancia para todos los artículos y establecerlo en totalGananciasMensual
-            const totalGanancias = dataFinal.reduce((total, articulo) => total + Number(articulo.Ganancia), 0);
+
+            console.log(dataFinal);
+    
+            const totalGanancias = dataFinal.reduce((total, articulo) => total + articulo.Ganancia, 0);
             setTotalGananciasMensual(totalGanancias);
-            console.log(totalGanancias);
-            // Calcular el porcentaje de ganancias mensual promedio haciendo el promedio de Porcentaje
-            const promedioPorcentaje = dataFinal.reduce((total, articulo) => total + parseFloat(articulo.Porcentaje.replace(',', '.')), 0) / dataFinal.length;
-            setPorcentajeGananciasMensual(promedioPorcentaje);
-            console.log(promedioPorcentaje);
+
+            const totalCostos = dataFinal.reduce((total, articulo) => total + articulo.Costo, 0);
+
+            const porcentajeGanancias = (totalGanancias / totalCostos) * 100;
+            setPorcentajeGananciasMensual(porcentajeGanancias);
+
+            
         }
         obtenerGananciaTotalMes();
     }, [mesActual, anioActual, ventasDetalladas, listaArticulos]);
-
 
     return (
         <dataContext.Provider value={{
