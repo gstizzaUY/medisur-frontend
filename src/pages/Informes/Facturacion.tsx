@@ -9,34 +9,35 @@ import dayjs from 'dayjs';
 const Facturacion = () => {
     const { mesActual, anioActual, facturasClientes, setFacturasClientes } = useContext(dataContext);
 
-const data = useMemo(() => {
-    const facturacionPorMes = {};
-    facturasClientes.forEach(factura => {
-        const mesAnio = dayjs(factura.Fecha).format('MM/YY');
-        const cliente = factura.ClienteNombre;
-        const zona = factura.ClienteZonaCodigo;
-        if (!facturacionPorMes[cliente]) {
-            facturacionPorMes[cliente] = { ClienteZonaCodigo: zona };
-        }
-        if (!facturacionPorMes[cliente][mesAnio]) {
-            facturacionPorMes[cliente][mesAnio] = 0
-        }
-        let totalFactura = parseFloat(factura.TotalSigno);
-        if (factura.ComprobanteCodigo === 701 || factura.ComprobanteCodigo === 703 || factura.ComprobanteCodigo === 702 || factura.ComprobanteCodigo === 704) {
-            facturacionPorMes[cliente][mesAnio] += totalFactura;
-        }
-    });
 
-    for (let cliente in facturacionPorMes) {
-        for (let mesAnio in facturacionPorMes[cliente]) {
-            if (mesAnio !== 'ClienteZonaCodigo') {
-                facturacionPorMes[cliente][mesAnio] = `${currency(facturacionPorMes[cliente][mesAnio], { symbol: '$ ', precision: 2, separator: ".", decimal: "," }).format()}`;
+    const data = useMemo(() => {
+        const facturacionPorMes = {};
+        facturasClientes.forEach(factura => {
+            const mesAnio = dayjs(factura.Fecha).format('MM/YY');
+            const cliente = factura.ClienteNombre;
+            const zona = factura.ClienteZonaCodigo;
+            if (!facturacionPorMes[cliente]) {
+                facturacionPorMes[cliente] = { ClienteZonaCodigo: zona };
+            }
+            if (!facturacionPorMes[cliente][mesAnio]) {
+                facturacionPorMes[cliente][mesAnio] = 0
+            }
+            let totalFactura = parseFloat(factura.TotalSigno);
+            if (factura.ComprobanteCodigo === 701 || factura.ComprobanteCodigo === 703 || factura.ComprobanteCodigo === 702 || factura.ComprobanteCodigo === 704) {
+                facturacionPorMes[cliente][mesAnio] += totalFactura;
+            }
+        });
+
+        for (let cliente in facturacionPorMes) {
+            for (let mesAnio in facturacionPorMes[cliente]) {
+                if (mesAnio !== 'ClienteZonaCodigo') {
+                    facturacionPorMes[cliente][mesAnio] = `${currency(facturacionPorMes[cliente][mesAnio], { symbol: '$ ', precision: 2, separator: ".", decimal: "," }).format()}`;
+                }
             }
         }
-    }
 
-    return Object.entries(facturacionPorMes).map(([cliente, facturacion]) => ({ nombre: cliente,  ...facturacion }));
-}, [facturasClientes]);
+        return Object.entries(facturacionPorMes).map(([cliente, facturacion]) => ({ nombre: cliente, ...facturacion }));
+    }, [facturasClientes]);
 
     const columns = useMemo(() => {
         const cols = [

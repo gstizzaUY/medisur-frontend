@@ -20,13 +20,19 @@ const TableThree = () => {
           }
         });
         let articulosMap = new Map();
+        
         listaArticulos.filter(articulo => articulo !== null).forEach(articulo => {
           if (articulo) {
             const item = data.find(item => item.ArticuloCodigo === articulo.Codigo);
+            // if (!item) {
+            //   console.warn(`Artículo con código ${articulo.Codigo} no encontrado en data`);
+            // }
             const articuloConStock = item ? { ...articulo, Stock: item.StockActual } : { ...articulo, Stock: "0.00000" };
             articulosMap.set(articulo.Codigo, articuloConStock);
+            //console.log('articuloConStock', articuloConStock);
           }
         });
+        //console.log('articulosMap final', articulosMap);
 
         articulosMap.forEach((articulo, codigo) => {
           const comprasFiltradas = comprasDetalladas.filter(compra => compra.ArticuloCodigo === codigo);
@@ -54,6 +60,7 @@ const TableThree = () => {
     };
     obtenerItems();
   }, [ listaArticulos, comprasDetalladas ]);
+
 
     
   const data = listaArticulos;

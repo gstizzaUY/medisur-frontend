@@ -461,7 +461,6 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
                 }
                 acc[codigo].CantidadTotal += parseFloat(venta.LineaCantidad);
                 acc[codigo].PrecioVentaTotal += parseFloat(venta.LineaCantidad) * parseFloat(venta.LineaPrecio);
-                console.log(acc);
                 return acc;
             }, {});
     
@@ -483,8 +482,6 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
                     Porcentaje: ((gananciaTotal / costoTotal) * 100).toFixed(2) + '%'
                 };
             });
-
-            console.log(dataFinal);
     
             const totalGanancias = dataFinal.reduce((total, articulo) => total + articulo.Ganancia, 0);
             setTotalGananciasMensual(totalGanancias);

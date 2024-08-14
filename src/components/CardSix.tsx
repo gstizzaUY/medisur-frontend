@@ -7,7 +7,7 @@ const CardOne = () => {
     const { mesActual, anioActual, totalGananciasMensual, porentajeGananciasMensual } = useContext(dataContext);
 
     return (
-        <div className="rounded-sm border border-stroke bg-white py-6 px-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
+        <div className="rounded-sm border border-stroke bg-white py-6 px-2 shadow-default dark:border-strokedark dark:bg-boxdark">
             <p>Ganancias</p>
             <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-meta-2 dark:bg-meta-4">
                 <MonetizationOnSharpIcon className="text-primary" />
