@@ -60,7 +60,7 @@ const options: ApexOptions = {
       lines: {
         show: true,
       },
-    },
+      },
   },
   dataLabels: {
     enabled: false,
@@ -110,6 +110,9 @@ const options: ApexOptions = {
     },
     min: 0,
     max: 6000000,
+    labels: {
+      formatter: (value: number) => currency(value, { separator: '.', decimal: ',' }).format(),
+    },
   },
 };
 
@@ -121,96 +124,131 @@ interface ChartOneState {
 }
 
 const ChartOne: React.FC = () => {
-  const { mesActual, anioActual, facturasClientes } = React.useContext(dataContext);
+  const { mesActual, anioActual, facturasClientes, egresos } = React.useContext(dataContext);
   const [state, setState] = useState<ChartOneState>({
     series: [
       {
-        name: 'Ventas 1',
+        name: 'Facturación Neta',
         data: Array(12).fill(0),
       },
       {
-        name: 'Compras',
+        name: 'Egresos',
         data: Array(12).fill(0),
       },
     ],
     options: options,
   });
 
-  // Función para generar los últimos 12 meses en formato 'MM/YY'
-function generateLast12Months() {
-  const months = [];
-  for (let i = 0; i < 12; i++) {
-    const month = dayjs().subtract(i, 'month').format('MM/YY');
-    months.unshift(month);
-  }
-  return months;
-}
+  const [visibleSeries, setVisibleSeries] = useState<string[]>(['Facturación Neta', 'Egresos']);
 
-useEffect(() => {
-  const ventasPorMes = {};
-  const devolucionesPorMes = {};
-
-  facturasClientes.forEach(factura => {
-    const mesAnio = dayjs(factura.Fecha).format('MM/YY');
-    let totalFactura = parseFloat(factura.Total);
-    if (factura.ComprobanteCodigo === 701 || factura.ComprobanteCodigo === 703) {
-      if (!ventasPorMes[mesAnio]) {
-        ventasPorMes[mesAnio] = 0;
-      }
-      ventasPorMes[mesAnio] += totalFactura;
-    } else if (factura.ComprobanteCodigo === 702 || factura.ComprobanteCodigo === 704) {
-      if (!devolucionesPorMes[mesAnio]) {
-        devolucionesPorMes[mesAnio] = 0;
-      }
-      devolucionesPorMes[mesAnio] += totalFactura;
-    }
-  });
-  const facturacionNetoPorMes = {};
-  for (let mesAnio in ventasPorMes) {
-    facturacionNetoPorMes[mesAnio] = ventasPorMes[mesAnio] - (devolucionesPorMes[mesAnio] || 0);
-  }
-
-
-  setState(prevState => ({
-    ...prevState,
-    series: [
-      {
-        name: 'Facturación Neta',
-        data: Object.values(facturacionNetoPorMes).reverse(),
-      },
-      {
-        name: '',
-        data: Array(12).fill(0),
-      },
-    ],
-    options: {
-      ...prevState.options,
-      xaxis: {
-        ...prevState.options.xaxis,
-        categories: generateLast12Months(),
-      },
-    },
-  }));
-}, [facturasClientes]);
-
-
-  // Actualizar las opciones del gráfico para formatear los valores en el eje y
-  options.yaxis.labels = {
-    formatter: (value: number) => currency(value, { separator: '.', decimal: ',' }).format(),
+  const toggleSeriesVisibility = (seriesName: string) => {
+    setVisibleSeries(prevVisibleSeries =>
+      prevVisibleSeries.includes(seriesName)
+        ? prevVisibleSeries.filter(name => name !== seriesName)
+        : [...prevVisibleSeries, seriesName]
+    );
   };
+
+  // Función para generar los últimos 12 meses en formato 'MM/YY'
+  function generateLast12Months() {
+    const months = [];
+    for (let i = 0; i < 12; i++) {
+      const month = dayjs().subtract(i, 'month').format('MM/YY');
+      months.unshift(month);
+    }
+    return months;
+  }
+
+  useEffect(() => {
+    const ventasPorMes = {};
+    const devolucionesPorMes = {};
+    const egresosPorMes = {};
+  
+    facturasClientes.forEach(factura => {
+      const mesAnio = dayjs(factura.Fecha).format('MM/YY');
+      let totalFactura = parseFloat(factura.Total);
+      if (factura.ComprobanteCodigo === 701 || factura.ComprobanteCodigo === 703) {
+        if (!ventasPorMes[mesAnio]) {
+          ventasPorMes[mesAnio] = 0;
+        }
+        ventasPorMes[mesAnio] += totalFactura;
+      } else if (factura.ComprobanteCodigo === 702 || factura.ComprobanteCodigo === 704) {
+        if (!devolucionesPorMes[mesAnio]) {
+          devolucionesPorMes[mesAnio] = 0;
+        }
+        devolucionesPorMes[mesAnio] += totalFactura;
+      }
+    });
+  
+    // Crear una copia de los egresos y modificar el valor de Total cuando CajaCodigo sea 2
+    const egresosModificados = egresos.map(egreso => {
+      if (egreso.CajaCodigo === 2) {
+        return {
+          ...egreso,
+          Total: parseFloat(egreso.Total) * parseFloat(egreso.CotizacionEspecial),
+        };
+      }
+      return egreso;
+    });
+  
+    egresosModificados.forEach(egreso => {
+      const mesAnio = dayjs(egreso.Fecha).format('MM/YY');
+      let totalEgreso = parseFloat(egreso.Total);
+      if (!egresosPorMes[mesAnio]) {
+        egresosPorMes[mesAnio] = 0;
+      }
+      egresosPorMes[mesAnio] += totalEgreso;
+    });
+  
+    const facturacionNetoPorMes = {};
+    for (let mesAnio in ventasPorMes) {
+      facturacionNetoPorMes[mesAnio] = ventasPorMes[mesAnio] - (devolucionesPorMes[mesAnio] || 0);
+    }
+  
+    setState(prevState => ({
+      ...prevState,
+      series: [
+        {
+          name: 'Facturación Neta',
+          data: Object.values(facturacionNetoPorMes).reverse(),
+        },
+        {
+          name: 'Egresos',
+          data: Object.values(egresosPorMes).reverse(),
+        },
+      ],
+      options: {
+        ...prevState.options,
+        xaxis: {
+          ...prevState.options.xaxis,
+          categories: generateLast12Months(),
+        },
+      },
+    }));
+  }, [facturasClientes, egresos]);
 
   return (
     <div className="col-span-12 rounded-sm border border-stroke bg-white px-5 pt-7.5 pb-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-8">
       <div className="flex flex-wrap items-start justify-between gap-3 sm:flex-nowrap">
         <div className="flex w-full flex-wrap gap-3 sm:gap-5">
-          <div className="flex min-w-47.5">
+          <div className="flex min-w-47.5 cursor-pointer" onClick={() => toggleSeriesVisibility('Facturación Neta')}>
             <span className="mt-1 mr-2 flex h-4 w-full max-w-4 items-center justify-center rounded-full border border-secondary">
               <span className="block h-2.5 w-full max-w-2.5 rounded-full bg-secondary"></span>
             </span>
             <div className="w-full">
-              <p className="font-semibold text-primary">Total Facturado</p>
+              <p className="font-semibold text-primary">Facturación Neta</p>
             </div>
           </div>
+
+          <div className="flex min-w-47.5 cursor-pointer" onClick={() => toggleSeriesVisibility('Egresos')}>
+            <span className="mt-1 mr-2 flex h-4 w-full max-w-4 items-center justify-center rounded-full border border-secondary">
+              <span className="block h-2.5 w-full max-w-2.5 rounded-full bg-secondary"></span>
+            </span>
+            <div className="w-full">
+              <p className="font-semibold text-primary">Egresos</p>
+            </div>
+          </div>
+
         </div>
         <div className="flex w-full max-w-45 justify-end">
           <div className="inline-flex items-center rounded-md bg-whiter p-1.5 dark:bg-meta-4">
@@ -225,7 +263,7 @@ useEffect(() => {
         <div id="chartOne" className="-ml-5">
           <ReactApexChart
             options={state.options}
-            series={state.series}
+            series={state.series.filter(series => visibleSeries.includes(series.name))}
             type="area"
             height={350}
           />

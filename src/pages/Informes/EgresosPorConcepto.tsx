@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect, useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { dataContext } from '../../hooks/DataContext';
 import Breadcrumb from '../../components/Breadcrumb';
 import { MaterialReactTable, useMaterialReactTable } from 'material-react-table';
@@ -6,61 +6,43 @@ import { MRT_Localization_ES } from 'material-react-table/locales/es';
 import currency from "currency.js";
 import dayjs from 'dayjs';
 
-const Facturacion = () => {
-    const { mesActual, anioActual, facturasClientes } = useContext(dataContext);
-
+const EgresosPorConcepto = () => {
+    const { mesActual, anioActual, egresos } = useContext(dataContext);
 
     const data = useMemo(() => {
-        const facturacionPorMes = {};
-        facturasClientes.forEach(factura => {
-            const mesAnio = dayjs(factura.Fecha).format('MM/YY');
-            const cliente = factura.ClienteNombre;
-            const zona = factura.ClienteZonaCodigo;
-            if (!facturacionPorMes[cliente]) {
-                facturacionPorMes[cliente] = { ClienteZonaCodigo: zona };
+        const egresosPorMes = {};
+        egresos.forEach(egreso => {
+            const mesAnio = dayjs(egreso.Fecha).format('MM/YY');
+            const concepto = egreso.ConceptoNombre;
+            if (!egresosPorMes[concepto]) {
+                egresosPorMes[concepto] = {};
             }
-            if (!facturacionPorMes[cliente][mesAnio]) {
-                facturacionPorMes[cliente][mesAnio] = 0
+            if (!egresosPorMes[concepto][mesAnio]) {
+                egresosPorMes[concepto][mesAnio] = 0;
             }
-            let totalFactura = parseFloat(factura.TotalSigno);
-            if (factura.ComprobanteCodigo === 701 || factura.ComprobanteCodigo === 703 || factura.ComprobanteCodigo === 702 || factura.ComprobanteCodigo === 704) {
-                facturacionPorMes[cliente][mesAnio] += totalFactura;
-            }
+            let totalEgreso = parseFloat(egreso.Total);
+            egresosPorMes[concepto][mesAnio] += totalEgreso;
         });
 
-        for (let cliente in facturacionPorMes) {
-            for (let mesAnio in facturacionPorMes[cliente]) {
-                if (mesAnio !== 'ClienteZonaCodigo') {
-                    facturacionPorMes[cliente][mesAnio] = `${currency(facturacionPorMes[cliente][mesAnio], { symbol: '$ ', precision: 2, separator: ".", decimal: "," }).format()}`;
-                }
+        for (let concepto in egresosPorMes) {
+            for (let mesAnio in egresosPorMes[concepto]) {
+                egresosPorMes[concepto][mesAnio] = `${currency(egresosPorMes[concepto][mesAnio], { symbol: '$ ', precision: 2, separator: ".", decimal: "," }).format()}`;
             }
         }
 
-        return Object.entries(facturacionPorMes).map(([cliente, facturacion]) => ({ nombre: cliente, ...facturacion }));
-    }, [facturasClientes]);
+        return Object.entries(egresosPorMes).map(([concepto, egresos]) => ({ concepto, ...egresos }));
+    }, [egresos]);
 
     const columns = useMemo(() => {
         const cols = [
             {
-                accessorKey: 'ClienteZonaCodigo',
-                header: 'Zona',
-                sortDescFirst: true,
-                muiTableHeadCellProps: {
-                    align: 'left',
-                },
-                muiTableBodyCellProps: {
-                    align: 'center',
-                },
-                size: 50
-            },
-            {
-                accessorKey: 'nombre',
-                header: 'Cliente',
+                accessorKey: 'concepto',
+                header: 'Concepto',
                 sortDescFirst: true,
                 size: 200
             },
         ];
-        for (let i = 0; i < 7; i++) {
+        for (let i = 0; i < 12; i++) {
             let mes = mesActual - i;
             let anio = anioActual;
             if (mes < 1) {
@@ -101,7 +83,7 @@ const Facturacion = () => {
             pagination: { pageIndex: 0, pageSize: 100 },
             density: 'compact',
             sorting: [
-                { id: 'nombre', desc: false },
+                { id: 'concepto', desc: false },
             ],
             columnVisibility: {
                 'codigo': false,
@@ -111,13 +93,12 @@ const Facturacion = () => {
 
     return (
         <>
-            <Breadcrumb pageName="Facturación" />
+            <Breadcrumb pageName="Egresos por Concepto" />
             <MaterialReactTable
                 table={table}
             />
         </>
     );
-
 };
 
-export default Facturacion;
+export default EgresosPorConcepto;

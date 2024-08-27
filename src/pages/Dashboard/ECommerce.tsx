@@ -5,7 +5,9 @@ import CardTwo from '../../components/CardTwo.tsx';
 import CardFive from '../../components/CardFive.tsx';
 import CardSix from '../../components/CardSix.tsx';
 import ChartOne from '../../components/ChartOne.tsx';
-
+import CardSeven from '../../components/CardSeven.tsx';
+import CardEight from '../../components/CardEight.tsx';
+import CardNine from '../../components/CardNine.tsx';
 
 const ECommerce = () => {
   return (
@@ -18,6 +20,9 @@ const ECommerce = () => {
         <CardSix />
         <CardFour />
         <CardFive />
+        <CardSeven />
+        <CardEight />
+        <CardNine />
       </div>
 
       <div className="mt-4 grid-cols-1 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">

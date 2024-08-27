@@ -17,6 +17,8 @@ const Facturacion = lazy(() => import('../pages/Informes/Facturacion'));
 const ListaPrecios = lazy(() => import('../pages/Informes/ListaPrecios'));
 const ComprasDetalladas = lazy(() => import('../pages/Informes/ComprasDetalladas'));
 const GananciasPorArticulo = lazy(() => import('../pages/Informes/GananciasporArticulo'));
+const Egresos = lazy(() => import('../pages/Informes/Egresos'));
+const EgresosPorConcepto = lazy(() => import('../pages/Informes/EgresosPorConcepto'));
 
 const coreRoutes = [
   {
@@ -53,6 +55,16 @@ const coreRoutes = [
     path: '/app/informes/ganancias-por-articulo',
     title: 'Ganancias por Articulo',
     component: GananciasPorArticulo,
+  },
+  {
+    path: '/app/informes/egresos',
+    title: 'Egresos',
+    component: Egresos,
+  },
+  {
+    path: '/app/informes/egresos-por-concepto',
+    title: 'Egresos Por Concepto',
+    component: EgresosPorConcepto,
   },
   {
     path: '/app/cotizador/nueva-cotizacion',
