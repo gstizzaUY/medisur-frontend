@@ -36,6 +36,7 @@ const Egresos = () => {
         // Calcular la suma total de los egresos
         const total = egresosMesActual.reduce((acc, egreso) => acc + egreso.Total, 0);
         setTotalEgresos(total);
+
     }, [mesActual, anioActual, egresos]);
 
     const columns = useMemo(
@@ -100,6 +101,13 @@ const Egresos = () => {
                         {currency(cell.getValue(), { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
                     </div>
                 ),
+                Footer: () => (
+                    <div>
+                        <Box sx={{ fontWeight: 'bold' }}>
+                            {currency(totalEgresos, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
+                        </Box>
+                    </div>
+                ),
             },
         ],
         [totalEgresos]
@@ -120,7 +128,9 @@ const Egresos = () => {
             pagination: { pageIndex: 0, pageSize: 100 },
             density: 'compact',
             columnVisibility: {
-                'Codigo': false,
+                'ComprobanteTipoNombre': false,
+                'Serie': false,
+                'Numero': false,
             },
             sorting: [
                 { id: 'Fecha', desc: true },
