@@ -16,7 +16,7 @@ const CardThree = () => {
             <div className="mt-4 flex items-end justify-between">
                 <div>
                     <h4 className="text-title-md font-bold text-black dark:text-white">
-                        {currency(((totalEgresosMesActual / totalEgresosMesAnterior)) * 100, { symbol: "", precision: 2, separator: ".", decimal: "," }).format()}{' '}%
+                        {currency(((totalEgresosMesActual / totalEgresosMesAnterior) -1) * 100, { symbol: "", precision: 2, separator: ".", decimal: "," }).format()}{' '}%
                     </h4>
                     <span className="text-sm font-medium">Variación</span>
                 </div>

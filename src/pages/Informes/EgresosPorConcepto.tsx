@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useContext, useMemo, useEffect, useState } from 'react';
 import { dataContext } from '../../hooks/DataContext';
 import Breadcrumb from '../../components/Breadcrumb';
 import { MaterialReactTable, useMaterialReactTable } from 'material-react-table';
@@ -8,10 +8,25 @@ import dayjs from 'dayjs';
 
 const EgresosPorConcepto = () => {
     const { mesActual, anioActual, egresos } = useContext(dataContext);
+    const [filteredEgresos, setFilteredEgresos] = useState([]);
+
+    useEffect(() => {
+        const updatedEgresos = egresos.map(egreso => {
+            if (egreso.CajaCodigo === 2) {
+                return {
+                    ...egreso,
+                    Total: egreso.Total * egreso.CotizacionEspecial
+                };
+            }
+            return egreso;
+        });
+        setFilteredEgresos(updatedEgresos);
+    }, [egresos]);
 
     const data = useMemo(() => {
         const egresosPorMes = {};
-        egresos.forEach(egreso => {
+
+        filteredEgresos.forEach(egreso => {
             const mesAnio = dayjs(egreso.Fecha).format('MM/YY');
             const concepto = egreso.ConceptoNombre;
             if (!egresosPorMes[concepto]) {
@@ -29,9 +44,9 @@ const EgresosPorConcepto = () => {
                 egresosPorMes[concepto][mesAnio] = `${currency(egresosPorMes[concepto][mesAnio], { symbol: '$ ', precision: 2, separator: ".", decimal: "," }).format()}`;
             }
         }
-
+        console.log('Egresos por concepto:', egresosPorMes);
         return Object.entries(egresosPorMes).map(([concepto, egresos]) => ({ concepto, ...egresos }));
-    }, [egresos]);
+    }, [filteredEgresos]);
 
     const columns = useMemo(() => {
         const cols = [
@@ -42,6 +57,9 @@ const EgresosPorConcepto = () => {
                 size: 200
             },
         ];
+
+        const totals = {};
+
         for (let i = 0; i < 12; i++) {
             let mes = mesActual - i;
             let anio = anioActual;
@@ -50,6 +68,14 @@ const EgresosPorConcepto = () => {
                 anio -= 1;
             }
             const mesAni = `${mes.toString().padStart(2, '0')}/${anio.toString().slice(-2)}`;
+            totals[mesAni] = filteredEgresos.reduce((acc, egreso) => {
+                const egresoMesAnio = dayjs(egreso.Fecha).format('MM/YY');
+                if (egresoMesAnio === mesAni) {
+                    acc += parseFloat(egreso.Total);
+                }
+                return acc;
+            }, 0);
+
             cols.push(
                 {
                     accessorKey: mesAni,
@@ -62,11 +88,16 @@ const EgresosPorConcepto = () => {
                     muiTableBodyCellProps: {
                         align: 'right',
                     },
+                    Footer: () => (
+                        <div style={{ textAlign: 'right', fontWeight: 'bold', color: 'red', fontSize: '16px' }}>
+                            {currency(totals[mesAni], { symbol: '$ ', precision: 2, separator: ".", decimal: "," }).format()}
+                        </div>
+                    ),
                 }
             );
         }
         return cols;
-    }, [mesActual, anioActual]);
+    }, [mesActual, anioActual, filteredEgresos]);
 
     const table = useMaterialReactTable({
         columns,

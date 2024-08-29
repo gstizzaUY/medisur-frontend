@@ -24,6 +24,8 @@ const Egresos = () => {
             CotizacionEspecial: egreso.CajaCodigo === 2 ? parseFloat(egreso.CotizacionEspecial) : egreso.CotizacionEspecial
         }));
 
+        console.log('Egresos filtrados y convertidos:', egresosMesActual);
+
         // En egresosMesActual, sólo para los egresos con propiedad CajaCodigo = 2, Reemplazar la propiedad Total por el valor de Total multiplicado por CotizacionEspecial
         egresosMesActual.forEach(egreso => {
             if (egreso.CajaCodigo === 2) {
@@ -31,10 +33,13 @@ const Egresos = () => {
             }
         });
 
+        console.log('Egresos después de aplicar CotizacionEspecial:', egresosMesActual);
+
         setEgresosDelMes(egresosMesActual);
 
         // Calcular la suma total de los egresos
         const total = egresosMesActual.reduce((acc, egreso) => acc + egreso.Total, 0);
+        console.log('Total calculado:', total);
         setTotalEgresos(total);
 
     }, [mesActual, anioActual, egresos]);
@@ -103,7 +108,7 @@ const Egresos = () => {
                 ),
                 Footer: () => (
                     <div>
-                        <Box sx={{ fontWeight: 'bold' }}>
+                        <Box sx={{ textAlign: 'right', fontWeight: 'bold', color: 'red', fontSize: '16px' }}>
                             {currency(totalEgresos, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
                         </Box>
                     </div>
