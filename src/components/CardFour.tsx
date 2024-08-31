@@ -14,7 +14,10 @@ const CardFour = () => {
   let saldoVencido = 0;
   comprobantesPendientes.forEach((comprobante) => {
     saldoTotal += parseFloat(comprobante.SaldoSigno.slice(0, -3));
-    if (dayjs(comprobante.Fecha).add(comprobante.CondicionCodigo, 'day').isBefore(hoy)) {
+    // if (dayjs(comprobante.Fecha).add(comprobante.CondicionCodigo, 'day').isBefore(hoy)) {
+    //   saldoVencido += parseFloat(comprobante.SaldoSigno.slice(0, -3));
+    // }
+    if (dayjs(comprobante.Fecha).add(60, 'day').isBefore(hoy)) {
       saldoVencido += parseFloat(comprobante.SaldoSigno.slice(0, -3));
     }
   });

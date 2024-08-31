@@ -309,20 +309,33 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
                 setComprobantesPendientes(comprobantesPendientes);
                 // Por cada comprobantePendiente verificar extraer la Fecha del comprobante y el número de días de crédito del cliente obtenido de CondicionCodigo (string)
                 // Si la Fecha + días de crédito < hoy, agregar la propiedad Vencido: true, sino agregar la propiedad Vencido: false
-                const hoy = dayjs().format('YYYY-MM-DD');
+                const hoy = dayjs().format('YYYY-MM-DD');  
+                
+                //* OBTENER COMPROBANTES PENDIENTES CON VENCIMIENTO SEGÚN LA FACTURA
+                // const comprobantesPendientesConVencimiento = comprobantesPendientes.map(comprobante => {
+                //     const fechaVencimiento = dayjs(comprobante.Fecha).add(comprobante.CondicionCodigo, 'day').format('YYYY-MM-DD');
+                //     const vencido = fechaVencimiento < hoy;
+                //     if (vencido) {
+                //         return { ...comprobante, Vencido: true };
+                //     } else {
+                //         return { ...comprobante, Vencido: false };
+                //     }
+                // }
+                //);
+
+                //* OBTENER LOS COMPROBANTES PENDIENTES EN BASE A 60 DÍAS
                 const comprobantesPendientesConVencimiento = comprobantesPendientes.map(comprobante => {
-                    const fechaVencimiento = dayjs(comprobante.Fecha).add(comprobante.CondicionCodigo, 'day').format('YYYY-MM-DD');
+                    const fechaVencimiento = dayjs(comprobante.Fecha).add(60, 'day').format('YYYY-MM-DD');
                     const vencido = fechaVencimiento < hoy;
                     if (vencido) {
                         return { ...comprobante, Vencido: true };
                     } else {
                         return { ...comprobante, Vencido: false };
                     }
-                }
-                );
+                });
+                
                 setComprobantesPendientes(comprobantesPendientesConVencimiento);
                 setIsLoading(false);
-
             } catch (error) {
                 console.log(error);
             }
