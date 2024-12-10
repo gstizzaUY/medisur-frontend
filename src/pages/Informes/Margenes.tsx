@@ -18,24 +18,25 @@ const Margenes = () => {
 
     const data = useMemo(() => {
         const margenesPorCliente = {};
+        const mesActual = dayjs().format('MM/YY');
 
-        // Agrupar ventas por cliente y mes
+        // Filtrar solo ventas del mes actual
         ventasDetalladas.forEach(venta => {
-            const mesAnio = dayjs(venta.FacturaRegistroFecha).format('MM/YY');
+            const mesVenta = dayjs(venta.FacturaRegistroFecha).format('MM/YY');
+            if (mesVenta !== mesActual) return; // Ignorar ventas de otros meses
+
             const cliente = venta.ClienteNombre;
             const zona = venta.ZonaCodigo;
 
             if (!margenesPorCliente[cliente]) {
                 margenesPorCliente[cliente] = { 
                     ClienteZonaCodigo: zona,
-                    ventasPorMes: {}
-                };
-            }
-
-            if (!margenesPorCliente[cliente].ventasPorMes[mesAnio]) {
-                margenesPorCliente[cliente].ventasPorMes[mesAnio] = {
-                    totalVentas: 0,
-                    totalCosto: 0
+                    ventasPorMes: {
+                        [mesActual]: {
+                            totalVentas: 0,
+                            totalCosto: 0
+                        }
+                    }
                 };
             }
 
@@ -45,30 +46,30 @@ const Margenes = () => {
             const articulo = listaArticulos.find(art => art.Codigo === venta.ArticuloCodigo);
             const costo = parseFloat(articulo?.Costo || 0);
 
-            // Acumular totales
-            margenesPorCliente[cliente].ventasPorMes[mesAnio].totalVentas += cantidad * precioVenta;
-            margenesPorCliente[cliente].ventasPorMes[mesAnio].totalCosto += cantidad * costo;
+            // Acumular totales solo para el mes actual
+            margenesPorCliente[cliente].ventasPorMes[mesActual].totalVentas += cantidad * precioVenta;
+            margenesPorCliente[cliente].ventasPorMes[mesActual].totalCosto += cantidad * costo;
         });
 
-        // Calcular márgenes por mes
+        // Procesar datos
         const result = Object.entries(margenesPorCliente).map(([cliente, data]) => {
             const resultRow = {
                 nombre: cliente,
                 ClienteZonaCodigo: data.ClienteZonaCodigo
             };
 
-            // Obtener últimos 6 meses
+            // Generar estructura para los últimos 6 meses
             for (let i = 0; i < 7; i++) {
                 const fecha = dayjs().subtract(i, 'month');
                 const mesAnio = fecha.format('MM/YY');
-                const mesData = data.ventasPorMes[mesAnio];
-
-                if (mesData && mesData.totalCosto > 0) {
+                
+                if (mesAnio === mesActual && data.ventasPorMes[mesActual]) {
+                    const mesData = data.ventasPorMes[mesActual];
                     const margen = ((mesData.totalVentas - mesData.totalCosto) / mesData.totalVentas * 100);
                     resultRow[mesAnio] = {
                         value: `${margen.toFixed(2).replace('.', ',')}%`,
                         color: getMarginColor(margen),
-                        rawValue: margen // Para ordenamiento
+                        rawValue: margen
                     };
                 } else {
                     resultRow[mesAnio] = {

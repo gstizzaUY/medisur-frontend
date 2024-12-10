@@ -183,6 +183,7 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
                     }
                 });
                 setListaArticulos(data);
+                console.log(data);
             } catch (error) {
                 console.log(error);
             }
