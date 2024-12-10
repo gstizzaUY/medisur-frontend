@@ -14,11 +14,13 @@ const ListaClientes = lazy(() => import('../pages/Informes/ListaClientes'));
 const NuevaCotizacion = lazy(() => import('../pages/Cotizador/NuevaCotizacion'));
 const Cotizaciones = lazy(() => import('../pages/Cotizador/Cotizaciones'));
 const Facturacion = lazy(() => import('../pages/Informes/Facturacion'));
+const Margenes = lazy(() => import('../pages/Informes/Margenes'));
 const ListaPrecios = lazy(() => import('../pages/Informes/ListaPrecios'));
 const ComprasDetalladas = lazy(() => import('../pages/Informes/ComprasDetalladas'));
 const GananciasPorArticulo = lazy(() => import('../pages/Informes/GananciasporArticulo'));
 const Egresos = lazy(() => import('../pages/Informes/Egresos'));
 const EgresosPorConcepto = lazy(() => import('../pages/Informes/EgresosPorConcepto'));
+
 
 const coreRoutes = [
   {
@@ -45,6 +47,11 @@ const coreRoutes = [
     path: '/app/informes/facturacion',
     title: 'Facturacion',
     component: Facturacion,
+  },
+  {
+    path: '/app/informes/margenes',
+    title: 'Margenes',
+    component: Margenes,
   },
   {
     path: '/app/informes/listas-precios',

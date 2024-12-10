@@ -34,7 +34,7 @@ const NuevaCotizacion = () => {
   const precioInputRef = useRef(null);
   const selectRef = useRef();
   const [itemStock, setItemStock] = useState(0);
-
+  const [editingProductId, setEditingProductId] = useState(null);
 
 
   //* OBTENER ÚLTIMO PRECIO
@@ -186,7 +186,23 @@ const NuevaCotizacion = () => {
     limpiarFormularioAgregarProducto();
   };
 
-  //* CONTRSTUIR LA COTIZACIÓN
+
+  // 2. Agregar función para manejar la edición
+  const handleEditProductName = (index, newName) => {
+    const updatedProductos = productos.map((producto, i) => {
+      if (i === index) {
+        return {
+          ...producto,
+          NombreArticulo: newName
+        };
+      }
+      return producto;
+    });
+    setProductos(updatedProductos);
+  };
+
+
+  //* CONSTRUIR LA COTIZACIÓN
   useEffect(() => {
     // Eliminar el campo articuloNombre,costo y total del array articulos y eliminar el signo $ del precio
     const articulosSinNombre = articulos.map(({ NombreArticulo, costo, total, IVACodigo, ...rest }) => ({ ...rest, PrecioUnitario: precioVentaProducto.replace('$', '') }));
@@ -259,7 +275,6 @@ const NuevaCotizacion = () => {
     // recargar la página
     window.location.reload();
   };
-
 
 
   const handleOpenModal2 = () => {
@@ -453,11 +468,28 @@ const NuevaCotizacion = () => {
         </div>
         {productos.map((producto, index) => (
           <div key={index} className="flex pt-3 pb-3 border-b">
-            <div className="flex-1 ">
-              <p className="text-gray-800">{producto.NombreArticulo}</p>
+            <div className="flex-1">
+              {editingProductId === index ? (
+                <input
+                  className="w-full px-2 py-1 text-gray-800 border rounded focus:outline-none focus:border-blue-500"
+                  type="text"
+                  value={producto.NombreArticulo}
+                  onChange={(e) => handleEditProductName(index, e.target.value)}
+                  onBlur={() => setEditingProductId(null)}
+                  autoFocus
+                />
+              ) : (
+                <p
+                  className="text-gray-800 cursor-pointer hover:text-blue-600"
+                  onClick={() => setEditingProductId(index)}
+                >
+                  {producto.NombreArticulo}
+                </p>
+              )}
               <p className="text-gray-600">{producto.Notas}</p>
             </div>
 
+            {/* Resto del código del producto se mantiene igual */}
             <div className="px-1 w-20 text-right">
               <p className="text-gray-800">{producto.Cantidad}</p>
             </div>
@@ -472,16 +504,15 @@ const NuevaCotizacion = () => {
               <p className="text-gray-800">
                 {currency(producto.total, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
               </p>
-
             </div>
 
             <div className="px-5 w-30" style={{ textAlign: 'right' }}>
               <IconButton
                 style={{ color: '#C70039' }}
-                onClick={() => handleEliminarProducto(index)} >
+                onClick={() => handleEliminarProducto(index)}
+              >
                 <DeleteIcon />
               </IconButton>
-
             </div>
           </div>
         ))}
@@ -542,7 +573,7 @@ const NuevaCotizacion = () => {
             <div className="shadow w-full rounded-lg bg-white overflow-hidden block p-5">
               <div className="flex justify-end">
                 <IconButton
-                  style={{ color: '#00AAAF', fontSize:'large' }}
+                  style={{ color: '#00AAAF', fontSize: 'large' }}
                   onClick={handleCloseModal} >
                   <HighlightOffIcon />
                 </IconButton>
