@@ -9,10 +9,15 @@ import dayjs from 'dayjs';
 const Margenes = () => {
     const { facturasClientes, ventasDetalladas, listaArticulos } = useContext(dataContext);
 
+    // Función auxiliar para determinar el color según el margen
+    const getMarginColor = (margin: number): string => {
+        if (margin < 20) return '#FF0000'; // Rojo
+        if (margin <= 50) return '#000000'; // Negro
+        return '#008000'; // Verde
+    };
+
     const data = useMemo(() => {
         const margenesPorCliente = {};
-        console.log("Datos iniciales:", ventasDetalladas[0]); // Ver si hay zona en los datos
-
 
         // Agrupar ventas por cliente y mes
         ventasDetalladas.forEach(venta => {
@@ -51,7 +56,6 @@ const Margenes = () => {
                 nombre: cliente,
                 ClienteZonaCodigo: data.ClienteZonaCodigo
             };
-            console.log("Fila procesada:", resultRow); // Ver el resultado
 
             // Obtener últimos 6 meses
             for (let i = 0; i < 7; i++) {
@@ -61,9 +65,17 @@ const Margenes = () => {
 
                 if (mesData && mesData.totalCosto > 0) {
                     const margen = ((mesData.totalVentas - mesData.totalCosto) / mesData.totalVentas * 100);
-                    resultRow[mesAnio] = `${margen.toFixed(2).replace('.', ',')}%`;
+                    resultRow[mesAnio] = {
+                        value: `${margen.toFixed(2).replace('.', ',')}%`,
+                        color: getMarginColor(margen),
+                        rawValue: margen // Para ordenamiento
+                    };
                 } else {
-                    resultRow[mesAnio] = '-';
+                    resultRow[mesAnio] = {
+                        value: '-',
+                        color: '#000000',
+                        rawValue: 0
+                    };
                 }
             }
 
@@ -76,17 +88,17 @@ const Margenes = () => {
     const columns = useMemo(() => {
         const cols = [
             {
-                id: 'zona', // Agregar un id explícito
+                id: 'zona',
                 accessorKey: 'ClienteZonaCodigo',
                 header: 'Zona',
                 size: 90,
-                enableSorting: true, // Habilitar explícitamente el ordenamiento
-                Cell: ({ cell }) => ( // Renderizar celda explícitamente
+                enableSorting: true,
+                Cell: ({ cell }) => (
                     <div style={{ textAlign: 'center' }}>
                         {cell.getValue()}
                     </div>
                 ),
-                Header: () => ( // Renderizar header explícitamente
+                Header: () => (
                     <div style={{ 
                         textAlign: 'right',
                         color: 'black',
@@ -112,10 +124,24 @@ const Margenes = () => {
                 header: mesAnio,
                 size: 100,
                 muiTableHeadCellProps: { align: 'right' },
-                muiTableBodyCellProps: { align: 'right' }
+                muiTableBodyCellProps: { align: 'right' },
+                Cell: ({ cell }) => {
+                    const value = cell.getValue();
+                    return (
+                        <div style={{ 
+                            textAlign: 'right',
+                            color: value.color
+                        }}>
+                            {value.value}
+                        </div>
+                    );
+                },
+                sortingFn: (rowA, rowB, columnId) => {
+                    return rowA.original[columnId].rawValue - rowB.original[columnId].rawValue;
+                }
             });
         }
-        console.log("Configuración de columnas:", cols);
+
         return cols;
     }, []);
 

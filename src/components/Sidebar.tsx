@@ -418,7 +418,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                                 (isActive && '!text-white')
                               }
                             >
-                              Margenes
+                              Margenes por Cliente
                             </NavLink>
                           </li>
                           <li>
