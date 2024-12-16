@@ -29,7 +29,7 @@ const Margenes = () => {
             const zona = venta.ZonaCodigo;
 
             if (!margenesPorCliente[cliente]) {
-                margenesPorCliente[cliente] = { 
+                margenesPorCliente[cliente] = {
                     ClienteZonaCodigo: zona,
                     ventasPorMes: {
                         [mesActual]: {
@@ -62,10 +62,12 @@ const Margenes = () => {
             for (let i = 0; i < 7; i++) {
                 const fecha = dayjs().subtract(i, 'month');
                 const mesAnio = fecha.format('MM/YY');
-                
+
                 if (mesAnio === mesActual && data.ventasPorMes[mesActual]) {
                     const mesData = data.ventasPorMes[mesActual];
-                    const margen = ((mesData.totalVentas - mesData.totalCosto) / mesData.totalVentas * 100);
+                    const margen = mesData.totalVentas === 0
+                        ? 0
+                        : ((mesData.totalVentas - mesData.totalCosto) / mesData.totalCosto * 100);
                     resultRow[mesAnio] = {
                         value: `${margen.toFixed(2).replace('.', ',')}%`,
                         color: getMarginColor(margen),
@@ -84,7 +86,7 @@ const Margenes = () => {
         });
 
         return result;
-    }, [ventasDetalladas, listaArticulos]);
+    }, [ventasDetalladas, listaArticulos]); 34
 
     const columns = useMemo(() => {
         const cols = [
@@ -100,7 +102,7 @@ const Margenes = () => {
                     </div>
                 ),
                 Header: () => (
-                    <div style={{ 
+                    <div style={{
                         textAlign: 'right',
                         color: 'black',
                         fontWeight: 'bold'
@@ -129,7 +131,7 @@ const Margenes = () => {
                 Cell: ({ cell }) => {
                     const value = cell.getValue();
                     return (
-                        <div style={{ 
+                        <div style={{
                             textAlign: 'right',
                             color: value.color
                         }}>
