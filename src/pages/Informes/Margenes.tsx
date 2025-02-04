@@ -96,82 +96,108 @@ const Margenes = () => {
         }
     }, []);
 
+    // Modificar el useMemo de data
     const data = useMemo(() => {
         const margenesPorCliente = {};
         const mesActual = dayjs().format('MM/YY');
-        const mesSiguiente = dayjs().add(1, 'month').format('MM/YY');
 
-        // Filtrar solo ventas del mes actual
+        // Procesar todas las ventas (no solo las actuales)
         ventasDetalladas.forEach(venta => {
             const mesVenta = dayjs(venta.FacturaRegistroFecha).format('MM/YY');
-            if (mesVenta !== mesActual) return; // Ignorar ventas de otros meses
-
             const cliente = venta.ClienteNombre;
             const zona = venta.ZonaCodigo;
 
             if (!margenesPorCliente[cliente]) {
                 margenesPorCliente[cliente] = {
                     ClienteZonaCodigo: zona,
-                    ventasPorMes: {
-                        [mesActual]: {
-                            totalVentas: 0,
-                            totalCosto: 0
-                        }
-                    }
+                    ventasPorMes: {}
                 };
             }
 
-            // Calcular venta y costo del artículo
+            if (!margenesPorCliente[cliente].ventasPorMes[mesVenta]) {
+                margenesPorCliente[cliente].ventasPorMes[mesVenta] = {
+                    totalVentas: 0,
+                    ventasPorArticulo: {}
+                };
+            }
+
             const cantidad = parseFloat(venta.LineaCantidad);
             const precioVenta = parseFloat(venta.LineaPrecio);
-            const articulo = listaArticulos.find(art => art.Codigo === venta.ArticuloCodigo);
-            const costo = parseFloat(articulo?.Costo || 0);
+            const articuloCodigo = venta.ArticuloCodigo;
 
-            // Acumular totales solo para el mes actual
-            margenesPorCliente[cliente].ventasPorMes[mesActual].totalVentas += cantidad * precioVenta;
-            margenesPorCliente[cliente].ventasPorMes[mesActual].totalCosto += cantidad * costo;
+            if (!margenesPorCliente[cliente].ventasPorMes[mesVenta].ventasPorArticulo[articuloCodigo]) {
+                margenesPorCliente[cliente].ventasPorMes[mesVenta].ventasPorArticulo[articuloCodigo] = {
+                    cantidad: 0,
+                    venta: 0
+                };
+            }
+
+            margenesPorCliente[cliente].ventasPorMes[mesVenta].totalVentas += cantidad * precioVenta;
+            margenesPorCliente[cliente].ventasPorMes[mesVenta].ventasPorArticulo[articuloCodigo].cantidad += cantidad;
+            margenesPorCliente[cliente].ventasPorMes[mesVenta].ventasPorArticulo[articuloCodigo].venta += cantidad * precioVenta;
         });
 
-        // Procesar datos
         const result = Object.entries(margenesPorCliente).map(([cliente, data]) => {
             const resultRow = {
                 nombre: cliente,
                 ClienteZonaCodigo: data.ClienteZonaCodigo
             };
 
-            // Generar estructura para los últimos 6 meses
             for (let i = 0; i < 7; i++) {
                 const fecha = dayjs().subtract(i, 'month');
                 const mesAnio = fecha.format('MM/YY');
+                const mesAnioHistorico = fecha.format('M/YY');
 
-                if (mesAnio === mesActual && data.ventasPorMes[mesActual]) {
-                    const mesData = data.ventasPorMes[mesActual];
-                    const margen = mesData.totalVentas === 0
-                        ? 0
-                        : ((mesData.totalVentas - mesData.totalCosto) / mesData.totalCosto * 100);
-                    resultRow[mesAnio] = {
-                        value: `${margen.toFixed(2).replace('.', ',')}%`,
-                        color: getMarginColor(margen),
-                        rawValue: margen
-                    };
-                } else if (mesAnio === mesSiguiente) {
-                    // Mostrar los márgenes históricos
-                    const historialCosto = costosHistoricos[cliente]?.[mesAnio] || 0;
-                    const historialMargen = historialCosto === 0
-                        ? 0
-                        : ((data.ventasPorMes[mesActual]?.totalVentas || 0) - historialCosto) / historialCosto * 100;
+                const ventasMes = data.ventasPorMes[mesAnio];
+
+                // En el mes actual, modificar:
+                if (mesAnio === mesActual) {
+                    // Para el mes actual usamos los costos actuales
+                    let totalVentas = 0;
+                    let totalCosto = 0;
+
+                    if (ventasMes) {
+                        Object.entries(ventasMes.ventasPorArticulo).forEach(([articuloCodigo, datos]) => {
+                            const articulo = listaArticulos.find(art => art.Codigo === articuloCodigo);
+                            if (articulo) {
+                                totalVentas += datos.venta;
+                                totalCosto += datos.cantidad * parseFloat(articulo.Costo || '0');
+                            }
+                        });
+                    }
 
                     resultRow[mesAnio] = {
-                        value: `${historialMargen.toFixed(2).replace('.', ',')}%`,
-                        color: getMarginColor(historialMargen),
-                        rawValue: historialMargen
+                        value: totalVentas === 0 || totalCosto === 0 ? '' : `${((totalVentas - totalCosto) / totalCosto * 100).toFixed(2).replace('.', ',')}%`,
+                        color: totalVentas === 0 || totalCosto === 0 ? '#000000' : getMarginColor((totalVentas - totalCosto) / totalCosto * 100),
+                        rawValue: totalVentas === 0 || totalCosto === 0 ? 0 : (totalVentas - totalCosto) / totalCosto * 100
                     };
+
                 } else {
-                    resultRow[mesAnio] = {
-                        value: '-',
-                        color: '#000000',
-                        rawValue: 0
-                    };
+                    // Para meses anteriores usamos los costos históricos
+                    let totalVentas = 0;
+                    let totalCosto = 0;
+
+                    if (ventasMes) {
+                        Object.entries(ventasMes.ventasPorArticulo).forEach(([articuloCodigo, datos]) => {
+                            const costoHistorico = costosHistoricos[articuloCodigo]?.[mesAnioHistorico];
+                            if (costoHistorico) {
+                                totalVentas += datos.venta;
+                                totalCosto += datos.cantidad * parseFloat(costoHistorico);
+                            }
+                        });
+
+                        resultRow[mesAnio] = {
+                            value: totalVentas === 0 || totalCosto === 0 ? '' : `${((totalVentas - totalCosto) / totalCosto * 100).toFixed(2).replace('.', ',')}%`,
+                            color: totalVentas === 0 || totalCosto === 0 ? '#000000' : getMarginColor((totalVentas - totalCosto) / totalCosto * 100),
+                            rawValue: totalVentas === 0 || totalCosto === 0 ? 0 : (totalVentas - totalCosto) / totalCosto * 100
+                        };
+                    } else {
+                        resultRow[mesAnio] = {
+                            value: '',
+                            color: '#000000',
+                            rawValue: 0
+                        };
+                    }
                 }
             }
 
@@ -239,7 +265,7 @@ const Margenes = () => {
         }
 
         return cols;
-   
+
 
     }, [costosHistoricos]);
 
