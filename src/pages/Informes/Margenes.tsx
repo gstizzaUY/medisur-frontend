@@ -89,12 +89,12 @@ const Margenes = () => {
     }, []);
 
     // Revisar si es el último día del mes y guardar los márgenes
-    useEffect(() => {
-        const today = dayjs();
-        if (isLastDayOfMonth(today)) {
-            saveMarginsToBackend();
-        }
-    }, []);
+    // useEffect(() => {
+    //     const today = dayjs();
+    //     if (isLastDayOfMonth(today)) {
+    //         saveMarginsToBackend();
+    //     }
+    // }, []);
 
     // Modificar el useMemo de data
     const data = useMemo(() => {
@@ -282,7 +282,16 @@ const Margenes = () => {
             pagination: { pageIndex: 0, pageSize: 100 },
             density: 'compact',
             sorting: [{ id: 'nombre', desc: false }]
-        }
+        },
+        renderTopToolbarCustomActions: () => (
+            <button
+                onClick={saveMarginsToBackend}
+                className="btn-primary"
+                style={{ marginRight: '10px' }}
+            >
+                Guardar márgenes manualmente
+            </button>
+        )
     });
 
     return (

@@ -108,7 +108,11 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
     const [movimiento, setMovimiento] = useState({});
     const [facturasClientes, setFacturasClientes] = useState([]);
     const [totalFacturadoMesActual, setTotalFacturadoMesActual] = useState(0);
+    const [subtotalFacturadoMesActual, setSubtotalFacturadoMesActual] = useState(0);
+    const [ivaFacturadoMesActual, setIvaFacturadoMesActual] = useState(0);
     const [totalFacturadoMesAnterior, setTotalFacturadoMesAnterior] = useState(0);
+    const [subTotalFacturadoMesAnterior, setSubTotalFacturadoMesAnterior] = useState(0);
+    const [ivaFacturadoMesAnterior, setIvaFacturadoMesAnterior] = useState(0);
     const [comprobantesPendientes, setComprobantesPendientes] = useState([]);
     const [listaArticulos, setListaArticulos] = useState([]);
     const [ventasDetalladas, setVentasDetalladas] = useState([]);
@@ -258,7 +262,9 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
                 };
                 const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/facturas-clientes`, datos, config);
                 setFacturasClientes(data);
+
                 //* FACTURAS MES ACTUAL
+                // Total facturado del mes actual iva incluido
                 const facturasClientesMesActual = data.filter(factura => factura.Fecha.substring(5, 7) == mesActual && factura.Fecha.substring(0, 4) == anioActual);
                 // Filtrar las facturas del mes actual donde ComprobanteCodigo = 701, (Venta Crédito) y ComprobanteCodigo = 703, (Venta Contado)
                 const ventasMesActual = facturasClientesMesActual.filter(factura => factura.ComprobanteCodigo === 701 || factura.ComprobanteCodigo === 703);
@@ -269,6 +275,23 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
                 // Restar las devoluciones de las ventas para obtener el total facturado del mes actual
                 const totalMesActual = totalVentasMesActual - totalDevolucionesMesActual;
                 setTotalFacturadoMesActual(totalMesActual);
+
+                // Calcular el subtotal del mes actual (sin IVA)
+                const subtotalVentasMesActual = ventasMesActual.reduce((total, factura) => total + Number(factura.Subtotal), 0);
+                // Filtrar las facturas del mes actual donde ComprobanteCodigo = 702, (Nota de Crédito) y ComprobanteCodigo = 704, (Devolución Contado)
+                const subtotalDevolucionesMesActual = devolucionesMesActual.reduce((total, factura) => total + Number(factura.Subtotal), 0);
+                // Restar las devoluciones de las ventas para obtener el subtotal facturado del mes actual
+                const SubTotalMesActual = subtotalVentasMesActual - subtotalDevolucionesMesActual;
+                setSubtotalFacturadoMesActual(SubTotalMesActual);
+
+                // Calcular el IVA del mes actual
+                const ivaVentasMesActual = ventasMesActual.reduce((total, factura) => total + Number(factura.IVA), 0);
+                // Filtrar las facturas del mes actual donde ComprobanteCodigo = 702, (Nota de Crédito) y ComprobanteCodigo = 704, (Devolución Contado)
+                const ivaDevolucionesMesActual = devolucionesMesActual.reduce((total, factura) => total + Number(factura.IVA), 0);
+                // Restar las devoluciones de las ventas para obtener el total facturado del mes actual
+                const IVA_MesActual = ivaVentasMesActual - ivaDevolucionesMesActual;
+                setIvaFacturadoMesActual(IVA_MesActual);
+
                 //* FACTURAS MES ANTERIOR
                 const facturasClientesMesAnterior = data.filter(factura => factura.Fecha.substring(5, 7) == (mesActual === 1 ? 12 : mesActual - 1) && factura.Fecha.substring(0, 4) == (mesActual === 1 ? anioActual - 1 : anioActual));
                 // Filtrar las facturas del mes anterior donde ComprobanteCodigo = 701, (Venta Crédito) y ComprobanteCodigo = 703, (Venta Contado)
@@ -280,6 +303,23 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
                 // Restar las devoluciones de las ventas para obtener el total facturado del mes anterior
                 const totalMesAnterior = totalVentasMesAnterior - totalDevolucionesMesAnterior;
                 setTotalFacturadoMesAnterior(totalMesAnterior);
+
+                // Calcular el subtotal del mes anterior (sin IVA)
+                const subtotalVentasMesAnterior = ventasMesAnterior.reduce((total, factura) => total + Number(factura.Subtotal), 0);
+                // Filtrar las facturas del mes anterior donde ComprobanteCodigo = 702, (Nota de Crédito) y ComprobanteCodigo = 704, (Devolución Contado)
+                const subtotalDevolucionesMesAnterior = devolucionesMesAnterior.reduce((total, factura) => total + Number(factura.Subtotal), 0);
+                // Restar las devoluciones de las ventas para obtener el subtotal facturado del mes anterior
+                const SubTotalMesAnterior = subtotalVentasMesAnterior - subtotalDevolucionesMesAnterior;
+                setSubTotalFacturadoMesAnterior(SubTotalMesAnterior);
+                
+                // Calcular el IVA del mes anterior
+                const ivaVentasMesAnterior = ventasMesAnterior.reduce((total, factura) => total + Number(factura.IVA), 0);
+                // Filtrar las facturas del mes anterior donde ComprobanteCodigo = 702, (Nota de Crédito) y ComprobanteCodigo = 704, (Devolución Contado)
+                const ivaDevolucionesMesAnterior = devolucionesMesAnterior.reduce((total, factura) => total + Number(factura.IVA), 0);
+                // Restar las devoluciones de las ventas para obtener el total facturado del mes anterior
+                const IVA_MesAnterior = ivaVentasMesAnterior - ivaDevolucionesMesAnterior;
+                setIvaFacturadoMesAnterior(IVA_MesAnterior);
+
             } catch (error) {
                 console.log(error);
             }
@@ -614,6 +654,14 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
             setTotalFacturadoMesActual,
             totalFacturadoMesAnterior,
             setTotalFacturadoMesAnterior,
+            subtotalFacturadoMesActual,
+            setSubtotalFacturadoMesActual,
+            ivaFacturadoMesActual,
+            setIvaFacturadoMesActual,
+            subTotalFacturadoMesAnterior,
+            setSubTotalFacturadoMesAnterior,
+            ivaFacturadoMesAnterior,
+            setIvaFacturadoMesAnterior,
             comprobantesPendientes,
             setComprobantesPendientes,
             listaArticulos,

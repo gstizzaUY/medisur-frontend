@@ -24,17 +24,34 @@ const CardFour = () => {
 
   return (
     <div className="rounded-sm border border-stroke bg-white py-6 px-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
-      <p>Saldos Pendientes</p>
-      <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-meta-2 dark:bg-meta-4">
-        <LocalFireDepartmentTwoToneIcon className="text-primary" />
-      </div>
-      <div className="mt-2 flex items-end justify-between">
-          <div>
-            <h4 className="text-title-md font-bold text-danger dark:text-white">
-              {currency(saldoVencido, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
-            </h4>
-            <span className="text-sm font-medium">{currency(saldoTotal, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}</span>
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-meta-2 dark:bg-meta-4">
+            <LocalFireDepartmentTwoToneIcon className="text-primary" />
           </div>
+          <div>
+            <h5 className="text-md font-semibold text-black dark:text-white">Saldos Pendientes</h5>
+            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              Cuentas por cobrar
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 gap-1.5">
+        <div className="flex justify-between items-center py-1.5 px-3 bg-gray-50 rounded dark:bg-boxdark-2">
+          <span className="text-sm font-semibold text-black dark:text-white">Total:</span>
+          <h4 className="text-title-md font-bold text-black dark:text-white">
+            {currency(saldoTotal, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
+          </h4>
+        </div>
+        
+        <div className="flex justify-between items-center py-1.5 px-3 bg-red-50 rounded dark:bg-red-900 dark:bg-opacity-20">
+          <span className="text-sm font-semibold text-red-700 dark:text-red-300">Vencido:</span>
+          <h4 className="text-title-md font-bold text-red-700 dark:text-red-300">
+            {currency(saldoVencido, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
+          </h4>
+        </div>
       </div>
     </div>
   );

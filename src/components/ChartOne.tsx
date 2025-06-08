@@ -121,10 +121,11 @@ interface ChartOneState {
     name: string;
     data: number[];
   }[];
+  options?: ApexOptions;
 }
 
 const ChartOne: React.FC = () => {
-  const { mesActual, anioActual, facturasClientes, egresos } = React.useContext(dataContext);
+  const { facturasClientes, egresos } = React.useContext(dataContext) as any;
   const [state, setState] = useState<ChartOneState>({
     series: [
       {
@@ -140,6 +141,7 @@ const ChartOne: React.FC = () => {
   });
 
   const [visibleSeries, setVisibleSeries] = useState<string[]>(['Facturación Neta', 'Egresos']);
+  const [incluirIVA, setIncluirIVA] = useState<boolean>(true);
 
   const toggleSeriesVisibility = (seriesName: string) => {
     setVisibleSeries(prevVisibleSeries =>
@@ -160,28 +162,36 @@ const ChartOne: React.FC = () => {
   }
 
   useEffect(() => {
-    const ventasPorMes = {};
-    const devolucionesPorMes = {};
-    const egresosPorMes = {};
+    const ventasPorMes: { [key: string]: number } = {};
+    const devolucionesPorMes: { [key: string]: number } = {};
+    const ventasSubtotalPorMes: { [key: string]: number } = {};
+    const devolucionesSubtotalPorMes: { [key: string]: number } = {};
+    const egresosPorMes: { [key: string]: number } = {};
   
-    facturasClientes.forEach(factura => {
+    facturasClientes.forEach((factura: any) => {
       const mesAnio = dayjs(factura.Fecha).format('MM/YY');
       let totalFactura = parseFloat(factura.Total);
+      let subtotalFactura = parseFloat(factura.Subtotal);
+      
       if (factura.ComprobanteCodigo === 701 || factura.ComprobanteCodigo === 703) {
         if (!ventasPorMes[mesAnio]) {
           ventasPorMes[mesAnio] = 0;
+          ventasSubtotalPorMes[mesAnio] = 0;
         }
         ventasPorMes[mesAnio] += totalFactura;
+        ventasSubtotalPorMes[mesAnio] += subtotalFactura;
       } else if (factura.ComprobanteCodigo === 702 || factura.ComprobanteCodigo === 704) {
         if (!devolucionesPorMes[mesAnio]) {
           devolucionesPorMes[mesAnio] = 0;
+          devolucionesSubtotalPorMes[mesAnio] = 0;
         }
         devolucionesPorMes[mesAnio] += totalFactura;
+        devolucionesSubtotalPorMes[mesAnio] += subtotalFactura;
       }
     });
   
     // Crear una copia de los egresos y modificar el valor de Total cuando CajaCodigo sea 2
-    const egresosModificados = egresos.map(egreso => {
+    const egresosModificados = egresos.map((egreso: any) => {
       if (egreso.CajaCodigo === 2) {
         return {
           ...egreso,
@@ -191,7 +201,7 @@ const ChartOne: React.FC = () => {
       return egreso;
     });
   
-    egresosModificados.forEach(egreso => {
+    egresosModificados.forEach((egreso: any) => {
       const mesAnio = dayjs(egreso.Fecha).format('MM/YY');
       let totalEgreso = parseFloat(egreso.Total);
       if (!egresosPorMes[mesAnio]) {
@@ -200,32 +210,45 @@ const ChartOne: React.FC = () => {
       egresosPorMes[mesAnio] += totalEgreso;
     });
   
-    const facturacionNetoPorMes = {};
-    for (let mesAnio in ventasPorMes) {
-      facturacionNetoPorMes[mesAnio] = ventasPorMes[mesAnio] - (devolucionesPorMes[mesAnio] || 0);
-    }
+    // Calcular facturación neta según si incluir IVA o no
+    const facturacionNetoPorMes: { [key: string]: number } = {};
+    const meses = generateLast12Months();
+    
+    meses.forEach(mesAnio => {
+      if (incluirIVA) {
+        // Con IVA (usando Total)
+        facturacionNetoPorMes[mesAnio] = (ventasPorMes[mesAnio] || 0) - (devolucionesPorMes[mesAnio] || 0);
+      } else {
+        // Sin IVA (usando Subtotal)
+        facturacionNetoPorMes[mesAnio] = (ventasSubtotalPorMes[mesAnio] || 0) - (devolucionesSubtotalPorMes[mesAnio] || 0);
+      }
+    });
+
+    // Crear arrays de datos ordenados por los últimos 12 meses
+    const facturacionData = meses.map(mes => facturacionNetoPorMes[mes] || 0);
+    const egresosData = meses.map(mes => egresosPorMes[mes] || 0);
   
     setState(prevState => ({
       ...prevState,
       series: [
         {
           name: 'Facturación Neta',
-          data: Object.values(facturacionNetoPorMes).reverse(),
+          data: facturacionData,
         },
         {
           name: 'Egresos',
-          data: Object.values(egresosPorMes).reverse(),
+          data: egresosData,
         },
       ],
       options: {
         ...prevState.options,
         xaxis: {
-          ...prevState.options.xaxis,
+          ...prevState.options?.xaxis,
           categories: generateLast12Months(),
         },
       },
     }));
-  }, [facturasClientes, egresos]);
+  }, [facturasClientes, egresos, incluirIVA]);
 
   return (
     <div className="col-span-12 rounded-sm border border-stroke bg-white px-5 pt-7.5 pb-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-8">
@@ -252,8 +275,25 @@ const ChartOne: React.FC = () => {
         </div>
         <div className="flex w-full max-w-45 justify-end">
           <div className="inline-flex items-center rounded-md bg-whiter p-1.5 dark:bg-meta-4">
-            <button className="rounded py-1 px-3 text-xs font-medium text-black hover:bg-white hover:shadow-card dark:text-white dark:hover:bg-boxdark">
-              Mensual
+            <button 
+              className={`rounded py-1 px-3 text-xs font-medium transition ${
+                incluirIVA 
+                  ? 'bg-white text-black shadow-card dark:bg-boxdark dark:text-white' 
+                  : 'text-black hover:bg-white hover:shadow-card dark:text-white dark:hover:bg-boxdark'
+              }`}
+              onClick={() => setIncluirIVA(true)}
+            >
+              Con IVA
+            </button>
+            <button 
+              className={`rounded py-1 px-3 text-xs font-medium transition ${
+                !incluirIVA 
+                  ? 'bg-white text-black shadow-card dark:bg-boxdark dark:text-white' 
+                  : 'text-black hover:bg-white hover:shadow-card dark:text-white dark:hover:bg-boxdark'
+              }`}
+              onClick={() => setIncluirIVA(false)}
+            >
+              Sin IVA
             </button>
           </div>
         </div>
