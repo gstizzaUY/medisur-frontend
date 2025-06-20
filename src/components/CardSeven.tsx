@@ -7,8 +7,6 @@ import ArrowCircleLeftIcon from '@mui/icons-material/ArrowCircleLeft';
 const CardSeven = () => {
     const { mesActual, anioActual, totalEgresosMesActual } = useContext(dataContext);
 
-    console.log(totalEgresosMesActual);
-
     return (
         <div className="rounded-sm border border-stroke bg-white py-6 px-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
             <div className="flex items-center justify-between mb-5">
@@ -27,7 +25,7 @@ const CardSeven = () => {
             
             <div className="grid grid-cols-1 gap-1.5">
                 <div className="flex justify-between items-center py-1.5 px-3 bg-red-50 rounded dark:bg-red-900 dark:bg-opacity-20">
-                    <span className="text-sm font-semibold text-red-700 dark:text-red-300">Total:</span>
+                    <span className="text-sm font-semibold text-red-700 dark:text-red-300">SubTotal:</span>
                     <h4 className="text-title-md font-bold text-red-700 dark:text-red-300">
                         {currency(totalEgresosMesActual, { symbol: "$ ", precision: 2, separator: ".", decimal: "," }).format()}
                     </h4>

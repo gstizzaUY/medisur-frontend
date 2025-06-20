@@ -2,6 +2,7 @@ import React, { ReactNode } from "react";
 import { useState, useEffect } from "react";
 import clienteAxios from '../functions/clienteAxios';
 import dayjs from 'dayjs';
+import { lightGreen } from "@mui/material/colors";
 
 export const dataContext = React.createContext({});
 
@@ -569,21 +570,22 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
                     egreso => egreso.Fecha.includes(`${anioActual}-${mesActual.toString().padStart(2, '0')}`)
                 ).map(egreso => ({
                     ...egreso,
-                    Total: parseFloat(egreso.Total),
+                    SubTotal: parseFloat(egreso.SubTotal),
                     CotizacionEspecial: egreso.CajaCodigo === 2 ? parseFloat(egreso.CotizacionEspecial) : egreso.CotizacionEspecial
                 }));
 
                 // En egresosMesActual, sólo para los egresos con propiedad CajaCodigo = 2, Reemplazar la propiedad Total por el valor de Total multiplicado por CotizacionEspecial
                 egresosMesActual.forEach(egreso => {
                     if (egreso.CajaCodigo === 2) {
-                        egreso.Total = egreso.Total * egreso.CotizacionEspecial;
+                        egreso.SubTotal = egreso.SubTotal * egreso.CotizacionEspecial;
                     }
                 });
 
                 setEgresosMesActual(egresosMesActual);
 
                 // Calcular la suma total de los egresos del mes actual
-                const total = egresosMesActual.reduce((acc, egreso) => acc + egreso.Total, 0);
+                const total = egresosMesActual.reduce((acc, egreso) => acc + egreso.SubTotal, 0);
+                console.log(`Total Egresos Mes Actual: ${total}`);
                 setTotalEgresosMesActual(total);
 
                 // Filtrar los egresos del mes anterior y guardarlos en egresosMesAnterior
@@ -593,21 +595,21 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
                     egreso => egreso.Fecha.includes(`${anioAnterior}-${mesAnterior.toString().padStart(2, '0')}`)
                 ).map(egreso => ({
                     ...egreso,
-                    Total: parseFloat(egreso.Total),
+                    SubTotal: parseFloat(egreso.SubTotal),
                     CotizacionEspecial: egreso.CajaCodigo === 2 ? parseFloat(egreso.CotizacionEspecial) : egreso.CotizacionEspecial
                 }));
 
                 // En egresosMesAnterior, sólo para los egresos con propiedad CajaCodigo = 2, Reemplazar la propiedad Total por el valor de Total multiplicado por CotizacionEspecial
                 egresosMesAnterior.forEach(egreso => {
                     if (egreso.CajaCodigo === 2) {
-                        egreso.Total = egreso.Total * egreso.CotizacionEspecial;
+                        egreso.SubTotal = egreso.SubTotal * egreso.CotizacionEspecial;
                     }
                 });
 
                 setEgresosMesAnterior(egresosMesAnterior);
 
                 // Calcular la suma total de los egresos del mes anterior
-                const totalAnterior = egresosMesAnterior.reduce((acc, egreso) => acc + egreso.Total, 0);
+                const totalAnterior = egresosMesAnterior.reduce((acc, egreso) => acc + egreso.SubTotal, 0);
                 setTotalEgresosMesAnterior(totalAnterior);
 
 
