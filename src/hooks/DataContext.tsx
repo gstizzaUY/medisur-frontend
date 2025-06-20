@@ -557,65 +557,66 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
 
 
     //* OBTENER COMPROBANTES DE EGRESOS
-useEffect(() => {
-    const obtenerComprobantesEgresos = async () => {
-        const datos = { Mes: mesActual, Anio: anioActual };
-        try {
-            const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/informes/egresos`, datos);
-            setEgresos(data);
+    useEffect(() => {
+        const obtenerComprobantesEgresos = async () => {
+            const datos = { Mes: mesActual, Anio: anioActual };
+            try {
+                const { data } = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/facturas/informes/egresos`, datos);
+                setEgresos(data);
 
-            // Filtrar los egresos del mes actual y guardarlos en egresosMesActual
-            const egresosMesActual = data.filter(
-                egreso => egreso.Fecha.includes(`${anioActual}-${mesActual.toString().padStart(2, '0')}`)
-            ).map(egreso => ({
-                ...egreso,
-                Subtotal: parseFloat(egreso.Subtotal),
-                CotizacionEspecial: egreso.CajaCodigo === 2 ? parseFloat(egreso.CotizacionEspecial) : egreso.CotizacionEspecial
-            }));
+                // Filtrar los egresos del mes actual y guardarlos en egresosMesActual
+                const egresosMesActual = data.filter(
+                    egreso => egreso.Fecha.includes(`${anioActual}-${mesActual.toString().padStart(2, '0')}`)
+                ).map(egreso => ({
+                    ...egreso,
+                    Total: parseFloat(egreso.Total),
+                    CotizacionEspecial: egreso.CajaCodigo === 2 ? parseFloat(egreso.CotizacionEspecial) : egreso.CotizacionEspecial
+                }));
 
-            // En egresosMesActual, sólo para los egresos con propiedad CajaCodigo = 2, Reemplazar la propiedad Subtotal por el valor de Subtotal multiplicado por CotizacionEspecial
-            egresosMesActual.forEach(egreso => {
-                if (egreso.CajaCodigo === 2) {
-                    egreso.Subtotal = egreso.Subtotal * egreso.CotizacionEspecial;
-                }
-            });
+                // En egresosMesActual, sólo para los egresos con propiedad CajaCodigo = 2, Reemplazar la propiedad Total por el valor de Total multiplicado por CotizacionEspecial
+                egresosMesActual.forEach(egreso => {
+                    if (egreso.CajaCodigo === 2) {
+                        egreso.Total = egreso.Total * egreso.CotizacionEspecial;
+                    }
+                });
 
-            setEgresosMesActual(egresosMesActual);
+                setEgresosMesActual(egresosMesActual);
 
-            // Calcular la suma total de los egresos del mes actual
-            const total = egresosMesActual.reduce((acc, egreso) => acc + egreso.Subtotal, 0);
-            setTotalEgresosMesActual(total);
+                // Calcular la suma total de los egresos del mes actual
+                const total = egresosMesActual.reduce((acc, egreso) => acc + egreso.Total, 0);
+                setTotalEgresosMesActual(total);
 
-            // Filtrar los egresos del mes anterior y guardarlos en egresosMesAnterior
-            const mesAnterior = mesActual === 1 ? 12 : mesActual - 1;
-            const anioAnterior = mesActual === 1 ? anioActual - 1 : anioActual;
-            const egresosMesAnterior = data.filter(
-                egreso => egreso.Fecha.includes(`${anioAnterior}-${mesAnterior.toString().padStart(2, '0')}`)
-            ).map(egreso => ({
-                ...egreso,
-                Subtotal: parseFloat(egreso.Subtotal),
-                CotizacionEspecial: egreso.CajaCodigo === 2 ? parseFloat(egreso.CotizacionEspecial) : egreso.CotizacionEspecial
-            }));
+                // Filtrar los egresos del mes anterior y guardarlos en egresosMesAnterior
+                const mesAnterior = mesActual === 1 ? 12 : mesActual - 1;
+                const anioAnterior = mesActual === 1 ? anioActual - 1 : anioActual;
+                const egresosMesAnterior = data.filter(
+                    egreso => egreso.Fecha.includes(`${anioAnterior}-${mesAnterior.toString().padStart(2, '0')}`)
+                ).map(egreso => ({
+                    ...egreso,
+                    Total: parseFloat(egreso.Total),
+                    CotizacionEspecial: egreso.CajaCodigo === 2 ? parseFloat(egreso.CotizacionEspecial) : egreso.CotizacionEspecial
+                }));
 
-            // En egresosMesAnterior, sólo para los egresos con propiedad CajaCodigo = 2, Reemplazar la propiedad Subtotal por el valor de Subtotal multiplicado por CotizacionEspecial
-            egresosMesAnterior.forEach(egreso => {
-                if (egreso.CajaCodigo === 2) {
-                    egreso.Subtotal = egreso.Subtotal * egreso.CotizacionEspecial;
-                }
-            });
+                // En egresosMesAnterior, sólo para los egresos con propiedad CajaCodigo = 2, Reemplazar la propiedad Total por el valor de Total multiplicado por CotizacionEspecial
+                egresosMesAnterior.forEach(egreso => {
+                    if (egreso.CajaCodigo === 2) {
+                        egreso.Total = egreso.Total * egreso.CotizacionEspecial;
+                    }
+                });
 
-            setEgresosMesAnterior(egresosMesAnterior);
+                setEgresosMesAnterior(egresosMesAnterior);
 
-            // Calcular la suma total de los egresos del mes anterior
-            const totalAnterior = egresosMesAnterior.reduce((acc, egreso) => acc + egreso.Subtotal, 0);
-            setTotalEgresosMesAnterior(totalAnterior);
+                // Calcular la suma total de los egresos del mes anterior
+                const totalAnterior = egresosMesAnterior.reduce((acc, egreso) => acc + egreso.Total, 0);
+                setTotalEgresosMesAnterior(totalAnterior);
 
-        } catch (error) {
-            console.log(error);
+
+            } catch (error) {
+                console.log(error);
+            }
         }
-    }
-    obtenerComprobantesEgresos();
-}, []);
+        obtenerComprobantesEgresos();
+    }, []);
 
     return (
         <dataContext.Provider value={{
