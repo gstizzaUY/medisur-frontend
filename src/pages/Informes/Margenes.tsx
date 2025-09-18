@@ -25,50 +25,28 @@ const Margenes = () => {
         return date.isSame(date.endOf('month'), 'day');
     };
 
-    // Función para guardar los márgenes en el backend
-    const saveMarginsToBackend = async () => {
+    // Función para guardar los costos históricos manualmente
+    const saveCostosHistoricos = async () => {
         try {
+            console.log('🔄 Guardando costos históricos del mes actual...');
+            
+            // Usar la lista de artículos actual con sus costos
             const mesActual = dayjs().format('MM/YY');
-            const margenPorCliente = {};
-
-            // Generar márgenes para cada cliente
-            ventasDetalladas.forEach(venta => {
-                const mesVenta = dayjs(venta.FacturaRegistroFecha).format('MM/YY');
-                if (mesVenta !== mesActual) return;
-
-                const cliente = venta.ClienteNombre;
-                if (!margenPorCliente[cliente]) {
-                    margenPorCliente[cliente] = {
-                        totalVentas: 0,
-                        totalCosto: 0
-                    };
-                }
-
-                // Calcular venta y costo del artículo
-                const cantidad = parseFloat(venta.LineaCantidad);
-                const precioVenta = parseFloat(venta.LineaPrecio);
-                const articulo = listaArticulos.find(art => art.Codigo === venta.ArticuloCodigo);
-                const costo = parseFloat(articulo?.Costo || 0);
-
-                margenPorCliente[cliente].totalVentas += cantidad * precioVenta;
-                margenPorCliente[cliente].totalCosto += cantidad * costo;
+            
+            // Enviar la lista completa de artículos con sus costos actuales
+            const response = await clienteAxios.post(`${import.meta.env.VITE_API_URL}/costos/costos-historicos`, { 
+                listaArticulos: listaArticulos, // Lista completa de artículos con Codigo y Costo
+                mesAño: mesActual // Mes actual en formato MM/YY
             });
-
-            const costos = Object.entries(margenPorCliente).map(([cliente, data]) => {
-                const margen = data.totalVentas === 0
-                    ? 0
-                    : ((data.totalVentas - data.totalCosto) / data.totalCosto * 100);
-                return {
-                    cliente,
-                    margen: margen.toFixed(2)
-                };
-            });
-
-            // Guardar los márgenes en el backend
-            await clienteAxios.post(`${import.meta.env.VITE_API_URL}/costos/costos-historicos`, { listaArticulos: costos });
-            console.log('Márgenes guardados correctamente.');
+            
+            console.log('✅ Costos históricos guardados correctamente:', response.data);
+            
+            // Recargar los costos históricos para actualizar la vista
+            const updatedCostos = await clienteAxios.get(`${import.meta.env.VITE_API_URL}/costos/costos-historicos`);
+            setCostosHistoricos(updatedCostos.data);
+            
         } catch (error) {
-            console.error('Error al guardar los márgenes', error);
+            console.error('❌ Error al guardar los costos históricos', error);
         }
     };
 
@@ -143,10 +121,11 @@ const Margenes = () => {
                 ClienteZonaCodigo: data.ClienteZonaCodigo
             };
 
-            for (let i = 0; i < 7; i++) {
+            for (let i = 0; i < 12; i++) {
                 const fecha = dayjs().subtract(i, 'month');
                 const mesAnio = fecha.format('MM/YY');
-                const mesAnioHistorico = fecha.format('M/YY');
+                // Usar el mismo formato para datos históricos que para datos actuales
+                const mesAnioHistorico = fecha.format('MM/YY');
 
                 const ventasMes = data.ventasPorMes[mesAnio];
 
@@ -233,18 +212,18 @@ const Margenes = () => {
             {
                 accessorKey: 'nombre',
                 header: 'Cliente',
-                size: 200
+                size: 180 // Reducir de 200 a 180 para optimizar espacio con 12 meses
             }
         ];
 
-        // Agregar columnas para los últimos 6 meses
-        for (let i = 0; i < 7; i++) {
+        // Agregar columnas para los últimos 12 meses
+        for (let i = 0; i < 12; i++) {
             const fecha = dayjs().subtract(i, 'month');
             const mesAnio = fecha.format('MM/YY');
             cols.push({
                 accessorKey: mesAnio,
                 header: mesAnio,
-                size: 100,
+                size: 80, // Reducir de 100 a 80 para acomodar 12 meses
                 muiTableHeadCellProps: { align: 'right' },
                 muiTableBodyCellProps: { align: 'right' },
                 Cell: ({ cell }) => {
@@ -285,11 +264,25 @@ const Margenes = () => {
         },
         renderTopToolbarCustomActions: () => (
             <button
-                onClick={saveMarginsToBackend}
-                className="btn-primary"
+                onClick={saveCostosHistoricos}
+                className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors duration-200"
                 style={{ marginRight: '10px' }}
             >
-                Guardar márgenes manualmente
+                <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
+                    />
+                </svg>
+                Guardar costos del mes actual
             </button>
         )
     });
