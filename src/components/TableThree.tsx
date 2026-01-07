@@ -8,7 +8,7 @@ import currency from "currency.js";
 
 const TableThree = () => {
   const { listaArticulos, comprasDetalladas } = React.useContext(dataContext);
-  const [ articulosConStock, setArticulosConStock ] = React.useState([{}]);
+  const [articulosConStock, setArticulosConStock] = React.useState([{}]);
 
   //* Obtener items y agregar Stock de cada
   useEffect(() => {
@@ -20,7 +20,7 @@ const TableThree = () => {
           }
         });
         let articulosMap = new Map();
-        
+
         listaArticulos.filter(articulo => articulo !== null).forEach(articulo => {
           if (articulo) {
             const item = data.find(item => item.ArticuloCodigo === articulo.Codigo);
@@ -59,10 +59,10 @@ const TableThree = () => {
       }
     };
     obtenerItems();
-  }, [ listaArticulos, comprasDetalladas ]);
+  }, [listaArticulos, comprasDetalladas]);
 
 
-    
+
   const data = listaArticulos;
 
   const columns = useMemo(
@@ -90,8 +90,11 @@ const TableThree = () => {
         },
         // Eliminar los últimos 6 digitos
         Cell: ({ cell }) => (
+          // <Box>
+          //   {cell.getValue() ? cell.getValue().slice(0, -6) : ''}
+          // </Box>
           <Box>
-            {cell.getValue() ? cell.getValue().slice(0, -6) : ''}
+            {cell.getValue() ? parseFloat(cell.getValue()).toLocaleString('es-UY', { minimumFractionDigits: 0 }) : ''}
           </Box>
         ),
       },
@@ -190,7 +193,7 @@ const TableThree = () => {
           }
         },
       },
-      
+
     ],
     [listaArticulos],
   );

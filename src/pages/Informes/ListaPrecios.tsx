@@ -62,10 +62,15 @@ const ListaPrecios = () => {
         let result = [];
         for (let i = 0; i < articulosConPrecio.length; i++) {
             let articulo = articulosConPrecio[i];
+            // Convertir PrecioSinIVA a número, independientemente si es string o número
+            const precio = typeof articulo.PrecioSinIVA === 'string' 
+                ? Number(articulo.PrecioSinIVA.slice(0, -3)) 
+                : Number(articulo.PrecioSinIVA);
+            
             result.push({
                 Codigo: articulo.Codigo,
                 Nombre: articulo.Nombre,
-                PrecioSinIVA: currency(Number(articulo.PrecioSinIVA.slice(0, -3)), { symbol: '$ ', precision: 2, separator: '.', decimal: ',' }).format(),
+                PrecioSinIVA: currency(precio, { symbol: '$ ', precision: 2, separator: '.', decimal: ',' }).format(),
             });
         }
         // eliminar duplicados de result

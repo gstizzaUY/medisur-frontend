@@ -21,6 +21,14 @@ const GananciasPorArticulo = lazy(() => import('../pages/Informes/GananciasporAr
 const Egresos = lazy(() => import('../pages/Informes/Egresos'));
 const EgresosPorConcepto = lazy(() => import('../pages/Informes/EgresosPorConcepto'));
 
+// WooCommerce
+const ProductosWeb = lazy(() => import('../pages/WooCommerce/ProductosWeb'));
+const ProductoWebForm = lazy(() => import('../pages/WooCommerce/ProductoWebForm'));
+const EstadisticasWeb = lazy(() => import('../pages/WooCommerce/EstadisticasWeb'));
+
+// Configuración
+const ConfiguracionIA = lazy(() => import('../pages/Configuracion/ConfiguracionIA'));
+
 
 const coreRoutes = [
   {
@@ -122,7 +130,34 @@ const coreRoutes = [
     path: '/app/ui/buttons',
     title: 'Buttons',
     component: Buttons,
-  }
+  },
+  // WooCommerce Routes
+  {
+    path: '/app/woocommerce/productos',
+    title: 'Productos WooCommerce',
+    component: ProductosWeb,
+  },
+  {
+    path: '/app/woocommerce/nuevo',
+    title: 'Nuevo Producto Web',
+    component: ProductoWebForm,
+  },
+  {
+    path: '/app/woocommerce/editar/:codigoArticulo',
+    title: 'Editar Producto Web',
+    component: ProductoWebForm,
+  },
+  {
+    path: '/app/woocommerce/estadisticas',
+    title: 'Estadísticas WooCommerce',
+    component: EstadisticasWeb,
+  },
+  // Configuración Routes
+  {
+    path: '/app/configuracion/inteligencia-artificial',
+    title: 'Configuración de IA',
+    component: ConfiguracionIA,
+  },
 ];
 
 const routes = [...coreRoutes];

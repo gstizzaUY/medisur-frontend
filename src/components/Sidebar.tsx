@@ -8,6 +8,7 @@ import Inventory2TwoToneIcon from '@mui/icons-material/Inventory2TwoTone';
 import AssessmentTwoToneIcon from '@mui/icons-material/AssessmentTwoTone';
 import CalculateTwoToneIcon from '@mui/icons-material/CalculateTwoTone';
 import BackspaceTwoToneIcon from '@mui/icons-material/BackspaceTwoTone';
+import StorefrontTwoToneIcon from '@mui/icons-material/StorefrontTwoTone';
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -556,6 +557,169 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               </SidebarLinkGroup>
 
               {/* <!-- Menu Item Cotizador End --> */}
+
+              {/* <!-- Menu Item Tienda MediMarket --> */}
+              <SidebarLinkGroup
+                activeCondition={
+                  pathname === '/app/woocommerce' || pathname.includes('woocommerce')
+                }
+              >
+                {(handleClick, open) => {
+                  return (
+                    <React.Fragment>
+                      <NavLink
+                        to="#"
+                        className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${(pathname === '/app/woocommerce' ||
+                          pathname.includes('woocommerce')) &&
+                          'bg-graydark dark:bg-meta-4'
+                          }`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          sidebarExpanded
+                            ? handleClick()
+                            : setSidebarExpanded(true);
+                        }}
+                      >
+                        <StorefrontTwoToneIcon className="text-primary" />
+                        Tienda MediMarket
+                        <svg
+                          className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current ${open && 'rotate-180'
+                            }`}
+                          width="20"
+                          height="20"
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            clipRule="evenodd"
+                            d="M4.41107 6.9107C4.73651 6.58527 5.26414 6.58527 5.58958 6.9107L10.0003 11.3214L14.4111 6.91071C14.7365 6.58527 15.2641 6.58527 15.5896 6.91071C15.915 7.23614 15.915 7.76378 15.5896 8.08922L10.5896 13.0892C10.2641 13.4147 9.73651 13.4147 9.41107 13.0892L4.41107 8.08922C4.08563 7.76378 4.08563 7.23614 4.41107 6.9107Z"
+                            fill=""
+                          />
+                        </svg>
+                      </NavLink>
+                      {/* <!-- Dropdown Menu Start --> */}
+                      <div
+                        className={`translate transform overflow-hidden ${!open && 'hidden'
+                          }`}
+                      >
+                        <ul className="mt-4 mb-5.5 flex flex-col gap-2.5 pl-6">
+                          <li>
+                            <NavLink onClick={() => setSidebarOpen(!sidebarOpen)}
+                              to="/app/woocommerce/productos"
+                              className={({ isActive }) =>
+                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
+                                (isActive && '!text-white')
+                              }
+                            >
+                              Productos Web
+                            </NavLink>
+                          </li>
+                          <li>
+                            <NavLink onClick={() => setSidebarOpen(!sidebarOpen)}
+                              to="/app/woocommerce/estadisticas"
+                              className={({ isActive }) =>
+                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
+                                (isActive && '!text-white')
+                              }
+                            >
+                              Estadísticas
+                            </NavLink>
+                          </li>
+                        </ul>
+                      </div>
+                      {/* <!-- Dropdown Menu End --> */}
+                    </React.Fragment>
+                  );
+                }}
+              </SidebarLinkGroup>
+              {/* <!-- Menu Item Tienda MediMarket End --> */}
+
+              {/* <!-- Menu Item Configuración --> */}
+              <SidebarLinkGroup activeCondition={pathname === '/app/configuracion' || pathname.includes('configuracion')}>
+                {(handleClick, open) => {
+                  return (
+                    <React.Fragment>
+                      <NavLink
+                        to="#"
+                        className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${(pathname === '/app/configuracion' || pathname.includes('configuracion')) &&
+                          'bg-graydark dark:bg-meta-4'
+                          }`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          sidebarExpanded ? handleClick() : setSidebarExpanded(true);
+                        }}
+                      >
+                        <svg
+                          className="fill-current"
+                          width="18"
+                          height="18"
+                          viewBox="0 0 18 18"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M16.1999 7.8186H15.8905C15.7873 7.31922 15.628 6.8511 15.4218 6.41484L15.6405 6.19609C16.178 5.65859 16.178 4.77422 15.6405 4.23672L13.7624 2.35859C13.2249 1.82109 12.3405 1.82109 11.803 2.35859L11.5843 2.57734C11.148 2.37109 10.6799 2.21172 10.1805 2.10859V1.79922C10.1805 1.06797 9.59055 0.478027 8.85929 0.478027H6.1374C5.40617 0.478027 4.81617 1.06797 4.81617 1.79922V2.10859C4.31679 2.21172 3.84867 2.37109 3.41242 2.57734L3.19367 2.35859C2.65617 1.82109 1.77179 1.82109 1.23429 2.35859L-0.643835 4.23672C-1.18133 4.77422 -1.18133 5.65859 -0.643835 6.19609L-0.425085 6.41484C-0.631335 6.8511 -0.790711 7.31922 -0.893835 7.8186H-1.2032C-1.93445 7.8186 -2.52445 8.40859 -2.52445 9.13984V11.8617C-2.52445 12.593 -1.93445 13.183 -1.2032 13.183H-0.893835C-0.790711 13.6823 -0.631335 14.1505 -0.425085 14.5867L-0.643835 14.8055C-1.18133 15.343 -1.18133 16.2273 -0.643835 16.7648L1.23429 18.643C1.77179 19.1805 2.65617 19.1805 3.19367 18.643L3.41242 18.4242C3.84867 18.6305 4.31679 18.7898 4.81617 18.893V19.2023C4.81617 19.9336 5.40617 20.5236 6.1374 20.5236H8.85929C9.59055 20.5236 10.1805 19.9336 10.1805 19.2023V18.893C10.6799 18.7898 11.148 18.6305 11.5843 18.4242L11.803 18.643C12.3405 19.1805 13.2249 19.1805 13.7624 18.643L15.6405 16.7648C16.178 16.2273 16.178 15.343 15.6405 14.8055L15.4218 14.5867C15.628 14.1505 15.7873 13.6823 15.8905 13.183H16.1999C16.9311 13.183 17.5211 12.593 17.5211 11.8617V9.13984C17.5211 8.40859 16.9311 7.8186 16.1999 7.8186ZM16.2561 11.8617C16.2561 11.918 16.2124 11.9617 16.1561 11.9617H15.628C15.3468 11.9617 15.1093 12.1523 15.0655 12.4242C14.9624 13.0423 14.7405 13.6323 14.4155 14.1648C14.2561 14.4086 14.303 14.7242 14.5093 14.9305L14.8655 15.2867C14.9061 15.3273 14.9061 15.393 14.8655 15.4336L12.9874 17.3117C12.9468 17.3523 12.8811 17.3523 12.8405 17.3117L12.4843 16.9555C12.278 16.7492 11.9624 16.7023 11.7186 16.8617C11.1861 17.1867 10.5961 17.4086 9.97805 17.5117C9.70617 17.5555 9.5155 17.793 9.5155 18.0742V18.6023C9.5155 18.6586 9.47179 18.7023 9.4155 18.7023H6.69367C6.63742 18.7023 6.59367 18.6586 6.59367 18.6023V18.0742C6.59367 17.793 6.40304 17.5555 6.13117 17.5117C5.51304 17.4086 4.92304 17.1867 4.39054 16.8617C4.14679 16.7023 3.83117 16.7492 3.62492 16.9555L3.26867 17.3117C3.22804 17.3523 3.16242 17.3523 3.12179 17.3117L1.24367 15.4336C1.20304 15.393 1.20304 15.3273 1.24367 15.2867L1.59992 14.9305C1.80617 14.7242 1.85304 14.4086 1.69367 14.1648C1.36867 13.6323 1.14679 13.0423 1.04367 12.4242C0.999919 12.1523 0.762419 11.9617 0.481169 11.9617H-0.0469356C-0.103185 11.9617 -0.146935 11.918 -0.146935 11.8617V9.13984C-0.146935 9.08359 -0.103185 9.03984 -0.0469356 9.03984H0.481169C0.762419 9.03984 0.999919 8.84922 1.04367 8.57734C1.14679 7.95922 1.36867 7.36922 1.69367 6.83672C1.85304 6.59297 1.80617 6.27734 1.59992 6.07109L1.24367 5.71484C1.20304 5.67422 1.20304 5.60859 1.24367 5.56797L3.12179 3.68984C3.16242 3.64922 3.22804 3.64922 3.26867 3.68984L3.62492 4.04609C3.83117 4.25234 4.14679 4.29922 4.39054 4.13984C4.92304 3.81484 5.51304 3.59297 6.13117 3.48984C6.40304 3.44609 6.59367 3.20859 6.59367 2.92734V2.39922C6.59367 2.34297 6.63742 2.29922 6.69367 2.29922H9.4155C9.47179 2.29922 9.5155 2.34297 9.5155 2.39922V2.92734C9.5155 3.20859 9.70617 3.44609 9.97805 3.48984C10.5961 3.59297 11.1861 3.81484 11.7186 4.13984C11.9624 4.29922 12.278 4.25234 12.4843 4.04609L12.8405 3.68984C12.8811 3.64922 12.9468 3.64922 12.9874 3.68984L14.8655 5.56797C14.9061 5.60859 14.9061 5.67422 14.8655 5.71484L14.5093 6.07109C14.303 6.27734 14.2561 6.59297 14.4155 6.83672C14.7405 7.36922 14.9624 7.95922 15.0655 8.57734C15.1093 8.84922 15.3468 9.03984 15.628 9.03984H16.1561C16.2124 9.03984 16.2561 9.08359 16.2561 9.13984V11.8617Z"
+                            fill=""
+                          />
+                          <path
+                            d="M7.49805 5.7998C5.59055 5.7998 4.03418 7.35617 4.03418 9.26367C4.03418 11.1712 5.59055 12.7275 7.49805 12.7275C9.40555 12.7275 10.9619 11.1712 10.9619 9.26367C10.9619 7.35617 9.40555 5.7998 7.49805 5.7998ZM7.49805 11.4619C6.28555 11.4619 5.29992 10.4762 5.29992 9.26367C5.29992 8.05117 6.28555 7.06555 7.49805 7.06555C8.71055 7.06555 9.69617 8.05117 9.69617 9.26367C9.69617 10.4762 8.71055 11.4619 7.49805 11.4619Z"
+                            fill=""
+                          />
+                        </svg>
+                        Configuración
+                        <svg
+                          className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current ${open && 'rotate-180'}`}
+                          width="20"
+                          height="20"
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            clipRule="evenodd"
+                            d="M4.41107 6.9107C4.73651 6.58527 5.26414 6.58527 5.58958 6.9107L10.0003 11.3214L14.4111 6.91071C14.7365 6.58527 15.2641 6.58527 15.5896 6.91071C15.915 7.23614 15.915 7.76378 15.5896 8.08922L10.5896 13.0892C10.2641 13.4147 9.73651 13.4147 9.41107 13.0892L4.41107 8.08922C4.08563 7.76378 4.08563 7.23614 4.41107 6.9107Z"
+                            fill=""
+                          />
+                        </svg>
+                      </NavLink>
+                      {/* <!-- Dropdown Menu Start --> */}
+                      <div className={`translate transform overflow-hidden ${!open && 'hidden'}`}>
+                        <ul className="mt-4 mb-5.5 flex flex-col gap-2.5 pl-6">
+                          <li>
+                            <NavLink
+                              to="/app/configuracion/inteligencia-artificial"
+                              className={({ isActive }) =>
+                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
+                                (isActive && '!text-white')
+                              }
+                            >
+                              <svg
+                                className="fill-current"
+                                width="16"
+                                height="16"
+                                viewBox="0 0 16 16"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M8 0L9.5 2.5L12 2L11.5 4.5L14 5.5L12.5 7.5L14 9.5L11.5 10.5L12 13L9.5 12.5L8 15L6.5 12.5L4 13L4.5 10.5L2 9.5L3.5 7.5L2 5.5L4.5 4.5L4 2L6.5 2.5L8 0Z"
+                                  fill="currentColor"
+                                />
+                              </svg>
+                              Inteligencia Artificial
+                            </NavLink>
+                          </li>
+                        </ul>
+                      </div>
+                      {/* <!-- Dropdown Menu End --> */}
+                    </React.Fragment>
+                  );
+                }}
+              </SidebarLinkGroup>
+              {/* <!-- Menu Item Configuración End --> */}
 
               {/* <!-- Menu Item Calendar --> */}
               {/* <li>
