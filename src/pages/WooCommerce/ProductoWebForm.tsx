@@ -1385,11 +1385,11 @@ const ProductoWebForm = () => {
             </div>
 
             {/* Botones de Acción */}
-            <div className="flex gap-4">
+            <div className="flex flex-col gap-3 md:flex-row md:gap-4">
               <button
                 type="button"
                 onClick={() => navigate('/app/woocommerce/productos')}
-                className="inline-flex items-center gap-2 rounded border border-stroke px-6 py-3 font-medium text-black hover:bg-gray-2 dark:border-strokedark dark:text-white"
+                className="inline-flex w-full items-center justify-center gap-2 rounded border border-stroke px-6 py-3 font-medium text-black hover:bg-gray-2 dark:border-strokedark dark:text-white md:w-auto"
               >
                 <FiArrowLeft /> Cancelar
               </button>
@@ -1397,7 +1397,7 @@ const ProductoWebForm = () => {
               <button
                 type="submit"
                 disabled={guardando}
-                className="inline-flex items-center gap-2 rounded bg-meta-3 px-6 py-3 font-medium text-white hover:bg-opacity-90 disabled:opacity-50"
+                className="inline-flex w-full items-center justify-center gap-2 rounded bg-meta-3 px-6 py-3 font-medium text-white hover:bg-opacity-90 disabled:opacity-50 md:w-auto"
               >
                 <FiSave />
                 {guardando
@@ -1414,7 +1414,7 @@ const ProductoWebForm = () => {
                 type="button"
                 onClick={handlePublicar}
                 disabled={publicando || guardando}
-                className="inline-flex items-center gap-2 rounded bg-success px-6 py-3 font-medium text-white hover:bg-opacity-90 disabled:opacity-50"
+                className="inline-flex w-full items-center justify-center gap-2 rounded bg-success px-6 py-3 font-medium text-white hover:bg-opacity-90 disabled:opacity-50 md:w-auto"
               >
                 <FiCheckCircle />
                 {publicando ? 'Publicando...' : 'Guardar y Publicar'}
