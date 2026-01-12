@@ -25,6 +25,8 @@ const EgresosPorConcepto = lazy(() => import('../pages/Informes/EgresosPorConcep
 const ProductosWeb = lazy(() => import('../pages/WooCommerce/ProductosWeb'));
 const ProductoWebForm = lazy(() => import('../pages/WooCommerce/ProductoWebForm'));
 const EstadisticasWeb = lazy(() => import('../pages/WooCommerce/EstadisticasWeb'));
+const ProductosVariables = lazy(() => import('../pages/WooCommerce/ProductosVariables'));
+const ProductoVariableForm = lazy(() => import('../pages/WooCommerce/ProductoVariableForm'));
 
 // Configuración
 const ConfiguracionIA = lazy(() => import('../pages/Configuracion/ConfiguracionIA'));
@@ -151,6 +153,21 @@ const coreRoutes = [
     path: '/app/woocommerce/estadisticas',
     title: 'Estadísticas WooCommerce',
     component: EstadisticasWeb,
+  },
+  {
+    path: '/app/woocommerce/productos-variables',
+    title: 'Productos Variables',
+    component: ProductosVariables,
+  },
+  {
+    path: '/app/woocommerce/producto-variable/nuevo',
+    title: 'Nuevo Producto Variable',
+    component: ProductoVariableForm,
+  },
+  {
+    path: '/app/woocommerce/producto-variable/editar/:id',
+    title: 'Editar Producto Variable',
+    component: ProductoVariableForm,
   },
   // Configuración Routes
   {

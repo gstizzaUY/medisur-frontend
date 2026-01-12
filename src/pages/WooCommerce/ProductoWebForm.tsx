@@ -26,7 +26,7 @@ const ProductoWebForm = () => {
   const [modoEdicion, setModoEdicion] = useState(false);
 
   // Nuevos estados para manejo de múltiples artículos
-  const [articulosSeleccionados, setArticulosSeleccionados] = useState<Array<string | { codigo: string; nombre: string; precioWeb: number }>>([]);
+  const [articulosSeleccionados, setArticulosSeleccionados] = useState<Array<string | { codigo: string; nombre: string; precioWeb: number; ivaCodigo?: number }>>([]);
   const [indiceActual, setIndiceActual] = useState(0);
 
   // Estados para IA

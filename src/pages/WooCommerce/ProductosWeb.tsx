@@ -12,11 +12,17 @@ const ProductosWeb = () => {
   const { articulosConStock } = context;
   
   const [productosWeb, setProductosWeb] = useState<any[]>([]);
+  const [productosVariables, setProductosVariables] = useState<any[]>([]); // Productos variables
   const [articulosPreciosWeb, setArticulosPreciosWeb] = useState<any[]>([]); // Artículos con precios web
   const [articulosSeleccionados, setArticulosSeleccionados] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [mostrarModalSincronizar, setMostrarModalSincronizar] = useState(false);
+  const [opcionesSincronizacion, setOpcionesSincronizacion] = useState({
+    sincronizarStock: true,
+    sincronizarPrecios: true
+  });
   const [vistaActual, setVistaActual] = useState<'todos' | 'configurados'>('todos');
   const [filtros, setFiltros] = useState({
     page: 1,
@@ -37,6 +43,10 @@ const ProductosWeb = () => {
       // Cargar productos configurados en WooCommerce
       const response = await woocommerceService.listarProductos({ limit: 1000 });
       setProductosWeb(response.data.productos);
+
+      // Cargar productos variables
+      const variablesResponse = await woocommerceService.listarProductosVariables({ limit: 1000 });
+      setProductosVariables(variablesResponse.data.productos || []);
 
       // Cargar artículos con lista de precios "Precios Web" (código 201)
       const preciosWebResponse = await woocommerceService.obtenerArticulosPreciosWeb();
@@ -164,6 +174,56 @@ const ProductosWeb = () => {
     });
   };
 
+  const handleCrearProductoVariable = () => {
+    if (articulosSeleccionados.size === 0) {
+      toast.error('Selecciona al menos 2 artículos para crear un producto variable');
+      return;
+    }
+    
+    if (articulosSeleccionados.size < 2) {
+      toast.error('Se necesitan al menos 2 artículos para crear variaciones');
+      return;
+    }
+
+    // Validar que todos los artículos seleccionados estén configurados (pero no publicados)
+    const articulosConConfiguracion = Array.from(articulosSeleccionados).filter(codigo => {
+      const articulo = getArticulosCombinados().find((a: any) => a.Codigo === codigo);
+      return articulo?.configuradoWeb;
+    });
+
+    if (articulosConConfiguracion.length !== articulosSeleccionados.size) {
+      const faltantes = articulosSeleccionados.size - articulosConConfiguracion.length;
+      toast.error(
+        `${faltantes} artículo(s) no están configurados.\n\n` +
+        'Primero configura cada artículo con su información (foto, descripción, precio) pero NO los publiques.\n' +
+        'Luego podrás crear el producto variable.'
+      );
+      return;
+    }
+
+    // Validar que ninguno esté publicado
+    const articulosPublicados = articulosConConfiguracion.filter(codigo => {
+      const articulo = getArticulosCombinados().find((a: any) => a.Codigo === codigo);
+      return articulo?.productoWeb?.publicado;
+    });
+
+    if (articulosPublicados.length > 0) {
+      toast.error(
+        `${articulosPublicados.length} artículo(s) ya están publicados individualmente.\n\n` +
+        'Para crear un producto variable, los artículos deben estar configurados pero NO publicados.'
+      );
+      return;
+    }
+    
+    // Obtener los códigos para enviar al formulario
+    const codigosArticulos = Array.from(articulosSeleccionados);
+    
+    // Navegar al formulario de producto variable
+    navigate('/app/woocommerce/producto-variable/nuevo', {
+      state: { codigosArticulos }
+    });
+  };
+
   const handleFiltroChange = (campo: string, valor: any) => {
     // Solo resetear a página 1 si NO es un cambio de página
     if (campo === 'page') {
@@ -214,15 +274,21 @@ const ProductosWeb = () => {
     }
   };
 
+  const handleAbrirModalSincronizar = () => {
+    setMostrarModalSincronizar(true);
+  };
+
   const handleSincronizarTodo = async () => {
-    if (!confirm('¿Sincronizar stock y precios de todos los productos publicados?\n\nEsto actualizará el stock y precios en WooCommerce con los valores actuales de Medisur.')) return;
+    if (!opcionesSincronizacion.sincronizarStock && !opcionesSincronizacion.sincronizarPrecios) {
+      toast.error('Selecciona al menos una opción de sincronización');
+      return;
+    }
+
+    setMostrarModalSincronizar(false);
 
     try {
       setSyncing(true);
-      const response = await woocommerceService.sincronizarTodo({
-        sincronizarStock: true,
-        sincronizarPrecios: true,
-      });
+      const response = await woocommerceService.sincronizarTodo(opcionesSincronizacion);
       toast.success(`${response.data.totalSincronizados} productos sincronizados`);
       cargarDatos();
     } catch (error: any) {
@@ -305,6 +371,14 @@ const ProductosWeb = () => {
     }
   };
 
+  // Verificar si un producto es parte de un producto variable publicado
+  const esVariacionDeProductoVariable = (codigoArticulo: string) => {
+    return productosVariables.find((prodVar: any) => {
+      if (!prodVar.publicado) return false;
+      return prodVar.variaciones?.some((v: any) => v.codigoArticulo === codigoArticulo);
+    });
+  };
+
   const getEstadoBadge = (configurado: boolean, publicado: boolean, woocommerceId: number) => {
     // Solo mostrar tick verde si está publicado
     if (configurado && publicado && woocommerceId) {
@@ -337,60 +411,87 @@ const ProductosWeb = () => {
 
   return (
     <>
-      <Breadcrumb pageName="Productos Tienda MediMarket" />
+      <Breadcrumb pageName="Productos Tienda CliniMarket" />
 
       <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
         {/* Header */}
-        <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
-          <div className="flex items-center justify-between">
+        <div className="border-b border-stroke px-4 py-4 dark:border-strokedark md:px-7">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-3">
               <FiPackage className="text-2xl text-primary" />
-              <h3 className="font-medium text-black dark:text-white">
-                Productos Medisur para Tienda MediMarket
+              <h3 className="text-base font-medium text-black dark:text-white md:text-lg">
+                
               </h3>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => navigate('/app/woocommerce/productos-variables')}
+                className="inline-flex items-center justify-center gap-1.5 rounded bg-meta-5 px-3 py-2 text-sm font-medium text-white hover:bg-opacity-90 md:gap-2 md:px-4"
+                title="Gestionar productos con variaciones (tallas, colores, etc.)"
+              >
+                <FiPackage className="text-base" />
+                <span className="hidden sm:inline">Productos Variables</span>
+                <span className="sm:hidden">Variables</span>
+              </button>
               {articulosSeleccionados.size > 0 && (
-                <button
-                  onClick={handleConfigurarSeleccionados}
-                  className="inline-flex items-center gap-2 rounded bg-success px-4 py-2 font-medium text-white hover:bg-opacity-90"
-                >
-                  <FiEdit /> Configurar {articulosSeleccionados.size} seleccionados
-                </button>
+                <>
+                  <button
+                    onClick={handleConfigurarSeleccionados}
+                    className="inline-flex items-center justify-center gap-1.5 rounded bg-success px-3 py-2 text-sm font-medium text-white hover:bg-opacity-90 md:gap-2 md:px-4"
+                  >
+                    <FiEdit className="text-base" />
+                    <span className="hidden sm:inline">Configurar {articulosSeleccionados.size}</span>
+                    <span className="sm:hidden">Config. ({articulosSeleccionados.size})</span>
+                  </button>
+                  {articulosSeleccionados.size >= 2 && (
+                    <button
+                      onClick={handleCrearProductoVariable}
+                      className="inline-flex items-center justify-center gap-1.5 rounded bg-meta-5 px-3 py-2 text-sm font-medium text-white hover:bg-opacity-90 md:gap-2 md:px-4"
+                      title="Crear un producto con variaciones (tallas, colores, etc.)"
+                    >
+                      <FiPackage className="text-base" />
+                      <span className="hidden sm:inline">Crear Variable</span>
+                      <span className="sm:hidden">Variable</span>
+                    </button>
+                  )}
+                </>
               )}
               <button
                 onClick={handleRefrescarPrecios}
                 disabled={refreshing}
-                className="inline-flex items-center gap-2 rounded bg-primary px-4 py-2 font-medium text-white hover:bg-opacity-90 disabled:opacity-50"
+                className="inline-flex items-center justify-center gap-1.5 rounded bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-opacity-90 disabled:opacity-50 md:gap-2 md:px-4"
                 title="Actualizar lista de productos desde Zetasoftware"
               >
-                <FiRefreshCw className={refreshing ? 'animate-spin' : ''} />
-                {refreshing ? 'Actualizando...' : 'Actualizar Listado Web'}
+                <FiRefreshCw className={`text-base ${refreshing ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">{refreshing ? 'Actualizando...' : 'Actualizar Listado'}</span>
+                <span className="sm:hidden">Actualizar</span>
               </button>
               <button
-                onClick={handleSincronizarTodo}
+                onClick={handleAbrirModalSincronizar}
                 disabled={syncing}
-                className="inline-flex items-center gap-2 rounded bg-meta-3 px-4 py-2 font-medium text-white hover:bg-opacity-90 disabled:opacity-50"
+                className="inline-flex items-center justify-center gap-1.5 rounded bg-meta-3 px-3 py-2 text-sm font-medium text-white hover:bg-opacity-90 disabled:opacity-50 md:gap-2 md:px-4"
                 title="Sincronizar stock y precios de productos publicados con Medisur"
               >
-                <FiRefreshCw className={syncing ? 'animate-spin' : ''} />
-                {syncing ? 'Sincronizando...' : 'Sincronizar Stock y Precios'}
+                <FiRefreshCw className={`text-base ${syncing ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">{syncing ? 'Sincronizando...' : 'Sincronizar'}</span>
+                <span className="sm:hidden">Sync</span>
               </button>
               <button
                 onClick={handleEliminarTodo}
                 disabled={loading}
-                className="inline-flex items-center gap-2 rounded bg-danger px-4 py-2 font-medium text-white hover:bg-opacity-90 disabled:opacity-50"
+                className="inline-flex items-center justify-center gap-1.5 rounded bg-danger px-3 py-2 text-sm font-medium text-white hover:bg-opacity-90 disabled:opacity-50 md:gap-2 md:px-4"
                 title="Eliminar TODOS los productos de BD y WooCommerce"
               >
-                <FiTrash2 />
-                Eliminar Todo
+                <FiTrash2 className="text-base" />
+                <span className="hidden sm:inline">Eliminar Todo</span>
+                <span className="sm:hidden">Eliminar</span>
               </button>
             </div>
           </div>
         </div>
 
         {/* Vista y Filtros */}
-        <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
+        <div className="border-b border-stroke px-4 py-4 dark:border-strokedark md:px-7">
           <div className="mb-4 flex gap-2">
             <button
               onClick={() => setVistaActual('todos')}
@@ -436,7 +537,7 @@ const ProductosWeb = () => {
         </div>
 
         {/* Tabla de productos */}
-        <div className="p-7">
+        <div className="p-4 md:p-7">
           {loading ? (
             <div className="flex items-center justify-center py-10">
               <div className="h-16 w-16 animate-spin rounded-full border-4 border-solid border-primary border-t-transparent"></div>
@@ -512,11 +613,14 @@ const ProductosWeb = () => {
                     {articulosPaginados.map((articulo: any) => {
                       const productoWeb = articulo.productoWeb;
                       const configurado = articulo.configuradoWeb;
+                      const productoVariable = esVariacionDeProductoVariable(articulo.Codigo);
                       
                       return (
                         <tr
                           key={articulo.Codigo}
-                          className="border-b border-stroke dark:border-strokedark"
+                          className={`border-b border-stroke dark:border-strokedark ${
+                            productoVariable ? 'bg-meta-5 bg-opacity-5' : ''
+                          }`}
                         >
                           <td className="px-4 py-4">
                             <input
@@ -540,13 +644,25 @@ const ProductosWeb = () => {
                                   className="h-12 w-12 rounded object-cover"
                                 />
                               )}
-                              <div>
-                                <p className="font-medium text-black dark:text-white">
-                                  {articulo.Nombre}
-                                </p>
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <p className="font-medium text-black dark:text-white">
+                                    {articulo.Nombre}
+                                  </p>
+                                  {productoVariable && (
+                                    <span className="inline-flex items-center gap-1 rounded bg-meta-5 px-2 py-0.5 text-xs font-medium text-white" title={`Variación de: ${productoVariable.nombre}`}>
+                                      <FiPackage className="text-xs" /> Variable
+                                    </span>
+                                  )}
+                                </div>
                                 {productoWeb?.nombreWeb && productoWeb.nombreWeb !== articulo.Nombre && (
                                   <p className="text-xs text-bodydark">
                                     Web: {productoWeb.nombreWeb}
+                                  </p>
+                                )}
+                                {productoVariable && (
+                                  <p className="text-xs text-meta-5">
+                                    Parte de: {productoVariable.nombre}
                                   </p>
                                 )}
                               </div>
@@ -618,41 +734,41 @@ const ProductosWeb = () => {
                               productoWeb?.woocommerceId || 0
                             )}
                           </td>
-                          <td className="px-4 py-4">
-                            <div className="flex items-center gap-2">
+                          <td className="px-2 py-4 md:px-4">
+                            <div className="flex items-center justify-center gap-2">
                               {configurado ? (
                                 <>
                                   <button
                                     onClick={() => navigate(`/app/woocommerce/editar/${encodeURIComponent(articulo.Codigo)}`)}
-                                    className="hover:text-primary"
+                                    className="flex h-8 w-8 items-center justify-center rounded bg-primary bg-opacity-10 text-primary hover:bg-opacity-20"
                                     title="Editar configuración web"
                                   >
-                                    <FiEdit />
+                                    <FiEdit className="text-base" />
                                   </button>
                                   {!productoWeb.publicado ? (
                                     <>
                                       <button
                                         onClick={() => handlePublicar(articulo.Codigo)}
-                                        className="hover:text-success"
+                                        className="flex h-8 w-8 items-center justify-center rounded bg-success bg-opacity-10 text-success hover:bg-opacity-20"
                                         title="Publicar en tienda"
                                       >
-                                        <FiCheck />
+                                        <FiCheck className="text-base" />
                                       </button>
                                       <button
                                         onClick={() => handleEliminar(articulo.Codigo)}
-                                        className="hover:text-danger"
+                                        className="flex h-8 w-8 items-center justify-center rounded bg-danger bg-opacity-10 text-danger hover:bg-opacity-20"
                                         title="Eliminar configuración"
                                       >
-                                        <FiTrash2 />
+                                        <FiTrash2 className="text-base" />
                                       </button>
                                     </>
                                   ) : (
                                     <button
                                       onClick={() => handleDespublicar(articulo.Codigo)}
-                                      className="hover:text-warning"
+                                      className="flex h-8 w-8 items-center justify-center rounded bg-warning bg-opacity-10 text-warning hover:bg-opacity-20"
                                       title="Despublicar"
                                     >
-                                      <FiXCircle />
+                                      <FiXCircle className="text-base" />
                                     </button>
                                   )}
                                 </>
@@ -662,9 +778,9 @@ const ProductosWeb = () => {
                                     setArticulosSeleccionados(new Set([articulo.Codigo]));
                                     handleConfigurarSeleccionados();
                                   }}
-                                  className="inline-flex items-center gap-1 rounded bg-primary px-3 py-1 text-sm text-white hover:bg-opacity-90"
+                                  className="inline-flex items-center gap-1 rounded bg-primary px-2 py-1.5 text-xs font-medium text-white hover:bg-opacity-90 md:px-3 md:text-sm"
                                 >
-                                  <FiPlus /> Configurar
+                                  <FiPlus className="text-sm" /> Configurar
                                 </button>
                               )}
                             </div>
@@ -709,6 +825,76 @@ const ProductosWeb = () => {
           )}
         </div>
       </div>
+
+      {/* Modal de Sincronización */}
+      {mostrarModalSincronizar && (
+        <div
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          onClick={() => setMostrarModalSincronizar(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-lg border border-stroke bg-white p-6 shadow-lg dark:border-strokedark dark:bg-boxdark"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="mb-4 text-xl font-semibold text-black dark:text-white">
+              Sincronizar Productos con WooCommerce
+            </h3>
+            <p className="mb-6 text-sm text-bodydark">
+              Selecciona qué información deseas sincronizar desde Medisur hacia WooCommerce:
+            </p>
+            <div className="mb-6 space-y-4">
+              <label className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={opcionesSincronizacion.sincronizarStock}
+                  onChange={(e) =>
+                    setOpcionesSincronizacion({
+                      ...opcionesSincronizacion,
+                      sincronizarStock: e.target.checked,
+                    })
+                  }
+                  className="h-5 w-5"
+                />
+                <span className="text-sm font-medium text-black dark:text-white">
+                  Sincronizar Stock
+                </span>
+              </label>
+              <label className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={opcionesSincronizacion.sincronizarPrecios}
+                  onChange={(e) =>
+                    setOpcionesSincronizacion({
+                      ...opcionesSincronizacion,
+                      sincronizarPrecios: e.target.checked,
+                    })
+                  }
+                  className="h-5 w-5"
+                />
+                <span className="text-sm font-medium text-black dark:text-white">
+                  Sincronizar Precios
+                </span>
+              </label>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setMostrarModalSincronizar(false)}
+                className="flex-1 rounded border border-stroke px-4 py-2 font-medium text-black hover:bg-gray dark:border-strokedark dark:text-white"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleSincronizarTodo}
+                disabled={!opcionesSincronizacion.sincronizarStock && !opcionesSincronizacion.sincronizarPrecios}
+                className="flex-1 rounded bg-meta-3 px-4 py-2 font-medium text-white hover:bg-opacity-90 disabled:opacity-50"
+              >
+                Sincronizar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

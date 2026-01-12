@@ -219,4 +219,54 @@ export const woocommerceService = {
     );
     return response.data;
   },
+
+  // ==================== PRODUCTOS VARIABLES ====================
+
+  // Listar productos variables
+  listarProductosVariables: async (params = {}) => {
+    const response = await clienteAxios.get(`${WOO_BASE}/productos-variables`, {
+      ...getAuthHeaders(),
+      params,
+    });
+    return response.data;
+  },
+
+  // Obtener producto variable específico
+  obtenerProductoVariable: async (id: string) => {
+    const response = await clienteAxios.get(
+      `${WOO_BASE}/productos-variables/${id}`,
+      getAuthHeaders()
+    );
+    return response.data;
+  },
+
+  // Guardar producto variable (crear o actualizar sin publicar)
+  guardarProductoVariable: async (data: any) => {
+    const response = await clienteAxios.post(
+      `${WOO_BASE}/productos-variables`,
+      data,
+      getAuthHeaders()
+    );
+    return response.data;
+  },
+
+  // Publicar producto variable en WooCommerce
+  publicarProductoVariable: async (id: string) => {
+    const response = await clienteAxios.post(
+      `${WOO_BASE}/productos-variables/${id}/publicar`,
+      {},
+      getAuthHeaders()
+    );
+    return response.data;
+  },
+
+  // Despublicar producto variable (elimina de WooCommerce y limpia datos)
+  despublicarProductoVariable: async (id: string) => {
+    const response = await clienteAxios.post(
+      `${WOO_BASE}/productos-variables/${id}/despublicar`,
+      {},
+      getAuthHeaders()
+    );
+    return response.data;
+  },
 };

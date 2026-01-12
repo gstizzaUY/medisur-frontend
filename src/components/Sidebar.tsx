@@ -558,7 +558,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 
               {/* <!-- Menu Item Cotizador End --> */}
 
-              {/* <!-- Menu Item Tienda MediMarket --> */}
+              {/* <!-- Menu Item Tienda CliniMarket --> */}
               <SidebarLinkGroup
                 activeCondition={
                   pathname === '/app/woocommerce' || pathname.includes('woocommerce')
@@ -581,7 +581,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                         }}
                       >
                         <StorefrontTwoToneIcon className="text-primary" />
-                        Tienda MediMarket
+                        Tienda CliniMarket
                         <svg
                           className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current ${open && 'rotate-180'
                             }`}
@@ -634,7 +634,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                   );
                 }}
               </SidebarLinkGroup>
-              {/* <!-- Menu Item Tienda MediMarket End --> */}
+              {/* <!-- Menu Item Tienda CliniMarket End --> */}
 
               {/* <!-- Menu Item Configuración --> */}
               <SidebarLinkGroup activeCondition={pathname === '/app/configuracion' || pathname.includes('configuracion')}>
