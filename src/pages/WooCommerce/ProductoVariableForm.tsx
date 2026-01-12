@@ -1,9 +1,10 @@
 import { useState, useEffect, useContext } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { woocommerceService } from '../../services/woocommerceService';
+import { aiService } from '../../services/aiService';
 import toast from 'react-hot-toast';
 import Breadcrumb from '../../components/Breadcrumb';
-import { FiSave, FiPackage } from 'react-icons/fi';
+import { FiSave, FiPackage, FiZap } from 'react-icons/fi';
 import { dataContext } from '../../hooks/DataContext';
 
 interface Atributo {
@@ -53,6 +54,7 @@ const ProductoVariableForm = () => {
 
   const [loading, setLoading] = useState(false);
   const [loadingProductos, setLoadingProductos] = useState(true);
+  const [procesandoIA, setProcesandoIA] = useState(false);
 
   useEffect(() => {
     if (modoEdicion && id) {
@@ -271,6 +273,43 @@ const ProductoVariableForm = () => {
     return producto?.imagenes?.[0]?.url || '';
   };
 
+  const autocompletarDescripcionesIA = async () => {
+    if (!formData.nombre.trim()) {
+      toast.error('Primero ingresa un nombre para el producto');
+      return;
+    }
+
+    if (formData.atributos.length === 0) {
+      toast.error('Define al menos un atributo antes de usar la IA');
+      return;
+    }
+
+    setProcesandoIA(true);
+    try {
+      const response = await aiService.autocompletarProductoVariable(
+        formData.nombreWeb || formData.nombre,
+        formData.atributos,
+        productosSimples,
+        undefined // usar configuración por defecto
+      );
+
+      const datos = response.data;
+      
+      setFormData(prev => ({
+        ...prev,
+        descripcionCorta: datos.descripcionCorta || prev.descripcionCorta,
+        descripcion: datos.descripcionLarga || prev.descripcion,
+      }));
+
+      toast.success('✅ Descripciones generadas con IA');
+    } catch (error: any) {
+      console.error('Error generando descripciones:', error);
+      toast.error(error.response?.data?.message || 'Error al generar descripciones con IA');
+    } finally {
+      setProcesandoIA(false);
+    }
+  };
+
   const handleGuardar = async () => {
     // Validaciones
     if (!formData.nombre.trim()) {
@@ -376,9 +415,21 @@ const ProductoVariableForm = () => {
             </div>
 
             <div className="mt-4">
-              <label className="mb-2 block text-sm font-medium text-black dark:text-white">
-                Descripción
-              </label>
+              <div className="mb-2 flex items-center justify-between">
+                <label className="block text-sm font-medium text-black dark:text-white">
+                  Descripción
+                </label>
+                <button
+                  type="button"
+                  onClick={autocompletarDescripcionesIA}
+                  disabled={procesandoIA || formData.atributos.length === 0}
+                  className="inline-flex items-center gap-2 rounded bg-purple-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-opacity-90 disabled:opacity-50"
+                  title="Generar descripciones con IA basadas en los atributos"
+                >
+                  <FiZap size={14} />
+                  {procesandoIA ? 'Generando...' : 'Generar con IA'}
+                </button>
+              </div>
               <textarea
                 value={formData.descripcion}
                 onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
@@ -386,6 +437,9 @@ const ProductoVariableForm = () => {
                 className="w-full rounded border border-stroke bg-gray px-4 py-2 text-black focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
                 placeholder="Descripción detallada del producto..."
               />
+              <p className="mt-1 text-xs text-bodydark">
+                La IA generará una descripción que menciona las opciones disponibles (atributos y valores)
+              </p>
             </div>
 
             <div className="mt-4">

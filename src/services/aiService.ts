@@ -183,6 +183,26 @@ export const aiService = {
     return response.data;
   },
 
+  // Autocompletar producto variable con atributos
+  autocompletarProductoVariable: async (
+    nombreProducto: string,
+    atributos: Array<{ nombre: string; valores: string[] }>,
+    productosHijos?: any[],
+    configuracion?: Partial<ConfiguracionIA>
+  ) => {
+    const response = await clienteAxios.post(
+      `${AI_BASE}/autocompletar-producto-variable`,
+      { 
+        nombreProducto,
+        atributos,
+        productosHijos,
+        configuracion 
+      },
+      getAuthHeaders()
+    );
+    return response.data;
+  },
+
   // Obtener configuración de IA
   obtenerConfiguracion: async () => {
     const response = await clienteAxios.get(
