@@ -47,6 +47,7 @@ const ProductoVariableForm = () => {
   });
 
   const [productosSimples, setProductosSimples] = useState<any[]>([]);
+  const [preciosEditados, setPreciosEditados] = useState<Record<string, number>>({});
   const [nuevoAtributo, setNuevoAtributo] = useState({
     nombre: '',
     valor: ''
@@ -89,6 +90,13 @@ const ProductoVariableForm = () => {
         .map((resp: any) => resp.data.data);
       
       setProductosSimples(productosSimplesCargados);
+
+      // Inicializar precios editables desde los ProductoWeb hijos
+      const precios: Record<string, number> = {};
+      productosSimplesCargados.forEach((p: any) => {
+        precios[p.codigoArticulo] = p.precioWeb ?? 0;
+      });
+      setPreciosEditados(precios);
       
       // Popular el formulario con los datos del producto variable
       setFormData({
@@ -349,9 +357,25 @@ const ProductoVariableForm = () => {
 
     try {
       setLoading(true);
+
+      // En modo edición, actualizar el precioWeb de cada hijo en MongoDB (sin tocar WooCommerce)
+      if (modoEdicion && Object.keys(preciosEditados).length > 0) {
+        const promesasPrecios = Object.entries(preciosEditados).map(([codigoArticulo, precio]) => {
+          const original = productosSimples.find((p: any) => p.codigoArticulo === codigoArticulo);
+          if (original && original.precioWeb !== precio) {
+            return woocommerceService.guardarProducto({ ...original, codigoArticulo, precioWeb: precio });
+          }
+          return Promise.resolve();
+        });
+        await Promise.all(promesasPrecios);
+      }
+
       const dataToSave = modoEdicion && id ? { ...formData, _id: id } : formData;
       const response = await woocommerceService.guardarProductoVariable(dataToSave);
       toast.success(modoEdicion ? 'Producto variable actualizado exitosamente' : 'Producto variable guardado exitosamente');
+      if (modoEdicion) {
+        toast('Usá el botón "Actualizar" en el listado para reflejar los precios en WooCommerce.', { icon: 'ℹ️', duration: 5000 });
+      }
       navigate('/app/woocommerce/productos-variables');
     } catch (error: any) {
       console.error('Error guardando producto:', error);
@@ -595,6 +619,9 @@ const ProductoVariableForm = () => {
                       <th className="px-4 py-3 font-medium text-black dark:text-white">Imagen</th>
                       <th className="px-4 py-3 font-medium text-black dark:text-white">SKU</th>
                       <th className="px-4 py-3 font-medium text-black dark:text-white">Nombre</th>
+                      {modoEdicion && (
+                        <th className="px-4 py-3 font-medium text-black dark:text-white">Precio $</th>
+                      )}
                       {formData.atributos.map((attr, index) => (
                         <th key={index} className="px-4 py-3 font-medium text-black dark:text-white">
                           {attr.nombre}
@@ -633,6 +660,23 @@ const ProductoVariableForm = () => {
                         <td className="px-4 py-3 text-sm text-bodydark">
                           {obtenerNombreArticulo(variacion.codigoArticulo)}
                         </td>
+                        {modoEdicion && (
+                          <td className="px-4 py-3">
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={preciosEditados[variacion.codigoArticulo] ?? ''}
+                              onChange={(e) =>
+                                setPreciosEditados(prev => ({
+                                  ...prev,
+                                  [variacion.codigoArticulo]: parseFloat(e.target.value) || 0
+                                }))
+                              }
+                              className="w-28 rounded border border-stroke bg-gray px-3 py-1 text-sm text-black focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
+                            />
+                          </td>
+                        )}
                         {formData.atributos.map((attr, aIndex) => (
                           <td key={aIndex} className="px-4 py-3">
                             <select
