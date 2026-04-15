@@ -49,6 +49,19 @@ const ProductosVariables = () => {
     }
   };
 
+  const handleEliminar = async (id: string, nombre: string) => {
+    if (!confirm(`⚠️ ¿Estás seguro de eliminar "${nombre}"?\n\nEsta acción eliminará el producto variable de la base de datos y no se puede deshacer.`)) return;
+
+    try {
+      await woocommerceService.eliminarProductoVariable(id);
+      toast.success('Producto variable eliminado correctamente');
+      cargarProductos();
+    } catch (error: any) {
+      console.error('Error eliminando producto variable:', error);
+      toast.error(error.response?.data?.message || 'Error al eliminar producto variable');
+    }
+  };
+
   const handleDespublicar = async (id: string, nombre: string) => {
     if (!confirm(`⚠️ ¿Estás seguro de despublicar "${nombre}"?\n\nEsto eliminará:\n- El producto de WooCommerce\n- Todas las variaciones\n- Los IDs almacenados\n\nEl producto quedará como borrador y podrás volver a publicarlo.`)) return;
 
@@ -255,6 +268,7 @@ const ProductosVariables = () => {
                                 <FiCheck /> Publicar
                               </button>
                               <button
+                                onClick={() => handleEliminar(producto._id, producto.nombreWeb || producto.nombre)}
                                 className="hover:text-danger"
                                 title="Eliminar"
                               >

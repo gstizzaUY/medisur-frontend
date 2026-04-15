@@ -269,4 +269,13 @@ export const woocommerceService = {
     );
     return response.data;
   },
+
+  // Eliminar producto variable de la base de datos (solo si no está publicado)
+  eliminarProductoVariable: async (id: string) => {
+    const response = await clienteAxios.delete(
+      `${WOO_BASE}/productos-variables/${id}`,
+      getAuthHeaders()
+    );
+    return response.data;
+  },
 };

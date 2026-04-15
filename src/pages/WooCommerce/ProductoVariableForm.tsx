@@ -295,11 +295,20 @@ const ProductoVariableForm = () => {
 
       const datos = response.data;
       
+      console.log('[autocompletarDescripcionesIA] Respuesta completa:', response);
+      console.log('[autocompletarDescripcionesIA] datos.descripcionCorta:', datos.descripcionCorta);
+      console.log('[autocompletarDescripcionesIA] datos.descripcionLarga:', datos.descripcionLarga);
+      
       setFormData(prev => ({
         ...prev,
         descripcionCorta: datos.descripcionCorta || prev.descripcionCorta,
         descripcion: datos.descripcionLarga || prev.descripcion,
       }));
+
+      console.log('[autocompletarDescripcionesIA] formData después de actualizar:', {
+        descripcionCorta: datos.descripcionCorta || formData.descripcionCorta,
+        descripcion: datos.descripcionLarga || formData.descripcion
+      });
 
       toast.success('✅ Descripciones generadas con IA');
     } catch (error: any) {
