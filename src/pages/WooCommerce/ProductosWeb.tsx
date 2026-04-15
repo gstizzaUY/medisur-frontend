@@ -6,6 +6,9 @@ import Breadcrumb from '../../components/Breadcrumb';
 import { FiPackage, FiPlus, FiRefreshCw, FiEdit, FiTrash2, FiCheck, FiXCircle } from 'react-icons/fi';
 import { dataContext } from '../../hooks/DataContext';
 
+const roundPrecio = (valor: number): number =>
+  valor >= 1 ? Math.round(valor) : parseFloat(valor.toFixed(2));
+
 const ProductosWeb = () => {
   const navigate = useNavigate();
   const context = useContext(dataContext) as any;
@@ -97,7 +100,7 @@ const ProductosWeb = () => {
       
       // Calcular margen %
       const costo = parseFloat(String(articuloStock?.Costo || 0));
-      const precioWeb = parseFloat(String(articulo.PrecioSinIVA || 0));
+      const precioWeb = roundPrecio(parseFloat(String(articulo.PrecioSinIVA || 0)) * 1.22);
       const margen = costo > 0 ? ((precioWeb - costo) / precioWeb) * 100 : 0;
       
       // Obtener IVA código
@@ -163,7 +166,7 @@ const ProductosWeb = () => {
       return {
         codigo: codigo,
         nombre: articulo?.Nombre || '',
-        precioWeb: parseFloat(articulo?.PrecioSinIVA || 0),
+        precioWeb: parseFloat(articulo?.PrecioSinIVA || 0) * 1.22,
         ivaCodigo: articulo?.IVACodigo || 2
       };
     });
@@ -600,13 +603,13 @@ const ProductosWeb = () => {
                       </th>
                       <th className="px-4 py-4 font-medium text-black dark:text-white">Código</th>
                       <th className="px-4 py-4 font-medium text-black dark:text-white">Producto</th>
-                      <th className="px-4 py-4 font-medium text-black dark:text-white text-right">Costo</th>
+                      <th className="hidden px-4 py-4 font-medium text-black dark:text-white text-right">Costo</th>
                       <th className="px-4 py-4 font-medium text-black dark:text-white text-right">Precio Venta Web</th>
-                      <th className="px-4 py-4 font-medium text-black dark:text-white text-right">Margen %</th>
-                      <th className="px-4 py-4 font-medium text-black dark:text-white text-center">IVA</th>
-                      <th className="px-4 py-4 font-medium text-black dark:text-white text-right">Stock</th>
+                      <th className="hidden px-4 py-4 font-medium text-black dark:text-white text-right">Margen %</th>
+                      <th className="hidden px-4 py-4 font-medium text-black dark:text-white text-center">IVA</th>
+                      <th className="hidden px-4 py-4 font-medium text-black dark:text-white text-right">Stock</th>
                       <th className="px-4 py-4 font-medium text-black dark:text-white text-center">Publicado</th>
-                      <th className="px-4 py-4 font-medium text-black dark:text-white">Acciones</th>
+                      <th className="px-4 py-4 font-medium text-black dark:text-white text-center">Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -669,7 +672,7 @@ const ProductosWeb = () => {
                             </div>
                           </td>
                           {/* Columna Costo */}
-                          <td className="px-4 py-4 text-right">
+                          <td className="hidden px-4 py-4 text-right">
                             <p className="text-sm text-bodydark">
                               ${parseFloat(articulo.Costo || 0).toFixed(2)}
                             </p>
@@ -677,11 +680,11 @@ const ProductosWeb = () => {
                           {/* Columna Precio Venta Web */}
                           <td className="px-4 py-4 text-right">
                             <p className="text-sm font-medium text-black dark:text-white">
-                              ${articulo.PrecioWeb?.toFixed(2) || '0.00'}
+                              ${articulo.PrecioWeb?.toFixed(articulo.PrecioWeb >= 1 ? 0 : 2) || '0'}
                             </p>
                           </td>
                           {/* Columna Margen % */}
-                          <td className="px-4 py-4 text-right">
+                          <td className="hidden px-4 py-4 text-right">
                             {(() => {
                               const margen = articulo.Margen || 0;
                               const colorClase = 
@@ -696,7 +699,7 @@ const ProductosWeb = () => {
                             })()}
                           </td>
                           {/* Columna IVA */}
-                          <td className="px-4 py-4 text-center">
+                          <td className="hidden px-4 py-4 text-center">
                             {(() => {
                               const ivaCodigo = articulo.IVACodigo || productoWeb?.ivaCodigo || 2;
                               const ivaTexto = ivaCodigo === 1 ? '10%' : ivaCodigo === 3 ? '0%' : '22%';
@@ -712,7 +715,7 @@ const ProductosWeb = () => {
                             })()}
                           </td>
                           {/* Columna Stock */}
-                          <td className="px-4 py-4 text-right">
+                          <td className="hidden px-4 py-4 text-right">
                             {(() => {
                               const stock = Math.floor(parseFloat(articulo.Stock || 0));
                               const colorClase = 
@@ -734,10 +737,12 @@ const ProductosWeb = () => {
                               productoWeb?.woocommerceId || 0
                             )}
                           </td>
-                          <td className="px-2 py-4 md:px-4">
-                            <div className="flex items-center justify-center gap-2">
+                          <td className="px-4 py-4 text-center">
+                            {/* Grid fijo de 3 slots: [editar] [publicar/despublicar] [eliminar] */}
+                            <div className="inline-grid grid-cols-3 gap-1.5">
                               {configurado ? (
                                 <>
+                                  {/* Slot 1: Editar */}
                                   <button
                                     onClick={() => navigate(`/app/woocommerce/editar/${encodeURIComponent(articulo.Codigo)}`)}
                                     className="flex h-8 w-8 items-center justify-center rounded bg-primary bg-opacity-10 text-primary hover:bg-opacity-20"
@@ -745,23 +750,15 @@ const ProductosWeb = () => {
                                   >
                                     <FiEdit className="text-base" />
                                   </button>
+                                  {/* Slot 2: Publicar o Despublicar */}
                                   {!productoWeb.publicado ? (
-                                    <>
-                                      <button
-                                        onClick={() => handlePublicar(articulo.Codigo)}
-                                        className="flex h-8 w-8 items-center justify-center rounded bg-success bg-opacity-10 text-success hover:bg-opacity-20"
-                                        title="Publicar en tienda"
-                                      >
-                                        <FiCheck className="text-base" />
-                                      </button>
-                                      <button
-                                        onClick={() => handleEliminar(articulo.Codigo)}
-                                        className="flex h-8 w-8 items-center justify-center rounded bg-danger bg-opacity-10 text-danger hover:bg-opacity-20"
-                                        title="Eliminar configuración"
-                                      >
-                                        <FiTrash2 className="text-base" />
-                                      </button>
-                                    </>
+                                    <button
+                                      onClick={() => handlePublicar(articulo.Codigo)}
+                                      className="flex h-8 w-8 items-center justify-center rounded bg-success bg-opacity-10 text-success hover:bg-opacity-20"
+                                      title="Publicar en tienda"
+                                    >
+                                      <FiCheck className="text-base" />
+                                    </button>
                                   ) : (
                                     <button
                                       onClick={() => handleDespublicar(articulo.Codigo)}
@@ -771,17 +768,34 @@ const ProductosWeb = () => {
                                       <FiXCircle className="text-base" />
                                     </button>
                                   )}
+                                  {/* Slot 3: Eliminar (solo si no publicado) */}
+                                  {!productoWeb.publicado ? (
+                                    <button
+                                      onClick={() => handleEliminar(articulo.Codigo)}
+                                      className="flex h-8 w-8 items-center justify-center rounded bg-danger bg-opacity-10 text-danger hover:bg-opacity-20"
+                                      title="Eliminar configuración"
+                                    >
+                                      <FiTrash2 className="text-base" />
+                                    </button>
+                                  ) : (
+                                    <span className="h-8 w-8" />
+                                  )}
                                 </>
                               ) : (
-                                <button
-                                  onClick={() => {
-                                    setArticulosSeleccionados(new Set([articulo.Codigo]));
-                                    handleConfigurarSeleccionados();
-                                  }}
-                                  className="inline-flex items-center gap-1 rounded bg-primary px-2 py-1.5 text-xs font-medium text-white hover:bg-opacity-90 md:px-3 md:text-sm"
-                                >
-                                  <FiPlus className="text-sm" /> Configurar
-                                </button>
+                                <>
+                                  {/* Slots 1 y 2 vacíos + slot 3: botón Configurar que los ocupa todos */}
+                                  <div className="col-span-3 flex justify-center">
+                                    <button
+                                      onClick={() => {
+                                        setArticulosSeleccionados(new Set([articulo.Codigo]));
+                                        handleConfigurarSeleccionados();
+                                      }}
+                                      className="inline-flex items-center gap-1 rounded bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-opacity-90"
+                                    >
+                                      <FiPlus className="text-sm" /> Configurar
+                                    </button>
+                                  </div>
+                                </>
                               )}
                             </div>
                           </td>

@@ -7,6 +7,10 @@ import Breadcrumb from '../../components/Breadcrumb';
 import { FiSave, FiPackage, FiZap } from 'react-icons/fi';
 import { dataContext } from '../../hooks/DataContext';
 
+/** Redondea al entero más cercano si el valor es >= 1; conserva 2 decimales si es menor a 1. */
+const roundPrecio = (valor: number): number =>
+  valor >= 1 ? Math.round(valor) : parseFloat(valor.toFixed(2));
+
 interface Atributo {
   nombre: string;
   valores: string[];
@@ -91,10 +95,10 @@ const ProductoVariableForm = () => {
       
       setProductosSimples(productosSimplesCargados);
 
-      // Inicializar precios editables desde los ProductoWeb hijos
+      // Inicializar precios editables desde los ProductoWeb hijos (con IVA 22% para mostrar en UI)
       const precios: Record<string, number> = {};
       productosSimplesCargados.forEach((p: any) => {
-        precios[p.codigoArticulo] = p.precioWeb ?? 0;
+        precios[p.codigoArticulo] = roundPrecio((p.precioWeb ?? 0) * 1.22);
       });
       setPreciosEditados(precios);
       
@@ -363,7 +367,7 @@ const ProductoVariableForm = () => {
         const promesasPrecios = Object.entries(preciosEditados).map(([codigoArticulo, precio]) => {
           const original = productosSimples.find((p: any) => p.codigoArticulo === codigoArticulo);
           if (original && original.precioWeb !== precio) {
-            return woocommerceService.guardarProducto({ ...original, codigoArticulo, precioWeb: precio });
+            return woocommerceService.guardarProducto({ ...original, codigoArticulo, precioWeb: precio / 1.22 });
           }
           return Promise.resolve();
         });

@@ -7,6 +7,10 @@ import Breadcrumb from '../../components/Breadcrumb';
 import { FiSave, FiCheckCircle, FiArrowLeft, FiPlus, FiTrash2, FiChevronLeft, FiChevronRight, FiZap } from 'react-icons/fi';
 import { dataContext } from '../../hooks/DataContext';
 
+/** Redondea al entero más cercano si el valor es >= 1; conserva 2 decimales si es menor a 1. */
+const roundPrecio = (valor: number): number =>
+  valor >= 1 ? Math.round(valor) : parseFloat(valor.toFixed(2));
+
 const ProductoWebForm = () => {
   const { codigoArticulo: codigoArticuloParam } = useParams();
   const codigoArticulo = codigoArticuloParam ? decodeURIComponent(codigoArticuloParam) : undefined;
@@ -112,7 +116,8 @@ const ProductoWebForm = () => {
           const preciosWebResponse = await woocommerceService.obtenerArticulosPreciosWeb();
           const articuloPrecioWeb = preciosWebResponse.find((art: any) => art.Codigo === codigo);
           if (articuloPrecioWeb) {
-            precioWeb = parseFloat(articuloPrecioWeb.PrecioSinIVA || 0);
+            precioWeb = parseFloat(articuloPrecioWeb.PrecioSinIVA || 0) * 1.22;
+            precioWeb = roundPrecio(precioWeb);
             ivaCodigo = articuloPrecioWeb.IVACodigo || 2;
           }
         } catch (error) {
@@ -162,8 +167,8 @@ const ProductoWebForm = () => {
         codigoArticulo: producto.codigoArticulo,
         nombreWeb: producto.nombreWeb || '',
         slug: producto.slug || '',
-        precioRegular: producto.precioRegular || 0,
-        precioWeb: producto.precioWeb || 0,
+        precioRegular: roundPrecio((producto.precioRegular || 0) * 1.22),
+        precioWeb: roundPrecio((producto.precioWeb || 0) * 1.22),
         descuento: producto.descuento || 0,
         ivaCodigo: producto.ivaCodigo || 2,
         imagenes: producto.imagenes || [],
@@ -193,7 +198,7 @@ const ProductoWebForm = () => {
       setArticuloZsoftware({
         codigo: info.codigo || producto.codigoArticulo || '',
         nombre: info.nombre || producto.nombreWeb || '',
-        precioVenta: info.precioVenta ?? producto.precioWeb ?? 0,
+        precioVenta: roundPrecio((info.precioVenta ?? producto.precioWeb ?? 0) * 1.22),
         costo: info.costo ?? 0,
         stock: info.stock !== undefined ? parseFloat(info.stock) : 0,
         descripcion: info.descripcion || producto.descripcionCorta || '',
@@ -228,7 +233,7 @@ const ProductoWebForm = () => {
       const preciosWebResponse = await woocommerceService.obtenerArticulosPreciosWeb();
       const articuloPrecioWeb = preciosWebResponse.find((art: any) => art.Codigo === articulo.codigo);
       if (articuloPrecioWeb) {
-        precioWeb = parseFloat(articuloPrecioWeb.PrecioSinIVA || 0);
+        precioWeb = roundPrecio(parseFloat(articuloPrecioWeb.PrecioSinIVA || 0) * 1.22);
       }
     } catch (error) {
       console.error('Error obteniendo precio web:', error);
@@ -522,16 +527,23 @@ const ProductoWebForm = () => {
       console.log('[handleGuardar] modoEdicion:', modoEdicion);
       console.log('[handleGuardar] formData enviado:', formData);
 
+      // Convertir precios a sin IVA antes de enviar al backend
+      const dataParaBackend = {
+        ...formData,
+        precioWeb: formData.precioWeb / 1.22,
+        precioRegular: formData.precioRegular / 1.22,
+      };
+
       let response;
       if (modoEdicion) {
         response = await woocommerceService.actualizarProductoPublicado(
           formData.codigoArticulo,
-          formData
+          dataParaBackend
         );
         console.log('[handleGuardar] Respuesta actualizarProductoPublicado:', response);
         toast.success('Producto actualizado');
       } else {
-        response = await woocommerceService.guardarProducto(formData);
+        response = await woocommerceService.guardarProducto(dataParaBackend);
         console.log('[handleGuardar] Respuesta guardarProducto:', response);
         toast.success('Producto guardado como borrador');
 
@@ -572,12 +584,18 @@ const ProductoWebForm = () => {
     try {
       setPublicando(true);
 
+      // Convertir precios a sin IVA antes de enviar al backend
+      const dataParaBackend = {
+        ...formData,
+        precioWeb: formData.precioWeb / 1.22,
+        precioRegular: formData.precioRegular / 1.22,
+      };
       // Guardar como borrador primero
       let respGuardar;
       if (modoEdicion) {
-        respGuardar = await woocommerceService.guardarProducto({ ...formData, estado: 'borrador' });
+        respGuardar = await woocommerceService.guardarProducto({ ...dataParaBackend, estado: 'borrador' });
       } else {
-        respGuardar = await woocommerceService.guardarProducto({ ...formData, estado: 'borrador' });
+        respGuardar = await woocommerceService.guardarProducto({ ...dataParaBackend, estado: 'borrador' });
       }
 
       if (!respGuardar?.success) {
@@ -595,7 +613,7 @@ const ProductoWebForm = () => {
         // Solo actualizar si la publicación fue exitosa y el producto está publicado
         const respActualizar = await woocommerceService.actualizarProductoPublicado(
           formData.codigoArticulo,
-          { ...formData, estado: 'publicado' }
+          { ...dataParaBackend, estado: 'publicado' }
         );
         if (respActualizar?.success) {
           toast.success('Producto actualizado después de publicar');
@@ -710,7 +728,7 @@ const ProductoWebForm = () => {
                             {articulo.nombre}
                           </p>
                           <p className="text-sm text-bodydark">
-                            Código: {articulo.codigo} | Stock: {articulo.stock} | Precio: ${articulo.precioVenta}
+                            Código: {articulo.codigo} | Stock: {articulo.stock} | Precio: ${(articulo.precioVenta * 1.22).toFixed(2)}
                           </p>
                         </div>
                         <button
@@ -751,8 +769,8 @@ const ProductoWebForm = () => {
                   <p className="font-medium">{articuloZsoftware.stock || 0}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-bodydark">Precio Zsoftware</p>
-                  <p className="font-medium">${articuloZsoftware.precioVenta || 0}</p>
+                  <p className="text-sm text-bodydark">Precio web (c/IVA 22%)</p>
+                  <p className="font-medium">${(articuloZsoftware.precioVenta || 0).toFixed(2)}</p>
                 </div>
               </div>
             </div>
@@ -872,7 +890,7 @@ const ProductoWebForm = () => {
                     />
                   </div>
 
-                  <div>
+                  <div className="hidden">
                     <label className="mb-2.5 block font-medium text-black dark:text-white">
                       IVA *
                     </label>
