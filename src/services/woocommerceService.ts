@@ -107,11 +107,31 @@ export const woocommerceService = {
     return response.data;
   },
 
+  // Restablecer precio al valor de Zetasoftware (limpia precioManual, actualiza WooCommerce)
+  restablecerPrecio: async (codigoArticulo: string) => {
+    const response = await clienteAxios.post(
+      `${WOO_BASE}/productos/${encodeURIComponent(codigoArticulo)}/restablecer-precio`,
+      {},
+      getAuthHeaders()
+    );
+    return response.data;
+  },
+
   // Sincronización masiva
   sincronizarTodo: async (params = {}) => {
     const response = await clienteAxios.post(
       `${WOO_BASE}/sincronizar-todo`,
       params,
+      getAuthHeaders()
+    );
+    return response.data;
+  },
+
+  // Importar precios y stock reales desde WooCommerce hacia MongoDB
+  importarDesdeWooCommerce: async () => {
+    const response = await clienteAxios.post(
+      `${WOO_BASE}/importar-desde-woocommerce`,
+      {},
       getAuthHeaders()
     );
     return response.data;

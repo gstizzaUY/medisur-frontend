@@ -1364,7 +1364,7 @@ const ProductoWebForm = () => {
                   </small>
                 </div>
 
-                <div className="mb-4">
+                <div className="mb-4 hidden">
                   <label className="flex items-center gap-2">
                     <input
                       type="checkbox"
