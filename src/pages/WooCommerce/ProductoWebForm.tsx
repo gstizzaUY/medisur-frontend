@@ -86,18 +86,28 @@ const ProductoWebForm = () => {
   const cargarCategorias = async () => {
     try {
       const response = await woocommerceService.obtenerCategorias();
-      setCategorias(response.data.categorias);
+      const lista = response?.data?.categorias;
+      if (Array.isArray(lista)) {
+        setCategorias(lista);
+      } else {
+        console.warn('[cargarCategorias] Respuesta inesperada:', response);
+        toast.error('No se pudieron cargar las categorías de WooCommerce');
+      }
     } catch (error) {
       console.error('Error cargando categorías:', error);
+      toast.error('Error al cargar las categorías de WooCommerce');
     }
   };
 
   const cargarEtiquetas = async () => {
     try {
       const response = await woocommerceService.obtenerEtiquetas();
-      console.log('[cargarEtiquetas] Respuesta completa:', response);
-      console.log('[cargarEtiquetas] Etiquetas:', response.data.etiquetas);
-      setEtiquetas(response.data.etiquetas);
+      const lista = response?.data?.etiquetas;
+      if (Array.isArray(lista)) {
+        setEtiquetas(lista);
+      } else {
+        console.warn('[cargarEtiquetas] Respuesta inesperada:', response);
+      }
     } catch (error) {
       console.error('Error cargando etiquetas:', error);
     }

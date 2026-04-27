@@ -42,8 +42,8 @@ const ProductoVariableForm = () => {
     atributos: [] as Atributo[],
     variaciones: [] as Variacion[],
     variacionPorDefecto: '', // Código del artículo que será la variación por defecto
-    categorias: [] as string[],
-    etiquetas: [] as string[],
+    categorias: [] as number[],
+    etiquetas: [] as number[],
     imagenes: [] as any[],
     destacado: false,
     gestionarStock: true,
@@ -52,6 +52,8 @@ const ProductoVariableForm = () => {
 
   const [productosSimples, setProductosSimples] = useState<any[]>([]);
   const [preciosEditados, setPreciosEditados] = useState<Record<string, number>>({});
+  const [categorias, setCategorias] = useState<any[]>([]);     // categorías disponibles en WooCommerce
+  const [etiquetas, setEtiquetas] = useState<any[]>([]);       // etiquetas disponibles en WooCommerce
   const [nuevoAtributo, setNuevoAtributo] = useState({
     nombre: '',
     valor: ''
@@ -62,6 +64,8 @@ const ProductoVariableForm = () => {
   const [procesandoIA, setProcesandoIA] = useState(false);
 
   useEffect(() => {
+    cargarCategorias();
+    cargarEtiquetas();
     if (modoEdicion && id) {
       // Modo edición: cargar producto variable existente
       cargarProductoVariable(id);
@@ -73,6 +77,36 @@ const ProductoVariableForm = () => {
       toast.error('No se recibieron artículos para crear el producto variable');
     }
   }, [id]);
+
+  const cargarCategorias = async () => {
+    try {
+      const response = await woocommerceService.obtenerCategorias();
+      const lista = response?.data?.categorias;
+      if (Array.isArray(lista)) {
+        setCategorias(lista);
+      } else {
+        console.warn('[cargarCategorias] Respuesta inesperada:', response);
+        toast.error('No se pudieron cargar las categorías de WooCommerce');
+      }
+    } catch (error) {
+      console.error('Error cargando categorías:', error);
+      toast.error('Error al cargar las categorías de WooCommerce');
+    }
+  };
+
+  const cargarEtiquetas = async () => {
+    try {
+      const response = await woocommerceService.obtenerEtiquetas();
+      const lista = response?.data?.etiquetas;
+      if (Array.isArray(lista)) {
+        setEtiquetas(lista);
+      } else {
+        console.warn('[cargarEtiquetas] Respuesta inesperada:', response);
+      }
+    } catch (error) {
+      console.error('Error cargando etiquetas:', error);
+    }
+  };
 
   const cargarProductoVariable = async (idProducto: string) => {
     try {
@@ -523,10 +557,78 @@ const ProductoVariableForm = () => {
             </div>
           </div>
 
+          {/* Categorías y Etiquetas */}
+          <div className="mb-6 border-t border-stroke pt-6 dark:border-strokedark">
+            <h4 className="mb-4 text-lg font-semibold text-black dark:text-white">
+              2. Categorías y Etiquetas
+            </h4>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <label className="mb-2 block text-sm font-medium text-black dark:text-white">
+                  Categorías
+                </label>
+                <select
+                  multiple
+                  value={formData.categorias.map(String)}
+                  onChange={(e) => {
+                    const options = Array.from(e.target.selectedOptions);
+                    setFormData({
+                      ...formData,
+                      categorias: options.map((opt) => parseInt(opt.value)),
+                    });
+                  }}
+                  className="w-full rounded border border-stroke bg-gray px-4 py-3 text-black focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
+                  size={6}
+                >
+                  {categorias.length === 0 ? (
+                    <option disabled value="">Cargando categorías...</option>
+                  ) : (
+                    categorias.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))
+                  )}
+                </select>
+                <small className="text-bodydark">
+                  Mantén presionado Ctrl (Cmd en Mac) para seleccionar múltiples
+                </small>
+              </div>
+              <div>
+                <label className="mb-2 block text-sm font-medium text-black dark:text-white">
+                  Etiquetas
+                </label>
+                <select
+                  multiple
+                  value={formData.etiquetas.map(String)}
+                  onChange={(e) => {
+                    const options = Array.from(e.target.selectedOptions);
+                    setFormData({
+                      ...formData,
+                      etiquetas: options.map((opt) => parseInt(opt.value)),
+                    });
+                  }}
+                  className="w-full rounded border border-stroke bg-gray px-4 py-3 text-black focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
+                  size={6}
+                >
+                  {etiquetas.length === 0 ? (
+                    <option disabled value="">Cargando etiquetas...</option>
+                  ) : (
+                    etiquetas.map((tag) => (
+                      <option key={tag.id} value={tag.id}>
+                        {tag.name}
+                      </option>
+                    ))
+                  )}
+                </select>
+              </div>
+            </div>
+          </div>
+
           {/* Atributos */}
           <div className="mb-6 border-t border-stroke pt-6 dark:border-strokedark">
             <h4 className="mb-4 text-lg font-semibold text-black dark:text-white">
-              2. Atributos (Talla, Color, etc.)
+              3. Atributos (Talla, Color, etc.)
             </h4>
             
             {/* Formulario para agregar atributos */}
@@ -607,7 +709,7 @@ const ProductoVariableForm = () => {
           {/* Variaciones */}
           <div className="border-t border-stroke pt-6 dark:border-strokedark">
             <h4 className="mb-4 text-lg font-semibold text-black dark:text-white">
-              3. Asignar Atributos a Variaciones ({formData.variaciones.length} artículos)
+              4. Asignar Atributos a Variaciones ({formData.variaciones.length} artículos)
             </h4>
             <p className="mb-4 text-sm text-bodydark">
               Selecciona cuál variación se mostrará por defecto cuando un cliente visite el producto en la tienda. 
