@@ -25,6 +25,8 @@ const ProductoWebForm = () => {
   const [articuloZsoftware, setArticuloZsoftware] = useState<any>(null);
   const [categorias, setCategorias] = useState<any[]>([]);
   const [etiquetas, setEtiquetas] = useState<any[]>([]);
+  const [cargandoCategorias, setCargandoCategorias] = useState(false);
+  const [errorCategorias, setErrorCategorias] = useState<string | null>(null);
   const [busquedaArticulo, setBusquedaArticulo] = useState('');
   const [articulosDisponibles, setArticulosDisponibles] = useState<any[]>([]);
   const [modoEdicion, setModoEdicion] = useState(false);
@@ -84,25 +86,37 @@ const ProductoWebForm = () => {
   }, [codigoArticulo]);
 
   const cargarCategorias = async () => {
+    setCargandoCategorias(true);
+    setErrorCategorias(null);
     try {
       const response = await woocommerceService.obtenerCategorias();
-      const lista = response?.data?.categorias;
+      console.log('[cargarCategorias] Respuesta completa:', response);
+      // El servicio ya devuelve response.data (el body), por lo que
+      // response = { success, data: { categorias: [...] } }
+      const lista = response?.data?.categorias ?? response?.categorias;
       if (Array.isArray(lista)) {
         setCategorias(lista);
+        if (lista.length === 0) {
+          setErrorCategorias('No hay categorías en WooCommerce. Creá una desde el panel de WooCommerce.');
+        }
       } else {
         console.warn('[cargarCategorias] Respuesta inesperada:', response);
-        toast.error('No se pudieron cargar las categorías de WooCommerce');
+        setErrorCategorias('Respuesta inesperada del servidor.');
       }
-    } catch (error) {
+    } catch (error: any) {
+      const msg = error?.response?.data?.message || error?.message || 'Error desconocido';
       console.error('Error cargando categorías:', error);
-      toast.error('Error al cargar las categorías de WooCommerce');
+      setErrorCategorias(`Error al cargar categorías: ${msg}`);
+    } finally {
+      setCargandoCategorias(false);
     }
   };
 
   const cargarEtiquetas = async () => {
     try {
       const response = await woocommerceService.obtenerEtiquetas();
-      const lista = response?.data?.etiquetas;
+      console.log('[cargarEtiquetas] Respuesta completa:', response);
+      const lista = response?.data?.etiquetas ?? response?.etiquetas;
       if (Array.isArray(lista)) {
         setEtiquetas(lista);
       } else {
@@ -1170,27 +1184,36 @@ const ProductoWebForm = () => {
                     <label className="mb-2.5 block font-medium text-black dark:text-white">
                       Categorías
                     </label>
-                    <select
-                      multiple
-                      value={formData.categorias.map(String)}
-                      onChange={(e) => {
-                        const options = Array.from(e.target.selectedOptions);
-                        setFormData({
-                          ...formData,
-                          categorias: options.map((opt) => parseInt(opt.value)),
-                        });
-                      }}
-                      className="w-full rounded border border-stroke bg-gray px-4 py-3 text-black focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
-                      size={6}
-                    >
-                      {categorias.map((cat) => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.name}
-                        </option>
-                      ))}
-                    </select>
+                    {cargandoCategorias ? (
+                      <p className="text-sm text-bodydark">Cargando categorías...</p>
+                    ) : errorCategorias ? (
+                      <div>
+                        <p className="text-sm text-danger mb-1">{errorCategorias}</p>
+                        <button type="button" onClick={cargarCategorias} className="text-xs text-primary underline">Reintentar</button>
+                      </div>
+                    ) : (
+                      <select
+                        multiple
+                        value={formData.categorias.map(String)}
+                        onChange={(e) => {
+                          const options = Array.from(e.target.selectedOptions);
+                          setFormData({
+                            ...formData,
+                            categorias: options.map((opt) => parseInt(opt.value)),
+                          });
+                        }}
+                        className="w-full rounded border border-stroke bg-gray px-4 py-3 text-black focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
+                        size={6}
+                      >
+                        {categorias.map((cat) => (
+                          <option key={cat.id} value={cat.id}>
+                            {cat.name}
+                          </option>
+                        ))}
+                      </select>
+                    )}
                     <small className="text-bodydark">
-                      Mantén presionado Ctrl (Cmd en Mac) para seleccionar múltiples
+                      {categorias.length > 0 ? `${categorias.length} categorías disponibles. ` : ''}Mantén presionado Ctrl (Cmd en Mac) para seleccionar múltiples
                     </small>
                   </div>
 
